@@ -20,7 +20,7 @@ never sent to a third-party AI service.
 | **Live demo** | **https://porabondhu.165-99-219-251.sslip.io** (HTTPS, microphone works) · plain-HTTP fallback http://165.99.219.251:8110 (browsers block the microphone on HTTP; use *Upload a recording* there) |
 | **Demo video** | Not recorded yet (optional under rule 12 when the live link works). Follow the [5-minute demo script](#demo-in-5-minutes) and its recording checklist |
 | **Repository** | https://github.com/mohammadyaksafu/porabondhu-ai |
-| **Docs** | [Teacher guide](docs/TEACHER_GUIDE.md) · [Curriculum alignment](docs/CURRICULUM_ALIGNMENT.md) · [Classroom workflow, pilot plan, safeguards and interview questions](docs/CLASSROOM_AND_PILOT.md) · [Technical defence and demo script](docs/TECHNICAL_DEFENSE.md) · [Data collection](docs/DATA_COLLECTION.md) |
+| **Docs** | [Teacher guide](docs/TEACHER_GUIDE.md) · [Children's data and security](docs/DATA_PROTECTION.md) · [Teacher usability test (not run yet)](docs/USABILITY_TEST.md) · [Curriculum alignment](docs/CURRICULUM_ALIGNMENT.md) · [Classroom workflow, pilot plan, safeguards and interview questions](docs/CLASSROOM_AND_PILOT.md) · [Technical defence and demo script](docs/TECHNICAL_DEFENSE.md) · [Data collection](docs/DATA_COLLECTION.md) |
 
 ### Test logins for the live demo
 
@@ -43,12 +43,18 @@ while the models load.
 
 ### Demo in 5 minutes
 
+**Real vs simulated:** everything you record in the demo is marked live by the real speech model on
+the server's CPU. The older history in the dashboards (badge **DEMO · simulated**) was generated from
+scripted errors so the screens are not empty; it is not model output on real children. Marking a
+reading takes time (about 18-20 s for a 60 s reading on our 4-core laptop, longer on the 2-core
+server); the progress bar shows the real stages, so do not cut the wait out of a recording.
+
 | Step | Where | What to show |
 |---|---|---|
 | 1 | Log in as `teacher` | Dashboard: the **DEMO** banner says how many readings are simulated |
 | 2 | **Class 2** (or create a class: **+ New class**, then **Add students**) | Class pattern map: which units (র-ফলা, কার, যুক্তাক্ষর) most children misread |
 | 3 | **Assess a child** → Roll 01 → passage **T06** (ফলা lesson, NCTB Class 2 p. ২৩-২৪) | Read it aloud in **your own voice**, making two slips (স্মরণ → সরণ, দ্বিতীয় → দিতীয়). Watch the progress bar show the real pipeline stages |
-| 4 | **Review** | Click a red word: heard vs expected unit by unit, play just that word. Change one mark with a tap, then **Finalise** (audio is deleted unless kept) |
+| 4 | **Review** | Click a red word: heard vs expected unit by unit, play just that word. Change one mark with a tap, then **Finalise review** (audio is deleted unless "Keep the audio" is ticked) |
 | 5 | Student page → **Assign practice** on a weak pattern | Words and a passage containing that unit are picked for the child |
 | 6 | Log out, log in as `c2r01` / `student123` | The checked reading now shows its mark; an unchecked one says "your teacher will check". **From your teacher** shows the assigned words with a **Say it** check |
 | 7 | Teacher → **Benchmark** | The measured numbers, including the targets we miss, and what they do not prove |
@@ -75,7 +81,8 @@ replace the certificate and the browser warns; that is the network, not the serv
 Set `PB_SEED_DEMO=false` in `backend/.env` before the first start (no public logins, no
 simulated data, no demo reset), set `PB_AUDIO_RETENTION_DAYS=14`, then create the teacher
 login: `python -m scripts.create_teacher <username>` (asks for an 8+ character password). See
-[docs/TEACHER_GUIDE.md](docs/TEACHER_GUIDE.md) and, before recording any child, the safeguards in
+[docs/TEACHER_GUIDE.md](docs/TEACHER_GUIDE.md), [docs/DATA_PROTECTION.md](docs/DATA_PROTECTION.md)
+(who can see recordings, consent and withdrawal, deletion, storage) and, before recording any child, the safeguards in
 [docs/CLASSROOM_AND_PILOT.md](docs/CLASSROOM_AND_PILOT.md#7-safeguards-required-before-any-real-child-pilot).
 
 ## Problem
@@ -335,6 +342,18 @@ frontend/          React 19 + TypeScript + Tailwind 4 + TanStack Query + Rechart
   folder at rest, and a named person responsible for the data. We have not recorded any child.
 * The teacher has the final word on every mark. PoraBondhu is a teacher's aid,
   not a validated assessment instrument.
+
+## Evidence still needed
+
+What exists today is a working, tested prototype; these claims are **not** yet supported:
+
+| Claim | Evidence needed |
+|---|---|
+| Accurate on children's reading | Consent-based child recordings, two independent annotators, results reported separately from adults |
+| Teachers can use it unaided | The [usability test](docs/USABILITY_TEST.md) with at least 5 teachers, task success and SUS reported |
+| Teachers want it / it saves time | At least 2 real [teacher interviews](docs/CLASSROOM_AND_PILOT.md#6-teacher-interviews-not-done-yet), quoted with permission |
+| Works in schools | A [pilot](docs/CLASSROOM_AND_PILOT.md#4-pilot-plan-8-weeks-proposed) (proposed only) meeting every safeguard |
+| Runs on school laptops | Timing measured on the actual school hardware (only our laptop and VPS so far) |
 
 ## Limitations
 

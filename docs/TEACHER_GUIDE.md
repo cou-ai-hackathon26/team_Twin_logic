@@ -7,17 +7,18 @@ main buttons to Bangla.
 
 ## What you need
 
-| | |
-|---|---|
-| Computer | A laptop with 4 CPU cores and 8 GB RAM is comfortable; 2 cores work but marking is slower |
-| Disk | About 3 GB free for the program and speech model |
-| Microphone | A USB or wired headset microphone works best in a noisy classroom |
-| Internet | Only for the one-time setup (`setup.ps1` downloads the model). After that it works offline, except the optional "Listen first" voice, which can be prepared in advance (`python -m scripts.pregen_tts`) |
-| Browser | Chrome or Edge. Recording needs `http://localhost` (on the same laptop) or an `https://` address |
+| Need | Value | Evidence |
+|---|---|---|
+| CPU | 4 cores comfortable; 2 cores work but slower | **Measured** on an Intel i5-10310U laptop (4 cores) and a 2-core VPS; no other machines tested |
+| Marking time | About 4.5-5 s per 14-16 s of audio on the 4-core laptop, i.e. roughly 18-20 s for a 60 s reading | **Measured**, a handful of recordings (see README); the 2-core VPS is slower, not yet timed |
+| Memory | About 0.7 GB for the running app with the Bangla model loaded; 8 GB RAM laptop recommended | **Measured** on the VPS container (idle, model loaded); the 8 GB recommendation is an **estimate** |
+| Disk | About 3.5 GB on our laptop: Python environment 1.4 GB, model folder 1.6 GB (the int8 model used is 339 MB; `setup.ps1` also keeps the 1.2 GB fp32 export), Whisper small 464 MB (English passages and the comparison only). The Docker image is 3.4 GB | **Measured** on our laptop and VPS |
+| Microphone | USB or wired headset in a noisy classroom | **Recommendation**, not tested in a classroom |
+| Internet | Only for setup (`setup.ps1` downloads the model). Afterwards it works offline, except the optional "Listen first" voice, which can be prepared in advance (`python -m scripts.pregen_tts`) | From the code (models run locally); offline classroom use **not yet tried** |
+| Browser | Chrome or Edge. Recording needs `http://localhost` (same laptop) or an `https://` address | Browser rule |
 
-Marking time measured on our development laptop (Intel i5-10310U, 4 cores): about 18-20 seconds for a
-60-second reading. The first reading after starting the program takes longer while the model loads.
-You can keep working: the next child can read while the previous reading is being marked.
+The first reading after starting the program takes longer while the model loads. You can keep
+working: the next child can read while the previous reading is being marked.
 
 ## First day
 
@@ -40,8 +41,8 @@ You can keep working: the next child can read while the previous reading is bein
 1. **Review queue** lists readings waiting for you, "needs most help first".
 2. Red = misread, grey line = skipped, dotted amber = **unsure** (the computer was not sure; it never
    counts as an error). Click a word to hear just that word and see which unit differs.
-3. If the computer is wrong, change the mark with one tap (keys 1-4 also work). Then **Finalise**.
-   The recording is deleted unless you tick "keep audio".
+3. If the computer is wrong, change the mark with one tap (keys 1-4 also work). Then **Finalise review**.
+   The recording is deleted unless you tick "Keep the audio".
 4. Only now does the child see their mark out of 10 and the words to practise.
 
 ## Using the results
@@ -59,8 +60,11 @@ single slip.
 
 ## Privacy
 
+Full details: [DATA_PROTECTION.md](DATA_PROTECTION.md).
+
+
 * Use roll codes, not names. Do not take photos.
-* Recordings are deleted when you finalise a review (unless you keep them), and automatically after
+* Recordings are deleted when you finalise a review (unless you tick "Keep the audio"), and automatically after
   the number of days set by `PB_AUDIO_RETENTION_DAYS` (we recommend 14).
 * Five wrong passwords lock a login for 10 minutes. Changing your password logs you out on other devices.
 * Never use the public demo website for real children. Before any real use, see the safeguards in
