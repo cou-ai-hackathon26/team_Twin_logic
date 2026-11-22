@@ -34,6 +34,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 log = logging.getLogger("porabondhu")
 
 SEED_FILE = Path(__file__).resolve().parent / "seed" / "passages.json"
+# T01-T12: written to practise NCTB textbook lessons (see docs/CURRICULUM_ALIGNMENT.md)
+TEXTBOOK_FILE = SEED_FILE.with_name("textbook_passages.json")
 FRONTEND_DIST = BACKEND_DIR.parent / "frontend" / "dist"
 
 
@@ -42,7 +44,8 @@ def seed_passages() -> int:
     try:
         existing = set(db.scalars(select(Passage.code)).all())
         added = 0
-        for p in json.loads(SEED_FILE.read_text(encoding="utf-8")):
+        seeds = [p for f in (SEED_FILE, TEXTBOOK_FILE) if f.exists() for p in json.loads(f.read_text(encoding="utf-8"))]
+        for p in seeds:
             if p["code"] not in existing:
                 db.add(Passage(code=p["code"], title=p["title"], grade=p["grade"], text=p["text"],
                                language=p.get("language", "bn")))

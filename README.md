@@ -80,7 +80,7 @@ know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
 | Baseline and English | OpenAI Whisper `small` via faster-whisper (CTranslate2, int8) |
 | Model reading (TTS) | Microsoft Edge neural voices via edge-tts (passage text only) |
 | Team-built AI parts | Bangla normaliser and grapheme segmenter, weighted word/unit alignment, CTC forced alignment and expected-text score, two-signal marking, weak-pattern tracking |
-| Passages | 30 Bangla and 25 English graded passages, Grades 1-5 (`backend/app/seed/passages.json`) [ADD SOURCE: written by the team, or which textbook/source] |
+| Passages | 42 Bangla and 25 English graded passages, Grades 1-5. **T01-T12** (`backend/app/seed/textbook_passages.json`) are aligned to the NCTB textbooks *আমার বাংলা বই* (Grades 1-3, 2025 reprint): each practises the কার, ফলা, রেফ or যুক্তাক্ষর of one lesson and cites its page ([evidence table](docs/CURRICULUM_ALIGNMENT.md), checked by `scripts/curriculum_evidence.py`). All passage text is written by the team (AI-assisted); no textbook text is copied |
 | Evaluation data | So far only a TTS-generated test set that checks the scripts run; human-recorded results are listed under [Evaluation](#evaluation) once measured |
 | Hosting | This repository running on a CPU laptop (`deploy/run-public.ps1`: separate demo database, ONNX int8 model) behind an ngrok HTTPS tunnel. A `Dockerfile` for cloud hosting (for example Hugging Face Spaces) is included |
 
@@ -88,7 +88,7 @@ know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
 
 | Tool | What we used it for |
 |---|---|
-| Claude (Anthropic), through Claude Code | Helping write and review code, tests, scripts and documentation, and helping with deployment setup. We designed the system and can explain every part |
+| Claude (Anthropic), through Claude Code | Helping write and review code, tests, scripts and documentation, drafting the textbook-aligned passages T01-T12 (checked by us against the NCTB lessons), and helping with deployment setup. We designed the system and can explain every part |
 
 No language-model API is called by the app itself.
 
@@ -127,7 +127,8 @@ docker run -p 7860:7860 porabondhu   # http://localhost:7860
 ```
 
 Public live demo from a laptop (separate demo database on port 8100, ngrok HTTPS tunnel):
-`.\deployun-public.ps1 -Domain <your-ngrok-domain>` (stop with `-Stop`).
+`.\deploy
+un-public.ps1 -Domain <your-ngrok-domain>` (stop with `-Stop`).
 Or push the committed code to a Hugging Face Docker Space (needs a PRO account):
 `backend/.venv/Scripts/python deploy/push_space.py`
 

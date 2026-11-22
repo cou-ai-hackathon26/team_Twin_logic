@@ -32,7 +32,7 @@ from ..bangla.segment import segment_normalized
 from ..db import SessionLocal
 from ..models import AppMeta, Classroom, Passage, Reading, Student, User
 
-DEMO_VERSION = 3  # v3: richer history (8 tests per child over ~10 weeks, steady progress)
+DEMO_VERSION = 4  # v4: grades 1-3 practise the NCTB-aligned passages T01-T12 first (v3: richer history)
 META_KEY = "demo_seed_version"
 TEACHER_LOGIN = ("teacher", "teacher123")
 STUDENT_PASSWORD = "student123"
@@ -205,7 +205,12 @@ def _seed_results(db: Session, c: Classroom, refresh: bool = False) -> int:
         ability = rng.uniform(0.32, 0.9)
         conj_bias = rng.choice([0.9, 0.8, 0.55, 0.3])
         n_bn, n_en = (5, 3) if rng.random() > 0.15 else (3, 1)
-        plan = rng.sample(bn, min(n_bn, len(bn))) + rng.sample(en, min(n_en, len(en)))
+        # textbook-aligned passages (T01-T12, docs/CURRICULUM_ALIGNMENT.md) first, then the rest
+        tb = [p for p in bn if (p.code or "").startswith("T")]
+        rest = [p for p in bn if p not in tb]
+        pick = rng.sample(tb, min(n_bn, len(tb)))
+        pick += rng.sample(rest, min(n_bn - len(pick), len(rest)))
+        plan = pick + rng.sample(en, min(n_en, len(en)))
         rng.shuffle(plan)
         day = rng.randint(66, 74)
         step = day / max(1, len(plan))
