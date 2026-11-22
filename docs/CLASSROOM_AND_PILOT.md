@@ -5,13 +5,16 @@ PoraBondhu in a classroom. Everything below is a plan to test, not a result.
 
 ## 1. A week in a Grade 3 class (60 children, one teacher)
 
+Times are our estimates; only the marking time was measured (on our development laptop).
+
 | Step | Who | Time | What happens |
 |---|---|---|---|
 | Set up once | Teacher | 10 min | Create the class, add roll numbers (no names), print the login slips if children will read on their own |
 | Hear each child | Child reads, teacher or a helper starts the recording | 1-2 min per child | One graded passage (for example T05-T08 for Grade 2, matched to the textbook lesson the class is on). 10-12 children a day covers the class in a week |
 | Wait for marks | Laptop | ~20-30 s per reading on a 4-core laptop CPU, runs in the background | The next child can start reading while the previous one is marked |
 | Review | Teacher | 1-2 min per reading | Open the review queue (sorted "needs most help first"), listen to any red or amber word, correct with one tap. "Unsure" words are never counted as errors |
-| Plan the lesson | Teacher | 5 min per week | Class pattern map: which units (e.g. র-ফলা, ি/ী, যুক্তাক্ষর) most children misread. Group children by weak pattern; the practice words come from the passage bank |
+| Plan the lesson | Teacher | 5 min per week | Class pattern map: which units (e.g. র-ফলা, ি/ী, যুক্তাক্ষর) most children misread. **Assign to this group** sends words and a passage with that unit to exactly those children |
+| Practice | Child, on a shared device | 5 min | "From your teacher": hear each word, say it, get an instant check; reading the assigned passage marks it done |
 | Talk to parents | Teacher | optional | Print the one-page student report (Report button), marks only after the teacher has reviewed them |
 
 Total extra teacher time: about 2-3 minutes per child per assessment round, against listening to
@@ -60,11 +63,56 @@ what they taught. If those are not met, we report it.
   [CURRICULUM_ALIGNMENT.md](CURRICULUM_ALIGNMENT.md)), so a validated version could support existing
   reading-assessment work. This would need a proper child-speech validation first.
 
-## 6. Teacher interviews
+## 6. Teacher interviews (not done yet)
 
-Use `teacher_interview_guide.txt`. Record only what teachers actually said, ask permission before
-quoting, and list here the design changes made because of their answers.
+No teacher has been interviewed yet. Use these questions (from the team's interview guide), about 10
+minutes per teacher, in person or by phone. Ask permission before quoting, never reword an answer,
+and if the answers contradict this plan, change the plan.
 
-| Teacher (role, district, no name unless they agree) | Key points | Change we made |
+1. Which grade do you teach, and how many students are in the class?
+2. How do you currently find out whether a student can read Bangla properly?
+3. How often do you get to hear each child read individually?
+4. About how long does it take to listen to one child?
+5. What is the hardest part of identifying weak readers?
+6. Where do children usually get stuck: conjuncts, vowel signs, ফলা, or something else?
+7. If a device listened to a child for two minutes and showed which words and units go wrong, would
+   that help? How would you use it?
+8. What could stop you using it in class (device, internet, time, noise, trust in the marks)?
+9. Would you rather see results per child or a class summary? Would you assign practice from it?
+10. Would you trust a mark you can change with one tap? What would make you distrust it?
+
+| Teacher (role, upazila; no name unless they agree) | Date | Key points (their words) | Change we made |
+|---|---|---|---|
+| _not yet interviewed_ | | | |
+
+## 7. Safeguards required before any real child pilot
+
+None of these is in place yet; all are required before recording a single child.
+
+* **Consent:** written, informed consent from a parent or guardian for each child, in Bangla, saying
+  what is recorded, who hears it, how long it is kept and how to withdraw. The child can also say no.
+* **Approval:** permission from the head teacher (and the upazila education office if required), and
+  an ethics review through the university if results will be published.
+* **Separate, private installation:** `PB_SEED_DEMO=false` (no public logins or demo data), a teacher
+  login created with `scripts/create_teacher.py`, each child's login changed from any default, and
+  the app run on the school's own laptop or a server only the team controls, over HTTPS.
+* **Minimal data:** roll codes only (no names, photos or dates of birth); `PB_AUDIO_RETENTION_DAYS`
+  set (we suggest 14); audio kept longer only for annotation, with explicit consent for that use.
+* **Storage:** the laptop disk encrypted (e.g. BitLocker) or the audio folder on an encrypted volume;
+  backups encrypted; a named team member responsible for the data and for deleting it after the pilot.
+* **Child wellbeing:** children see their mark only after the teacher checks it (built in); no
+  rankings; a child who is upset by reading aloud stops without penalty.
+* **Reporting:** results reported for children separately from adults, with sample size and limits;
+  no claim beyond what the pilot measured.
+
+## 8. Biggest operational risks and next steps
+
+| Risk | Why it matters | Realistic next step |
 |---|---|---|
-| _not yet interviewed_ | | |
+| Accuracy on children's voices is unmeasured | All numbers so far are adult speech; teachers will stop using it after a few false accusations | Consent-based pilot with two independent annotators (section 4), report child results separately |
+| Marking speed on old school laptops | ~18-20 s per 60 s of reading on our 4-core laptop; slower on 2-core machines | Measure on the actual school laptop first; chunked processing while the child reads is the planned fix |
+| Classroom noise and microphones | Noise makes words "unsure" or rejected | Use a USB headset; the quality check already rejects unusable audio |
+| Regional pronunciation | Standard-Bangla model may mark accepted local forms as errors | Teachers add accepted variants in Settings; collect them during the pilot |
+| Teacher time and trust | Reviewing still costs 1-2 min per reading (estimate) | Ask teachers in the interviews; track how often they change AI marks during the pilot |
+| Devices and setup | Needs a laptop with ~3 GB free and a one-time model download | A prepared USB installer or a pre-loaded laptop per school |
+| Hosting real data | A public server is not acceptable for children's voices | Offline school laptop by default; any hosted version only after the safeguards in section 7 |

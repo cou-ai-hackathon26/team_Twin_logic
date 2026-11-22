@@ -18,11 +18,15 @@ never sent to a third-party AI service.
 | **Members** | Md Yak Safu · Munny Rahaman Dristy |
 | **Domain** | Education (primary), Accessibility (secondary) |
 | **Live demo** | **https://porabondhu.165-99-219-251.sslip.io** (HTTPS, microphone works) · plain-HTTP fallback http://165.99.219.251:8110 (browsers block the microphone on HTTP; use *Upload a recording* there) |
-| **Demo video** | [ADD LINK, 3 minutes max] |
+| **Demo video** | Not recorded yet (optional under rule 12 when the live link works). Follow the [5-minute demo script](#demo-in-5-minutes) and its recording checklist |
 | **Repository** | https://github.com/mohammadyaksafu/porabondhu-ai |
-| **Docs** | [Curriculum alignment](docs/CURRICULUM_ALIGNMENT.md) · [Classroom workflow, pilot and cost plan](docs/CLASSROOM_AND_PILOT.md) · [Technical defence and demo script](docs/TECHNICAL_DEFENSE.md) · [Data collection](docs/DATA_COLLECTION.md) |
+| **Docs** | [Teacher guide](docs/TEACHER_GUIDE.md) · [Curriculum alignment](docs/CURRICULUM_ALIGNMENT.md) · [Classroom workflow, pilot plan, safeguards and interview questions](docs/CLASSROOM_AND_PILOT.md) · [Technical defence and demo script](docs/TECHNICAL_DEFENSE.md) · [Data collection](docs/DATA_COLLECTION.md) |
 
 ### Test logins for the live demo
+
+> **Testing only.** These logins are public, so anyone can see what is recorded on the demo
+> server. **Do not record or upload real children's voices there**; read the passages in your own
+> voice. The app shows the same warning on the login, assessment and recording screens.
 
 | Role | Username | Password |
 |---|---|---|
@@ -36,6 +40,43 @@ no audio) so the dashboards are not empty. Every simulated reading is labelled
 **DEMO · simulated** in the app, and the dashboard shows how many there are. Every new reading you record is
 marked live by the real models. The first reading after a restart takes longer
 while the models load.
+
+### Demo in 5 minutes
+
+| Step | Where | What to show |
+|---|---|---|
+| 1 | Log in as `teacher` | Dashboard: the **DEMO** banner says how many readings are simulated |
+| 2 | **Class 2** (or create a class: **+ New class**, then **Add students**) | Class pattern map: which units (র-ফলা, কার, যুক্তাক্ষর) most children misread |
+| 3 | **Assess a child** → Roll 01 → passage **T06** (ফলা lesson, NCTB Class 2 p. ২৩-২৪) | Read it aloud in **your own voice**, making two slips (স্মরণ → সরণ, দ্বিতীয় → দিতীয়). Watch the progress bar show the real pipeline stages |
+| 4 | **Review** | Click a red word: heard vs expected unit by unit, play just that word. Change one mark with a tap, then **Finalise** (audio is deleted unless kept) |
+| 5 | Student page → **Assign practice** on a weak pattern | Words and a passage containing that unit are picked for the child |
+| 6 | Log out, log in as `c2r01` / `student123` | The checked reading now shows its mark; an unchecked one says "your teacher will check". **From your teacher** shows the assigned words with a **Say it** check |
+| 7 | Teacher → **Benchmark** | The measured numbers, including the targets we miss, and what they do not prove |
+| 8 | Teacher → **Settings** → **Reset demo recordings** | Clean up for the next visitor |
+
+**Recording checklist for a demo video (3 minutes max):** use the HTTPS link in Chrome or
+Edge on a laptop; allow the microphone; use a headset in a quiet room; read in your own
+voice (no children); show steps 1, 3, 4, 6 and 7; keep the DEMO badges visible so simulated
+data is never presented as real; do not cut the waiting time to make marking look faster;
+finish with **Reset demo recordings**.
+
+**Reset demo recordings** (Settings, teacher only, demo server only) permanently deletes every
+reading recorded on the server, its audio, any leftover audio files and all assigned practice.
+The simulated history and the logins stay. It is disabled when `PB_SEED_DEMO=false`.
+
+**Check the live link yourself** (from a network without TLS inspection, e.g. mobile data):
+open the HTTPS link, click the padlock (the certificate should be issued by Let's Encrypt), log
+in as `teacher`, start a reading and allow the microphone. `https://<host>/api/health` should
+return HTTP 200 with `"ok": true` (builds from this commit on also report `"demo_mode": true`). Some campus networks (e.g. a FortiGate firewall)
+replace the certificate and the browser warns; that is the network, not the server.
+
+### Real school installation (no demo accounts)
+
+Set `PB_SEED_DEMO=false` in `backend/.env` before the first start (no public logins, no
+simulated data, no demo reset), set `PB_AUDIO_RETENTION_DAYS=14`, then create the teacher
+login: `python -m scripts.create_teacher <username>` (asks for an 8+ character password). See
+[docs/TEACHER_GUIDE.md](docs/TEACHER_GUIDE.md) and, before recording any child, the safeguards in
+[docs/CLASSROOM_AND_PILOT.md](docs/CLASSROOM_AND_PILOT.md#7-safeguards-required-before-any-real-child-pilot).
 
 ## Problem
 
@@ -144,8 +185,7 @@ docker run -d --name porabondhu --restart unless-stopped --memory 2g -p 8110:786
 ```
 
 Backup demo from a laptop (separate demo database on port 8100, ngrok HTTPS tunnel):
-`.\deploy
-un-public.ps1 -Domain <your-ngrok-domain>` (stop with `-Stop`).
+`.\deploy\run-public.ps1 -Domain <your-ngrok-domain>` (stop with `-Stop`).
 Or push the committed code to a Hugging Face Docker Space (needs a PRO account):
 `backend/.venv/Scripts/python deploy/push_space.py`
 
@@ -283,9 +323,16 @@ frontend/          React 19 + TypeScript + Tailwind 4 + TanStack Query + Rechart
   words practised), never rankings against other children.
 * Recordings not marked "keep" are deleted automatically after `PB_AUDIO_RETENTION_DAYS`
   (14 on the hosted demo), as well as when the teacher finalises a review.
-* A login is locked for 10 minutes after 5 wrong passwords; teachers change their own
-  password in Settings. The demo server has a **Reset demo recordings** button so the next
-  visitor never hears someone else's voice.
+* A login is locked for 10 minutes after 5 wrong passwords. Teachers change their own
+  password in Settings (8+ characters), which logs that account out on every other device;
+  a teacher resetting a child's password also logs the child out and unlocks the login.
+  Sessions are server-side (only a hash of the cookie is stored), HttpOnly, and Secure over HTTPS.
+* The demo server has a **Reset demo recordings** button so the next visitor never hears
+  someone else's voice.
+* **Not yet in place for real children** (see the safeguards list in
+  [docs/CLASSROOM_AND_PILOT.md](docs/CLASSROOM_AND_PILOT.md#7-safeguards-required-before-any-real-child-pilot)):
+  written parental consent forms, an ethics or head-teacher approval, encryption of the audio
+  folder at rest, and a named person responsible for the data. We have not recorded any child.
 * The teacher has the final word on every mark. PoraBondhu is a teacher's aid,
   not a validated assessment instrument.
 
