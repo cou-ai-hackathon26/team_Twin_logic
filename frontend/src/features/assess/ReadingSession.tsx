@@ -259,6 +259,11 @@ export function ReadingSession({
                 </div>
               )}
             </div>
+            {!window.isSecureContext && (
+              <div className="w-full rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+                Browsers allow the microphone only on secure (https://) pages. Open the https:// link of this demo to record, or go back and use <b>Upload a recording</b>.
+              </div>
+            )}
             <ErrorBox error={err} className="w-full" />
 
             <div className="w-full rounded-3xl bg-white p-6 shadow-lg ring-1 ring-slate-100 sm:p-10">

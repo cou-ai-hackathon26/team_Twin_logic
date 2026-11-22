@@ -7,8 +7,8 @@ and tells the teacher which patterns each child needs next. The teacher can
 correct any mark with one tap.
 
 **Everything runs on a CPU, with no language-model API.** Run locally, no audio
-leaves the computer. In the live demo, audio goes only to our own server (a
-laptop running this repository, reached through an ngrok HTTPS tunnel) and is
+leaves the computer. In the live demo, audio goes over HTTPS only to our own
+rented server (a 2-core Ubuntu VPS running this repository's Docker image) and is
 never sent to a third-party AI service.
 
 | | |
@@ -17,7 +17,7 @@ never sent to a third-party AI service.
 | **Team** | Twin logic (duo) |
 | **Members** | [MEMBER 1 NAME] (speech models, benchmark, deployment) · [MEMBER 2 NAME] (grapheme and alignment engines, backend, interface) |
 | **Domain** | Education (primary), Accessibility (secondary) |
-| **Live demo** | **https://unearned-mooing-dictation.ngrok-free.dev** (ngrok shows a one-time "You are about to visit" page: click **Visit Site**) |
+| **Live demo** | **https://porabondhu.165-99-219-251.sslip.io** (HTTPS, microphone works) · plain-HTTP fallback http://165.99.219.251:8110 (browsers block the microphone on HTTP; use *Upload a recording* there) |
 | **Demo video** | [ADD LINK, 3 minutes max] |
 | **Repository** | https://github.com/mohammadyaksafu/porabondhu-ai |
 
@@ -82,7 +82,7 @@ know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
 | Team-built AI parts | Bangla normaliser and grapheme segmenter, weighted word/unit alignment, CTC forced alignment and expected-text score, two-signal marking, weak-pattern tracking |
 | Passages | 42 Bangla and 25 English graded passages, Grades 1-5. **T01-T12** (`backend/app/seed/textbook_passages.json`) are aligned to the NCTB textbooks *আমার বাংলা বই* (Grades 1-3, 2025 reprint): each practises the কার, ফলা, রেফ or যুক্তাক্ষর of one lesson and cites its page ([evidence table](docs/CURRICULUM_ALIGNMENT.md), checked by `scripts/curriculum_evidence.py`). All passage text is written by the team (AI-assisted); no textbook text is copied |
 | Evaluation data | So far only a TTS-generated test set that checks the scripts run; human-recorded results are listed under [Evaluation](#evaluation) once measured |
-| Hosting | This repository running on a CPU laptop (`deploy/run-public.ps1`: separate demo database, ONNX int8 model) behind an ngrok HTTPS tunnel. A `Dockerfile` for cloud hosting (for example Hugging Face Spaces) is included |
+| Hosting | The repository's `Dockerfile` (ONNX int8 model, no PyTorch) on a 2-core / 4 GB Ubuntu VPS, behind Caddy with a Let's Encrypt certificate. Backup: the same code on a laptop behind an ngrok tunnel (`deploy/run-public.ps1`) |
 
 ## AI tools used
 
@@ -126,9 +126,17 @@ docker build -t porabondhu .
 docker run -p 7860:7860 porabondhu   # http://localhost:7860
 ```
 
-Public live demo from a laptop (separate demo database on port 8100, ngrok HTTPS tunnel):
-`.\deploy
-un-public.ps1 -Domain <your-ngrok-domain>` (stop with `-Stop`).
+Live demo on a VPS (what the link above runs):
+
+```bash
+git clone https://github.com/mohammadyaksafu/porabondhu-ai && cd porabondhu-ai
+docker build -t porabondhu .
+docker run -d --name porabondhu --restart unless-stopped --memory 2g -p 8110:7860   -e PB_COOKIE_SAMESITE=lax -v porabondhu_data:/home/user/app/backend/data porabondhu
+# then put an HTTPS reverse proxy (we use Caddy) in front of 127.0.0.1:8110
+```
+
+Backup demo from a laptop (separate demo database on port 8100, ngrok HTTPS tunnel):
+`.\deployun-public.ps1 -Domain <your-ngrok-domain>` (stop with `-Stop`).
 Or push the committed code to a Hugging Face Docker Space (needs a PRO account):
 `backend/.venv/Scripts/python deploy/push_space.py`
 
@@ -253,6 +261,12 @@ frontend/          React 19 + TypeScript + Tailwind 4 + TanStack Query + Rechart
 ## Privacy and safety
 
 * Students are a roll code and optional nickname; no names, faces or dates of birth.
+* **Hosted demo:** recordings travel over HTTPS to our own VPS, are marked there on the
+  CPU, and are stored only on that server's disk (Docker volume) until the teacher
+  finalises the review. No audio or text is sent to any third-party AI or analytics
+  service; the only outside call is Microsoft Edge TTS for the *passage text* of the
+  "Listen first" model reading. The demo uses public test logins, so do not record
+  real children on it.
 * Audio is kept only until the teacher finalises the review, unless they keep it.
 * The child sees encouragement only, never marks, scores or rankings.
 * The teacher has the final word on every mark. PoraBondhu is a teacher's aid,
