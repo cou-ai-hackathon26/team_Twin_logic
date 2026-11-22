@@ -7,6 +7,7 @@ backend/.pytest_cache/
 
 # Data: databases, audio, models, reports (child audio must never be committed)
 backend/data/
+backend/data_public/
 
 # Node
 frontend/node_modules/
