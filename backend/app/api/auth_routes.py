@@ -1,13 +1,17 @@
 """Public, login and student-only routes.
 
 Students can only see active passages of their own class grade, submit their
-own readings and see their own results (marks out of 10). Everything else is
-teacher-only (see routes.py).
+own readings and see their own results. Everything else is teacher-only (see routes.py).
+
+Child-safe results: a child sees the mark out of 10 and the words to practise only
+after the teacher has reviewed the reading. Until then the AI's marks are suggestions
+that may be wrong, so they are withheld (enforced here, not only in the UI).
 """
 
 from __future__ import annotations
 
 import os
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import FileResponse
@@ -38,8 +42,26 @@ def health() -> dict:
 @router.post("/auth/login")
 def login(body: LoginIn, request: Request, response: Response, db: Session = Depends(get_db)) -> dict:
     user = db.scalar(select(User).where(User.username == body.username.strip().lower()))
-    if user is None or not verify_password(body.password, user.password_hash):
+    if user is None:
         raise HTTPException(401, "Wrong username or password")
+    s = get_settings()
+    now = datetime.now(timezone.utc)
+    locked = user.locked_until
+    if locked is not None and locked.tzinfo is None:
+        locked = locked.replace(tzinfo=timezone.utc)  # SQLite returns naive UTC datetimes
+    if locked is not None and locked > now:
+        mins = max(1, round((locked - now).total_seconds() / 60))
+        raise HTTPException(429, f"Too many wrong passwords. Try again in {mins} minute{'s' if mins > 1 else ''}.")
+    if not verify_password(body.password, user.password_hash):
+        user.failed_logins = (user.failed_logins or 0) + 1
+        if user.failed_logins >= s.max_failed_logins:
+            user.locked_until = now + timedelta(minutes=s.lockout_minutes)
+            user.failed_logins = 0
+        db.commit()
+        raise HTTPException(401, "Wrong username or password")
+    if user.failed_logins or user.locked_until:
+        user.failed_logins, user.locked_until = 0, None
+        db.commit()
     if body.role and body.role != user.role:
         raise HTTPException(403, f"This is a {user.role} account. Use the {user.role.capitalize()} login.")
     token, max_age = create_session(db, user)
@@ -77,16 +99,37 @@ def _own_passage(db: Session, user: User, pid: int) -> Passage:
     return p
 
 
+CHILD_HIDDEN = ("score", "accuracy", "wcpm", "errors", "unsure")
+
+
+def child_summary(r: Reading) -> dict:
+    """A reading as the child may see it: no marks, and no word results before teacher review."""
+    d = analytics.reading_summary(r)
+    d["pending_review"] = r.status == "done" and not r.reviewed
+    if d["pending_review"]:
+        for k in (*CHILD_HIDDEN, "correct", "total_words"):
+            d[k] = None
+    return d
+
+
 @router.get("/my/overview")
 def my_overview(user: User = Depends(require_student)) -> dict:
     st = user.student
     card = analytics.student_card(st)
-    tests = [analytics.reading_summary(r) for r in reversed(st.readings) if r.status != "failed"]
+    tests = [child_summary(r) for r in reversed(st.readings) if r.status != "failed"]
+    checked = [t for t in tests if t["status"] == "done" and not t["pending_review"]]
+    latest = card["latest"]
     return {
         **card,
+        "latest": child_summary(next(r for r in st.readings if r.id == latest["id"])) if latest else None,
+        "mean_score": analytics._mean([t["score"] for t in checked]),
+        "candidate_patterns": [p for p in analytics.student_patterns(st, reviewed_only=True) if p["candidate"]][:5],
         "classroom": {"id": st.classroom.id, "name": st.classroom.name, "grade": st.classroom.grade},
         "history": tests,
-        "best_score": max((t["score"] for t in tests if t["score"] is not None), default=None),
+        "best_score": max((t["score"] for t in checked if t["score"] is not None), default=None),
+        "tests_done": sum(1 for t in tests if t["status"] == "done"),
+        "tests_checked": len(checked),
+        "words_read_correctly": sum(t["correct"] or 0 for t in checked),
     }
 
 
@@ -98,7 +141,7 @@ def my_practice(user: User = Depends(require_student)) -> list[dict]:
     page can play the child's own attempt next to the model pronunciation."""
     words: dict[str, dict] = {}
     for r in sorted(user.student.readings, key=lambda x: x.created_at, reverse=True):
-        if r.status != "done":
+        if r.status != "done" or not r.reviewed:  # only teacher-checked words
             continue
         has_audio = bool(r.audio_path and os.path.exists(r.audio_path))
         for m in r.marks:
@@ -127,15 +170,16 @@ def my_passages(user: User = Depends(require_student), db: Session = Depends(get
     q = (select(Passage).where(Passage.active.is_(True), Passage.grade == grade)
          .order_by(Passage.language, Passage.code, Passage.id))
     done: dict[int, float | None] = {}
+    attempted = {r.passage_id for r in user.student.readings if r.status == "done"}
     for r in user.student.readings:
-        if r.status == "done":
+        if r.status == "done" and r.reviewed:  # marks count once the teacher has checked them
             s = score_of(r.metrics)
             prev = done.get(r.passage_id)
             done[r.passage_id] = s if prev is None or (s is not None and s > prev) else prev
     out = []
     for p in db.scalars(q):
         d = passage_out(p)
-        d["attempted"] = p.id in done
+        d["attempted"] = p.id in attempted
         d["best_score"] = done.get(p.id)
         out.append(d)
     return out
@@ -174,6 +218,11 @@ def my_reading_audio(rid: int, user: User = Depends(require_student), db: Sessio
 def my_reading(rid: int, user: User = Depends(require_student), db: Session = Depends(get_db)) -> dict:
     r = _own_reading(db, user, rid)
     d = reading_out(r)
-    for k in ("comparison", "comparison_status", "thresholds"):  # teacher tools only
+    for k in ("comparison", "comparison_status", "thresholds", "transcript"):  # teacher tools only
         d[k] = None
+    d["pending_review"] = r.status == "done" and not r.reviewed
+    if d["pending_review"]:  # AI suggestions stay with the teacher until reviewed
+        d["metrics"] = None
+        d["score"] = None
+        d["marks"] = []
     return d

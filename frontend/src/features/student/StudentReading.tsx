@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { ArrowLeft, Ear, ListChecks, Loader2, Mic, RotateCcw, Volume2 } from 'lucide-react'
+import { ArrowLeft, Ear, Hourglass, ListChecks, Loader2, Mic, RotateCcw, Volume2 } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMe, useMyPassage, useReading, useUploadMyReading } from '@/api/hooks'
 import { ListenAlong, MyVoicePlayer, useMyVoice, useSayWord } from '@/components/audio'
@@ -42,10 +42,11 @@ export function StudentReadingPage() {
   )
 }
 
-/** A student's own result: mark out of 10 and which words to practise. */
+/** A student's own result: mark out of 10 and which words to practise, once the teacher has checked it. */
 export function StudentResultPage() {
   const id = Number(useParams().id)
   const { data: r, isLoading, error } = useReading(id, true)
+  const passage = useMyPassage(r?.pending_review ? r.passage_id : 0)
   const myAudio = `/api/my/readings/${id}/audio`
   const { say, busy } = useSayWord(r?.language ?? 'bn')
   const { playClip } = useMyVoice(myAudio)
@@ -91,6 +92,43 @@ export function StudentResultPage() {
       </>
     )
 
+  if (r.pending_review)
+    return (
+      <>
+        <PageHeader back={back} title={title} subtitle={dateTime(r.created_at)} />
+        <Card className="mb-6 overflow-hidden">
+          <div className="flex flex-col items-center gap-3 bg-marigold-50 px-6 py-10 text-center">
+            <div className="grid size-16 place-items-center rounded-full bg-white shadow ring-1 ring-amber-200">
+              <Hourglass className="size-8 text-amber-600" />
+            </div>
+            <p className="font-bn text-2xl font-semibold text-ink">খুব সুন্দর পড়েছ! শিক্ষক এখন তোমার পড়া শুনবেন।</p>
+            <p className="max-w-md text-slate-600">
+              Great reading! Your teacher will listen and check it. Then you will see your mark and the words to practise here.
+            </p>
+            <Link to={`/me/read/${r.passage_id}`}>
+              <Button variant="secondary">
+                <Mic className="size-4" /> Read it again
+              </Button>
+            </Link>
+          </div>
+        </Card>
+        {passage.data && (
+          <Card>
+            <CardHeader
+              title={
+                <span className="flex items-center gap-2">
+                  <Volume2 className="size-4 text-teal-700" /> Listen while you wait
+                </span>
+              }
+            />
+            <div className="px-5 py-6">
+              <ListenAlong compact text={passage.data.text} language={lang} textClassName={clsx('text-2xl leading-[2.2] text-slate-900', langFont(lang))} />
+            </div>
+          </Card>
+        )}
+      </>
+    )
+
   const m = r.metrics
   const marks = r.marks ?? []
   const practise = marks.filter((w) => w.final_status === 'misread' || w.final_status === 'skipped')
@@ -101,7 +139,7 @@ export function StudentResultPage() {
       <PageHeader
         back={back}
         title={title}
-        subtitle={`${dateTime(r.created_at)} · ${r.reviewed ? 'checked by your teacher' : 'your teacher may still check the marks'}`}
+        subtitle={`${dateTime(r.created_at)} · checked by your teacher`}
         actions={
           <Link to={`/me/read/${r.passage_id}`}>
             <Button variant="secondary">

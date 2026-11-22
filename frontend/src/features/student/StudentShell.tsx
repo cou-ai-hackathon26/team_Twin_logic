@@ -22,8 +22,8 @@ export function StudentShell() {
   const { learned } = useLearned()
   if (loc.pathname.startsWith('/me/read/')) return <Outlet />
 
-  // stars: one per test marked 8/10 or better
-  const stars = (overview.data?.history ?? []).filter((h) => (h.score ?? 0) >= 8).length
+  // stars reward effort, never marks: one per finished reading, one per practised word
+  const stars = (overview.data?.tests_done ?? 0) + learned.size
   const toPractise = (practice.data ?? []).filter((w) => !learned.has(w.expected)).length
   const name = overview.data?.nickname || me?.student?.code
 
@@ -54,7 +54,7 @@ export function StudentShell() {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-full bg-marigold-50 px-3 py-1.5 text-sm font-bold text-amber-800 ring-1 ring-amber-200" title="Stars: tests with 8/10 or more">
+            <div className="flex items-center gap-1.5 rounded-full bg-marigold-50 px-3 py-1.5 text-sm font-bold text-amber-800 ring-1 ring-amber-200" title="Stars: one for every reading you finish and every word you practise">
               <Star className="size-4 fill-marigold text-marigold" /> {stars}
             </div>
             <div className="hidden text-right text-sm leading-tight md:block">

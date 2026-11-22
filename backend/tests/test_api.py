@@ -175,9 +175,16 @@ def test_login_required_and_roles(anon, monkeypatch):
         if d["status"] not in ("queued", "processing"):
             break
         time.sleep(0.1)
-    assert d["status"] == "done" and d["score"] == 10.0
+    # before the teacher checks it, the child sees no mark and no word results
+    assert d["status"] == "done" and d["pending_review"] and d["score"] is None and d["marks"] == []
+    assert c.get("/api/my/overview").json()["history"][0]["score"] is None
+    with TestClient(app) as t:
+        t.post("/api/auth/login", json={"username": "teacher", "password": "teacher123"})
+        assert t.post(f"/api/readings/{rid}/finalize", json={"keep_audio": False}).status_code == 200
+    d = c.get(f"/api/my/readings/{rid}").json()
+    assert not d["pending_review"] and d["score"] == 10.0 and d["marks"]
     ov = c.get("/api/my/overview").json()
-    assert ov["history"][0]["score"] == 10.0
+    assert ov["history"][0]["score"] == 10.0 and ov["tests_checked"] >= 1
     # another grade's passage is not available
     from app.db import SessionLocal
     from app.models import Passage

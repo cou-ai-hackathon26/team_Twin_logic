@@ -1,8 +1,9 @@
 import clsx from 'clsx'
-import { BookOpen, CheckCircle2, Mic } from 'lucide-react'
+import { BookOpen, CheckCircle2, Clock, Mic } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMyOverview, useMyPassages } from '@/api/hooks'
+import { FromTeacher } from './FromTeacher'
 import type { Language } from '@/api/types'
 import { LanguageBadge, MarkBadge, ReadingStatusBadge, SimulatedBadge } from '@/components/domain'
 import { Button, Card, CardHeader, EmptyState, ErrorBox, PageLoader } from '@/components/ui/primitives'
@@ -22,7 +23,6 @@ export function StudentHome() {
   if (overview.isLoading) return <PageLoader />
   if (overview.error || !overview.data) return <ErrorBox error={overview.error ?? 'Not found'} />
   const o = overview.data
-  const marked = o.history.filter((h) => h.score !== null)
 
   return (
     <>
@@ -42,24 +42,27 @@ export function StudentHome() {
         </div>
         <div className="relative mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[
-            { l: 'Tests taken', v: String(marked.length), t: 'text-ink', h: undefined as string | undefined },
-            { l: 'Latest mark', v: mark10(marked[0]?.score), t: markTone(marked[0]?.score), h: marked[0]?.passage_title },
-            { l: 'Average mark', v: mark10(o.mean_score), t: markTone(o.mean_score), h: undefined },
-            { l: 'Best mark', v: mark10(o.best_score), t: markTone(o.best_score), h: undefined },
+            { l: 'Readings done', bn: 'পড়া শেষ', v: String(o.tests_done), t: 'text-ink' },
+            { l: 'Latest mark', bn: 'শেষ নম্বর', v: mark10(o.history.find((h) => h.score !== null)?.score), t: markTone(o.history.find((h) => h.score !== null)?.score) },
+            { l: 'Best mark', bn: 'সেরা নম্বর', v: mark10(o.best_score), t: markTone(o.best_score) },
+            { l: 'Words read right', bn: 'ঠিক পড়া শব্দ', v: String(o.words_read_correctly), t: 'text-teal-700' },
           ].map((x) => (
             <div key={x.l} className="rounded-2xl bg-white/80 px-4 py-3 ring-1 ring-amber-100 backdrop-blur">
-              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{x.l}</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                {x.l} <span className="font-bn normal-case tracking-normal">· {x.bn}</span>
+              </div>
               <div className={clsx('mt-1 text-2xl font-semibold tabular-nums', x.t)}>{x.v}</div>
-              {x.h && <div className={clsx('truncate text-xs text-slate-500', langFont(marked[0]?.language))}>{x.h}</div>}
             </div>
           ))}
         </div>
       </div>
 
+      <FromTeacher />
+
       <Card className="mb-6">
         <CardHeader
-          title="Reading tests"
-          subtitle="Every test gets a mark out of 10"
+          title="Read aloud"
+          subtitle="Read a passage aloud. You get a mark out of 10 after your teacher checks it."
           actions={
             <div className="inline-flex rounded-lg bg-slate-100 p-1 text-sm" role="tablist">
               {LANG_TABS.map((t) => (
@@ -89,14 +92,14 @@ export function StudentHome() {
                     <span className={clsx('text-lg font-semibold', langFont(p.language))}>{p.title}</span>
                     <LanguageBadge language={p.language} />
                   </div>
-                  {p.attempted && <MarkBadge score={p.best_score} />}
+                  {p.best_score !== null && <MarkBadge score={p.best_score} />}
                 </div>
                 <p className={clsx('mt-2 line-clamp-2 flex-1 text-sm text-slate-600', langFont(p.language))}>{p.text}</p>
                 <div className="mt-3 flex items-center justify-between">
                   <span className="flex items-center gap-1 text-xs text-slate-500">
                     {p.attempted ? (
                       <>
-                        <CheckCircle2 className="size-3.5 text-teal-600" /> Best mark so far
+                        <CheckCircle2 className="size-3.5 text-teal-600" /> You have read this
                       </>
                     ) : (
                       `${p.word_count} words`
@@ -104,7 +107,7 @@ export function StudentHome() {
                   </span>
                   <Link to={`/me/read/${p.id}`}>
                     <Button size="sm">
-                      <Mic className="size-4" /> {p.attempted ? 'Try again' : 'Start test'}
+                      <Mic className="size-4" /> {p.attempted ? 'Read again' : 'Start reading'}
                     </Button>
                   </Link>
                 </div>
@@ -115,20 +118,23 @@ export function StudentHome() {
       </Card>
 
       <Card>
-        <CardHeader title="My results" subtitle="Newest first" />
+        <CardHeader title="My readings" subtitle="Newest first" />
         {!o.history.length ? (
-          <EmptyState title="No tests yet">Your marks appear here after your first reading test.</EmptyState>
+          <EmptyState title="No readings yet">Your readings appear here. Your teacher will check each one.</EmptyState>
         ) : (
           <ul className="divide-y divide-slate-100">
             {o.history.map((r) => (
               <li key={r.id}>
                 <Link to={`/me/readings/${r.id}`} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3 hover:bg-slate-50">
-                  <MarkBadge score={r.score} />
+                  {!r.pending_review && r.status === 'done' && <MarkBadge score={r.score} />}
                   <span className={clsx('min-w-0 flex-1 truncate', langFont(r.language))}>{r.passage_title}</span>
                   <LanguageBadge language={r.language} />
-                  {r.correct !== null && r.total_words !== null && (
-                    <span className="text-sm tabular-nums text-slate-500">
-                      {r.correct}/{r.total_words} words
+                  {r.status === 'done' && !r.pending_review && r.correct !== null && (
+                    <span className="text-sm tabular-nums text-teal-700">{r.correct} words read right</span>
+                  )}
+                  {r.pending_review && (
+                    <span className="flex items-center gap-1 text-sm text-slate-500">
+                      <Clock className="size-3.5" /> Teacher will check
                     </span>
                   )}
                   <span className="text-sm text-slate-500">{dateTime(r.created_at)}</span>

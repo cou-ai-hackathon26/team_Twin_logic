@@ -23,9 +23,10 @@ def _reading_inputs(readings: list[Reading]):
         yield r.id, iso(r.created_at), [m.as_metric_dict() for m in r.marks]
 
 
-def student_patterns(student: Student) -> list[dict]:
+def student_patterns(student: Student, reviewed_only: bool = False) -> list[dict]:
     s = get_settings()
-    return compute_patterns(_reading_inputs(student.readings), s.weak_min_errors, s.weak_min_readings)
+    readings = [r for r in student.readings if r.reviewed] if reviewed_only else student.readings
+    return compute_patterns(_reading_inputs(readings), s.weak_min_errors, s.weak_min_readings)
 
 
 def reading_summary(r: Reading) -> dict:

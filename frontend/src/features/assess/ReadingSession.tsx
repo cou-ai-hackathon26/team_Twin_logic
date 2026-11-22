@@ -21,6 +21,7 @@ const PROMPTS = {
     retry: 'আবার পড়ো',
     great: 'খুব সুন্দর পড়েছ!',
     mark: 'তোমার নম্বর',
+    checking: 'শিক্ষক তোমার পড়া শুনে নম্বর দেবেন।',
     start: 'বোতাম চাপো, তারপর জোরে জোরে পড়ো',
     stop: 'পড়া শেষ হলে থামাও',
   },
@@ -30,6 +31,7 @@ const PROMPTS = {
     retry: 'Read again',
     great: 'Well done!',
     mark: 'Your mark',
+    checking: 'Your teacher will listen and give your mark.',
     start: 'Press the button, then read aloud',
     stop: 'Press stop when you finish',
   },
@@ -102,11 +104,15 @@ function WaitingForResult({
         ))}
       </div>
       <p className={clsx('text-4xl font-semibold text-teal-800', langFont(language))}>{t.great}</p>
-      <div className="flex flex-col items-center gap-2">
-        <span className={clsx('text-lg text-slate-600', langFont(language))}>{t.mark}</span>
-        <MarkBadge score={data.score} size="lg" />
-        {!data.reviewed && <span className="text-xs text-slate-500">The teacher may still check the marks.</span>}
-      </div>
+      {data.reviewed && data.score !== null ? (
+        <div className="flex flex-col items-center gap-2">
+          <span className={clsx('text-lg text-slate-600', langFont(language))}>{t.mark}</span>
+          <MarkBadge score={data.score} size="lg" />
+        </div>
+      ) : (
+        // the AI's marks are suggestions until the teacher checks them, so the child sees no mark yet
+        <p className={clsx('max-w-md text-lg text-slate-600', langFont(language))}>{t.checking}</p>
+      )}
       <div className="flex flex-wrap justify-center gap-3">{doneActions}</div>
     </div>
   )
