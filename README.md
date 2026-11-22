@@ -15,7 +15,7 @@ never sent to a third-party AI service.
 |---|---|
 | **Event** | CoU AI Hackathon 2026, Comilla University |
 | **Team** | Twin logic (duo) |
-| **Members** | [MEMBER 1 NAME] (speech models, benchmark, deployment) · [MEMBER 2 NAME] (grapheme and alignment engines, backend, interface) |
+| **Members** | Md Yak Safu · Munny Rahaman Dristy |
 | **Domain** | Education (primary), Accessibility (secondary) |
 | **Live demo** | **https://porabondhu.165-99-219-251.sslip.io** (HTTPS, microphone works) · plain-HTTP fallback http://165.99.219.251:8110 (browsers block the microphone on HTTP; use *Upload a recording* there) |
 | **Demo video** | [ADD LINK, 3 minutes max] |
