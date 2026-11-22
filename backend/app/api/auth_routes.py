@@ -20,8 +20,8 @@ from sqlalchemy.orm import Session
 
 from ..assessment.metrics import score_of
 from ..bangla.patterns import pattern_label
-from ..auth import (COOKIE, create_session, current_user, end_session, hash_password, require_student, user_out,
-                    verify_password)
+from ..auth import (COOKIE, create_session, current_user, end_other_sessions, end_session, hash_password,
+                    require_student, user_out, verify_password)
 from ..config import get_settings
 from ..db import get_db
 from ..models import Passage, Reading, User
@@ -35,7 +35,8 @@ router = APIRouter(prefix="/api")
 
 @router.get("/health")
 def health() -> dict:
-    return {"ok": True}
+    # demo_mode lets the login and recording screens warn: public test logins, no real children
+    return {"ok": True, "demo_mode": get_settings().seed_demo}
 
 
 # ------------------------------------------------------------------ auth
@@ -84,10 +85,13 @@ def me(user: User = Depends(current_user)) -> dict:
 
 
 @router.post("/auth/password", status_code=204)
-def change_password(body: PasswordIn, user: User = Depends(current_user), db: Session = Depends(get_db)) -> None:
+def change_password(body: PasswordIn, request: Request, user: User = Depends(current_user),
+                    db: Session = Depends(get_db)) -> None:
     if not verify_password(body.current_password, user.password_hash):
         raise HTTPException(403, "The current password is wrong")
     user.password_hash = hash_password(body.new_password)
+    user.failed_logins, user.locked_until = 0, None
+    end_other_sessions(db, user.id, keep_token=request.cookies.get(COOKIE))  # other devices must log in again
     db.commit()
 
 

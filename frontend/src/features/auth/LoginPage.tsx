@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { DemoNotice } from '@/components/DemoNotice'
 import { ArrowLeft, GraduationCap, Hand, KeyRound, LogIn, Mic, ScanSearch, School } from 'lucide-react'
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
@@ -99,6 +100,7 @@ export function LoginPage() {
             ))}
           </div>
 
+          <DemoNotice className="mt-6" />
           <form onSubmit={submit} className="mt-6 space-y-5">
             <div>
               <Label htmlFor="username">{role === 'student' ? 'Student username' : 'Username'}</Label>

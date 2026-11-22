@@ -71,3 +71,8 @@ export const useWordCheck = () =>
       return api.post<WordCheckResult>('/my/practice/check', fd)
     },
   })
+
+// ------------------------------------------------------------- public
+/** Server flags; demo_mode = public test logins, so the UI warns against recording real children. */
+export const useHealth = () =>
+  useQuery({ queryKey: ['health'], queryFn: () => api.get<{ ok: boolean; demo_mode?: boolean }>('/health'), staleTime: 10 * 60_000 })

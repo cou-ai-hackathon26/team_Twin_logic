@@ -69,6 +69,14 @@ def _request_token(request: Request) -> str | None:
     return request.cookies.get(COOKIE)
 
 
+def end_other_sessions(db: Session, user_id: int, keep_token: str | None = None) -> None:
+    """Log a user out everywhere (except the current browser), e.g. after a password change."""
+    q = delete(AuthSession).where(AuthSession.user_id == user_id)
+    if keep_token:
+        q = q.where(AuthSession.token_hash != _token_hash(keep_token))
+    db.execute(q)
+
+
 def end_session(db: Session, request: Request) -> None:
     token = _request_token(request)
     if token:

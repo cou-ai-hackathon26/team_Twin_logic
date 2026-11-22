@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { DemoNotice } from '@/components/DemoNotice'
 import { ArrowLeft, Mic, RotateCcw, Square, Star } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
@@ -265,6 +266,7 @@ export function ReadingSession({
                 </div>
               )}
             </div>
+            {phase === 'ready' && <DemoNotice className="w-full" />}
             {!window.isSecureContext && (
               <div className="w-full rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
                 Browsers allow the microphone only on secure (https://) pages. Open the https:// link of this demo to record, or go back and use <b>Upload a recording</b>.

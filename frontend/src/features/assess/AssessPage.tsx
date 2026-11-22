@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { DemoNotice } from '@/components/DemoNotice'
 import { Check, Mic, Upload } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -65,6 +66,7 @@ export function AssessPage() {
   return (
     <>
       <PageHeader title="New assessment" subtitle="Choose the child and a passage, then hand the device to the child." />
+      <DemoNotice className="mb-6" />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <Card className="self-start">
           <CardHeader title="1 · Child" />

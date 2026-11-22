@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from ..assessment.english import english_words
 from ..assessment.marking import passage_words
-from ..auth import STUDENT, hash_password, require_teacher
+from ..auth import STUDENT, end_other_sessions, hash_password, require_teacher
 from ..bangla.normalize import normalize_word
 from ..bangla.patterns import pattern_label
 from ..bangla.segment import segment_normalized
@@ -148,6 +148,8 @@ def set_student_account(sid: int, body: AccountIn, db: Session = Depends(get_db)
     else:
         st.account.username = username
         st.account.password_hash = hash_password(body.password)
+        st.account.failed_logins, st.account.locked_until = 0, None  # the teacher's reset also unlocks
+        end_other_sessions(db, st.account.id)  # the child logs in again with the new password
     db.commit()
     return analytics.student_card(st)
 
@@ -156,6 +158,7 @@ def set_student_account(sid: int, body: AccountIn, db: Session = Depends(get_db)
 def delete_student_account(sid: int, db: Session = Depends(get_db)) -> None:
     st = _get(db, Student, sid)
     if st.account is not None:
+        end_other_sessions(db, st.account.id)
         db.delete(st.account)
         db.commit()
 

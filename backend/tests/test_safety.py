@@ -97,3 +97,34 @@ def test_word_check(monkeypatch):
     r = s.post("/api/my/practice/check", data={"word": "প্রথম"}, files={"audio": ("w.wav", wav_bytes(1.2), "audio/wav")})
     assert r.json()["result"] in ("practise", "again")
     s.__exit__(None, None, None)
+
+
+def test_password_change_logs_out_other_devices(anon):  # noqa: F811
+    with TestClient(app) as phone, TestClient(app) as laptop:
+        for c in (phone, laptop):
+            assert c.post("/api/auth/login", json={"username": "c4r04", "password": "student123"}).status_code == 200
+        r = laptop.post("/api/auth/password", json={"current_password": "student123", "new_password": "newpass123"})
+        assert r.status_code == 204, r.text
+        assert laptop.get("/api/auth/me").status_code == 200  # this browser stays logged in
+        assert phone.get("/api/auth/me").status_code == 401   # the other device is logged out
+        assert laptop.post("/api/auth/password", json={"current_password": "newpass123",
+                                                       "new_password": "short"}).status_code == 422
+        laptop.post("/api/auth/password", json={"current_password": "newpass123", "new_password": "student123"})
+
+
+def test_unreviewed_reading_hidden_from_child_everywhere(monkeypatch):
+    s = _student_login("c4r05")
+    pid = next(p["id"] for p in s.get("/api/my/passages").json() if p["language"] == "bn")
+    monkeypatch.setattr(svc, "get_ctc", lambda: FakeRecognizer(["ভুল"]))
+    rid = s.post("/api/my/readings", data={"passage_id": pid},
+                 files={"audio": ("a.wav", wav_bytes(), "audio/wav")}).json()["id"]
+    for _ in range(200):
+        d = s.get(f"/api/my/readings/{rid}").json()
+        if d["status"] not in ("queued", "processing"):
+            break
+        time.sleep(0.1)
+    assert d["pending_review"] and d["score"] is None and d["metrics"] is None and d["marks"] == []
+    h = next(x for x in s.get("/api/my/overview").json()["history"] if x["id"] == rid)
+    assert h["score"] is None and h["errors"] is None and h["correct"] is None
+    assert all(w["reading_id"] != rid for w in s.get("/api/my/practice").json())
+    s.__exit__(None, None, None)

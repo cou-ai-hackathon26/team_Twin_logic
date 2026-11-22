@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import io
+import os
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
@@ -158,7 +159,17 @@ def demo_reset(db: Session = Depends(get_db)) -> dict:
         db.delete(a)
         n_assign += 1
     db.commit()
-    return {"readings_deleted": len(readings), "assignments_deleted": n_assign}
+    # also remove any audio file no reading points to any more (e.g. left after a crash)
+    kept = {os.path.abspath(p) for p in db.scalars(select(Reading.audio_path).where(Reading.audio_path.is_not(None)))}
+    orphans = 0
+    for f in get_settings().audio_dir.glob("*.wav"):
+        if os.path.abspath(f) not in kept:
+            try:
+                f.unlink()
+                orphans += 1
+            except OSError:
+                pass
+    return {"readings_deleted": len(readings), "assignments_deleted": n_assign, "orphan_audio_deleted": orphans}
 
 
 # ------------------------------------------------------------------ student
