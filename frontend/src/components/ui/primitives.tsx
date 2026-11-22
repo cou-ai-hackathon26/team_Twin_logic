@@ -1,6 +1,18 @@
 import clsx from 'clsx'
 import { Loader2, X } from 'lucide-react'
-import { useEffect, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { Children, useEffect, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+
+import { useT } from '@/lib/i18n'
+
+/** Translate plain-text children (icons and elements pass through). */
+function useTranslatedChildren(children: ReactNode) {
+  const t = useT()
+  return Children.map(children, (c) => {
+    if (typeof c !== 'string') return c
+    const core = c.trim()
+    return core ? c.replace(core, t(core)) : c
+  })
+}
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'warning'
 type Size = 'sm' | 'md' | 'lg' | 'xl'
@@ -29,6 +41,7 @@ export function Button({
   disabled,
   ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: Size; loading?: boolean }) {
+  const content = useTranslatedChildren(children)
   return (
     <button
       {...rest}
@@ -41,7 +54,7 @@ export function Button({
       )}
     >
       {loading && <Loader2 className="size-4 animate-spin" />}
-      {children}
+      {content}
     </button>
   )
 }
@@ -120,6 +133,9 @@ export function Stat({ label, value, hint, tone }: { label: string; value: React
 }
 
 export function PageHeader({ title, subtitle, actions, back }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode; back?: ReactNode }) {
+  const t = useT()
+  if (typeof title === 'string') title = t(title)
+  if (typeof subtitle === 'string') subtitle = t(subtitle)
   return (
     <div className="mb-6">
       {back && <div className="mb-2">{back}</div>}

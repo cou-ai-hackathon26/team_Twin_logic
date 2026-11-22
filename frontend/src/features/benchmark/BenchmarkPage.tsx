@@ -32,7 +32,7 @@ export function BenchmarkPage() {
     <>
       <PageHeader
         title="Benchmark"
-        subtitle="Three systems on the same human-annotated recordings. Published whichever system wins."
+        subtitle="Three systems on the same recordings, with 95% confidence intervals. Targets we miss are shown too."
       />
       <ErrorBox error={error} />
       {!data?.available ? (

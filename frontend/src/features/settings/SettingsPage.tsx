@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useAddVariant, useDeleteVariant, useSystem, useVariants, useWarmup } from '@/api/hooks'
 import type { ModelStatus } from '@/api/types'
 import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, PageHeader, PageLoader } from '@/components/ui/primitives'
+import { PasswordCard, PrivacyCard } from './AccountCards'
 
 function StateBadge({ s }: { s: ModelStatus }) {
   const cls = {
@@ -29,8 +30,10 @@ export function SettingsPage() {
   const th = data.thresholds
   return (
     <>
-      <PageHeader title="Settings" subtitle="Everything runs on this computer's CPU. No audio leaves the device." />
+      <PageHeader title="Settings" subtitle="Speech models run on this server's CPU. No audio is sent to any outside AI service." />
       <div className="grid gap-6 xl:grid-cols-2">
+        <PrivacyCard settings={data.settings} />
+        <PasswordCard />
         <Card>
           <CardHeader
             title="Speech models"

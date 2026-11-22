@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { setUiLang, tr, useUiLang } from '@/lib/i18n'
 import { Bell, BookOpenText, ExternalLink, FlaskConical, HardDrive, Inbox, LayoutDashboard, LogOut, Mic, Search, Settings, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation, useNavigate } from 'react-router-dom'
@@ -124,6 +125,7 @@ function ClassLinks() {
 }
 
 export function AppShell() {
+  const uiLang = useUiLang()
   const loc = useLocation()
   const out = useSignOut()
   const queue = useReviewQueue()
@@ -145,6 +147,7 @@ export function AppShell() {
 
   if (childMode) return <Outlet />
   const title = TITLES.find(([re]) => re.test(loc.pathname))
+  const t = (x: string) => tr(uiLang, x)
   const hour = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
@@ -163,7 +166,7 @@ export function AppShell() {
         <nav className="flex flex-1 flex-col gap-6">
           {GROUPS.map((g, gi) => (
             <div key={g.title}>
-              <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-teal-200/40">{g.title}</div>
+              <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-teal-200/40">{t(g.title)}</div>
               <div className="flex flex-col gap-0.5">
                 {g.items.map(({ to, label, icon: Icon, end, badge }) => (
                   <NavLink
@@ -181,7 +184,7 @@ export function AppShell() {
                       <>
                         {isActive && <span className="absolute top-2 bottom-2 -left-4 w-1 rounded-r-full bg-marigold" />}
                         <Icon className={clsx('size-[18px]', isActive && 'text-marigold')} />
-                        {label}
+                        {t(label)}
                         {badge === 'review' && <Count n={pending} dark />}
                       </>
                     )}
@@ -212,12 +215,20 @@ export function AppShell() {
             </div>
             <div className="hidden min-w-0 md:block">
               <div className="flex items-baseline gap-2">
-                <span className="font-display text-lg font-semibold text-ink">{title?.[1] ?? 'PoraBondhu'}</span>
+                <span className="font-display text-lg font-semibold text-ink">{t(title?.[1] ?? 'PoraBondhu')}</span>
                 {title && <span className="font-bn text-sm text-teal-700">{title[2]}</span>}
               </div>
               <div className="text-xs text-slate-500">{hour}</div>
             </div>
             <div className="ml-auto flex items-center gap-2">
+              <button
+                onClick={() => setUiLang(uiLang === 'bn' ? 'en' : 'bn')}
+                className="h-10 rounded-xl bg-white px-3 text-sm font-semibold text-teal-800 ring-1 ring-slate-200 hover:ring-teal-300"
+                title={uiLang === 'bn' ? 'Switch to English' : 'বাংলায় দেখুন'}
+                aria-label="Switch interface language"
+              >
+                {uiLang === 'bn' ? 'EN' : 'বাং'}
+              </button>
               <button
                 onClick={() => setPalette(true)}
                 className="hidden h-10 w-64 items-center gap-2 rounded-xl bg-white px-3 text-sm text-slate-400 ring-1 ring-slate-200 hover:ring-teal-300 lg:flex"
@@ -253,7 +264,7 @@ export function AppShell() {
           <Outlet />
         </main>
         <footer className="hidden items-center justify-center gap-2 py-5 text-xs text-slate-400 md:flex">
-          <HardDrive className="size-3.5" /> Runs fully on this computer. A teacher’s aid, not an official test.
+          <HardDrive className="size-3.5" /> Speech models run on this server’s CPU, no outside AI service. A teacher’s aid, not an official test.
         </footer>
 
         {/* mobile bottom tabs */}
@@ -273,7 +284,7 @@ export function AppShell() {
                       <span className="absolute -top-1 right-1 min-w-4 rounded-full bg-flag px-1 text-center text-[9px] leading-4 font-bold text-white">{pending > 99 ? '99+' : pending}</span>
                     )}
                   </span>
-                  {short}
+                  {t(short)}
                 </>
               )}
             </NavLink>

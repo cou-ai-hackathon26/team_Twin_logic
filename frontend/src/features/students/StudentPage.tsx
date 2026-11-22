@@ -1,4 +1,7 @@
-import { ArrowLeft, BookOpen, KeyRound, Mic, Pencil, Printer, Trash2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, KeyRound, Mic, Pencil, Printer, Send, Trash2 } from 'lucide-react'
+import { useStudentAssignments } from '@/api/practice'
+import { AssignModal, AssignmentList } from '@/features/practice/Assign'
+import type { PatternLabel } from '@/api/types'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -179,6 +182,8 @@ export function StudentPage() {
   const nav = useNavigate()
   const [editing, setEditing] = useState(false)
   const [confirmDel, setConfirmDel] = useState(false)
+  const [assigning, setAssigning] = useState<{ pattern: PatternLabel | null } | null>(null)
+  const assignments = useStudentAssignments(id)
   if (isLoading) return <PageLoader />
   if (error || !data) return <ErrorBox error={error ?? 'Student not found'} />
   const latest = data.latest
@@ -263,7 +268,12 @@ export function StudentPage() {
             <ul className="divide-y divide-slate-100">
               {data.recommendations.map((r) => (
                 <li key={r.pattern.key} className="space-y-2 px-5 py-4">
-                  <PatternChip p={r.pattern} strong />
+                  <div className="flex items-center justify-between gap-2">
+                    <PatternChip p={r.pattern} strong />
+                    <Button size="sm" variant="secondary" onClick={() => setAssigning({ pattern: r.pattern })}>
+                      <Send className="size-3.5" /> Assign practice
+                    </Button>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {r.practice_words.map((w) => (
                       <span key={w} className="rounded-md bg-teal-50 px-2 py-0.5 font-bn text-base text-teal-900">
@@ -286,6 +296,26 @@ export function StudentPage() {
             </ul>
           )}
         </Card>
+        <Card>
+          <CardHeader
+            title="Practice given"
+            subtitle="Shown to the child under “From your teacher”; done when they read the passage or tick the words"
+            actions={
+              <Button size="sm" variant="secondary" onClick={() => setAssigning({ pattern: null })}>
+                <Send className="size-3.5" /> Assign a passage
+              </Button>
+            }
+          />
+          <AssignmentList items={assignments.data ?? []} />
+        </Card>
+        <AssignModal
+          open={!!assigning}
+          onClose={() => setAssigning(null)}
+          studentIds={[id]}
+          who={data.code}
+          grade={data.classroom.grade}
+          pattern={assigning?.pattern}
+        />
         <StudentLogin s={data} />
         <Card>
           <CardHeader title="Grapheme patterns" subtitle="Confirmed errors per Bangla unit (transparent counts)" />

@@ -8,6 +8,7 @@ import { useMyVoice, useSayWord } from '@/components/audio'
 import { Button, Card, EmptyState, ErrorBox, PageLoader } from '@/components/ui/primitives'
 import { dateShort, langFont } from '@/lib/format'
 import { useLearned } from './practiceStore'
+import { WordCheck } from './WordCheck'
 
 function WordCard({ w, learned, onToggle }: { w: PracticeWord; learned: boolean; onToggle: () => void }) {
   const { say, busy } = useSayWord(w.language)
@@ -78,6 +79,7 @@ function WordCard({ w, learned, onToggle }: { w: PracticeWord; learned: boolean;
       >
         <Check className="size-4" /> {learned ? 'Learned · undo' : 'I can read it now'}
       </button>
+      {w.language === 'bn' && !learned && <WordCheck word={w.word} onRight={onToggle} />}
     </div>
   )
 }

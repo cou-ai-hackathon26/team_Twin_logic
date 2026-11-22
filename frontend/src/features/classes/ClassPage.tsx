@@ -1,4 +1,7 @@
-import { ArrowLeft, Mic, Printer, Trash2, UserPlus, Users } from 'lucide-react'
+import { ArrowLeft, Download, Mic, Printer, Send, Trash2, UserPlus, Users } from 'lucide-react'
+import { exportClassUrl, useClassAssignments } from '@/api/practice'
+import { AssignModal, AssignmentList } from '@/features/practice/Assign'
+import type { PatternLabel } from '@/api/types'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAddStudent, useAddStudentsBulk, useClassroom, useDeleteClassroom } from '@/api/hooks'
@@ -86,7 +89,7 @@ function AddStudentsModal({ classroomId, open, onClose }: { classroomId: number;
   )
 }
 
-function PatternMap({ items, students }: { items: ClassPattern[]; students: number }) {
+function PatternMap({ items, students, onAssign }: { items: ClassPattern[]; students: number; onAssign: (p: ClassPattern) => void }) {
   if (!items.length)
     return (
       <EmptyState title="No error patterns yet">Patterns appear after children have read and their errors repeat across readings.</EmptyState>
@@ -102,7 +105,17 @@ function PatternMap({ items, students }: { items: ClassPattern[]; students: numb
               <span className="text-xs text-slate-500">{p.category_en}</span>
             </div>
             <ProgressBar className="mt-2" value={p.errors / max} tone={p.students_candidate ? 'bg-rose-500' : 'bg-slate-400'} />
-            {p.students.length > 0 && <div className="mt-1 truncate text-xs text-slate-500">Weak for: {p.students.join(', ')}</div>}
+            {p.students.length > 0 && (
+              <div className="mt-1 flex items-center gap-2">
+                <span className="min-w-0 truncate text-xs text-slate-500">Weak for: {p.students.join(', ')}</span>
+                <button
+                  onClick={() => onAssign(p)}
+                  className="no-print inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold text-teal-700 ring-1 ring-teal-200 hover:bg-teal-50"
+                >
+                  <Send className="size-3" /> Assign to this group
+                </button>
+              </div>
+            )}
           </div>
           <div className="text-right text-sm">
             <div className="font-semibold tabular-nums text-slate-800">
@@ -123,6 +136,8 @@ export function ClassPage() {
   const nav = useNavigate()
   const [adding, setAdding] = useState(false)
   const [confirmDel, setConfirmDel] = useState(false)
+  const [assigning, setAssigning] = useState<{ ids: number[]; who: string; pattern: PatternLabel | null } | null>(null)
+  const assignments = useClassAssignments(id)
 
   if (isLoading) return <PageLoader />
   if (error || !data) return <ErrorBox error={error ?? 'Class not found'} />
@@ -145,6 +160,18 @@ export function ClassPage() {
           <>
             <Button variant="ghost" onClick={() => setConfirmDel(true)} aria-label="Delete class">
               <Trash2 className="size-4" />
+            </Button>
+            <a href={exportClassUrl(id)} download>
+              <Button variant="secondary" title="Download every reading as a spreadsheet (CSV, opens in Excel)">
+                <Download className="size-4" /> Export
+              </Button>
+            </a>
+            <Button
+              variant="secondary"
+              onClick={() => setAssigning({ ids: data.students.map((s) => s.id), who: 'the whole class', pattern: null })}
+              disabled={!data.students.length}
+            >
+              <Send className="size-4" /> Assign
             </Button>
             <Button variant="secondary" onClick={() => window.print()} title="Print or save the class report as PDF">
               <Printer className="size-4" /> Report
@@ -252,9 +279,30 @@ export function ClassPage() {
 
         <Card>
           <CardHeader title="Class pattern map" subtitle="Which Bangla units the class misreads most. Number = children with it as a weak pattern." />
-          <PatternMap items={data.pattern_map} students={data.stats.students} />
+          <PatternMap
+            items={data.pattern_map}
+            students={data.stats.students}
+            onAssign={(p) => {
+              const ids = data.students.filter((s) => p.students.includes(s.code)).map((s) => s.id)
+              setAssigning({ ids, who: `${ids.length} children`, pattern: p })
+            }}
+          />
+        </Card>
+        <Card className="xl:col-span-2">
+          <CardHeader title="Practice given" subtitle="Newest first. Done when the child reads the passage or ticks the words." />
+          <AssignmentList items={assignments.data ?? []} showStudent />
         </Card>
       </div>
+      {assigning && (
+        <AssignModal
+          open
+          onClose={() => setAssigning(null)}
+          studentIds={assigning.ids}
+          who={assigning.who}
+          grade={data.grade}
+          pattern={assigning.pattern}
+        />
+      )}
     </>
   )
 }

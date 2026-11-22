@@ -71,6 +71,12 @@ know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
 * Live grapheme engine page (normaliser, segmenter, unit diff)
 * English passages (marked by Whisper) next to Bangla
 * Evaluation scripts: calibration on tuning speakers, benchmark with 95% CIs
+* **Assign practice** to one child, a weak-pattern group (from the class pattern map) or the
+  whole class; the child sees it under "From your teacher" and it is marked done when read
+* **Word check** for students: say one practice word and the same speech model checks it at once
+  (unclear audio comes back as "try again", never as wrong)
+* CSV export of a class (opens in Excel), printable student and class reports
+* Bangla / English switch for the teacher interface (navigation, page titles, main buttons)
 
 ## Tech stack, models and data
 
@@ -271,7 +277,15 @@ frontend/          React 19 + TypeScript + Tailwind 4 + TanStack Query + Rechart
   "Listen first" model reading. The demo uses public test logins, so do not record
   real children on it.
 * Audio is kept only until the teacher finalises the review, unless they keep it.
-* The child sees encouragement only, never marks, scores or rankings.
+* The child sees a mark out of 10 and the words to practise **only after the teacher has
+  checked the reading** (enforced by the API, not only the screen). Before that the child
+  sees "your teacher will check your reading". Stars reward effort (readings finished,
+  words practised), never rankings against other children.
+* Recordings not marked "keep" are deleted automatically after `PB_AUDIO_RETENTION_DAYS`
+  (14 on the hosted demo), as well as when the teacher finalises a review.
+* A login is locked for 10 minutes after 5 wrong passwords; teachers change their own
+  password in Settings. The demo server has a **Reset demo recordings** button so the next
+  visitor never hears someone else's voice.
 * The teacher has the final word on every mark. PoraBondhu is a teacher's aid,
   not a validated assessment instrument.
 
