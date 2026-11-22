@@ -1,0 +1,82 @@
+import clsx from 'clsx'
+import type { PatternLabel, ReadingStatus, WordStatus } from '@/api/types'
+import { STATUS_META } from '@/lib/format'
+import { Badge } from './ui/primitives'
+
+export function PatternChip({ p, count, strong, title }: { p: PatternLabel; count?: number; strong?: boolean; title?: string }) {
+  return (
+    <span
+      title={title ?? `${p.en}`}
+      className={clsx(
+        'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-sm ring-1 ring-inset',
+        strong ? 'bg-rose-50 text-rose-900 ring-rose-200' : 'bg-slate-50 text-slate-700 ring-slate-200',
+      )}
+    >
+      <span className="font-bn text-base leading-none">{p.glyph}</span>
+      <span className="font-bn text-xs">{p.bn}</span>
+      {count !== undefined && <span className="text-xs font-semibold tabular-nums opacity-70">×{count}</span>}
+    </span>
+  )
+}
+
+export function StatusBadge({ status }: { status: WordStatus }) {
+  const m = STATUS_META[status]
+  return (
+    <Badge className={m.chip}>
+      <span className={clsx('size-1.5 rounded-full', m.dot)} />
+      {m.label}
+    </Badge>
+  )
+}
+
+const READING_STATUS: Record<ReadingStatus, { label: string; cls: string }> = {
+  queued: { label: 'Queued', cls: 'bg-slate-50 text-slate-700 ring-slate-200' },
+  processing: { label: 'Processing', cls: 'bg-sky-50 text-sky-800 ring-sky-200' },
+  done: { label: 'Ready', cls: 'bg-emerald-50 text-emerald-800 ring-emerald-200' },
+  rejected: { label: 'Re-record needed', cls: 'bg-amber-50 text-amber-800 ring-amber-200' },
+  failed: { label: 'Failed', cls: 'bg-rose-50 text-rose-800 ring-rose-200' },
+}
+
+export function ReadingStatusBadge({ status, reviewed }: { status: ReadingStatus; reviewed?: boolean }) {
+  if (status === 'done' && reviewed) return <Badge className="bg-teal-50 text-teal-800 ring-teal-200">Reviewed</Badge>
+  if (status === 'done') return <Badge className="bg-indigo-50 text-indigo-800 ring-indigo-200">Needs review</Badge>
+  const m = READING_STATUS[status]
+  return <Badge className={m.cls}>{m.label}</Badge>
+}
+
+export function GradeBadge({ grade }: { grade: number }) {
+  return <Badge className="bg-teal-50 text-teal-800 ring-teal-200">Grade {grade}</Badge>
+}
+
+export function LanguageBadge({ language }: { language: 'bn' | 'en' }) {
+  return language === 'en' ? (
+    <Badge className="bg-sky-50 text-sky-800 ring-sky-200">English</Badge>
+  ) : (
+    <Badge className="bg-orange-50 font-bn text-orange-800 ring-orange-200">বাংলা</Badge>
+  )
+}
+
+/** A reading test's mark out of 10. */
+export function MarkBadge({ score, size = 'md' }: { score: number | null | undefined; size?: 'md' | 'lg' }) {
+  const tone =
+    score === null || score === undefined
+      ? 'bg-slate-50 text-slate-400 ring-slate-200'
+      : score >= 8
+        ? 'bg-emerald-50 text-emerald-800 ring-emerald-200'
+        : score >= 5
+          ? 'bg-amber-50 text-amber-800 ring-amber-200'
+          : 'bg-rose-50 text-rose-800 ring-rose-200'
+  return (
+    <span
+      title="Mark out of 10: words read correctly ÷ words in the passage × 10"
+      className={clsx(
+        'inline-flex items-baseline gap-0.5 rounded-md font-semibold tabular-nums ring-1 ring-inset',
+        size === 'lg' ? 'px-3 py-1 text-lg' : 'px-2 py-0.5 text-sm',
+        tone,
+      )}
+    >
+      {score === null || score === undefined ? '—' : Number.isInteger(score) ? score : score.toFixed(1)}
+      <span className="text-[0.75em] font-medium opacity-70">/10</span>
+    </span>
+  )
+}

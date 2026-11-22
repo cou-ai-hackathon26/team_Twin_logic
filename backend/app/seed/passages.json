@@ -1,0 +1,387 @@
+[
+  {
+    "code": "P01",
+    "title": "আমার বিড়াল",
+    "grade": 1,
+    "text": "আমার একটি বিড়াল আছে। তার নাম মিনি। মিনি সাদা আর নরম। সে দুধ খেতে ভালোবাসে। রাতে মিনি আমার পাশে ঘুমায়।",
+    "language": "bn"
+  },
+  {
+    "code": "P02",
+    "title": "বৃষ্টির দিন",
+    "grade": 1,
+    "text": "আজ সকাল থেকে বৃষ্টি পড়ছে। আকাশ কালো মেঘে ঢাকা। আমি জানালার পাশে বসে আছি। পুকুরে ব্যাঙ ডাকছে। মা গরম খিচুড়ি রান্না করছেন।",
+    "language": "bn"
+  },
+  {
+    "code": "P03",
+    "title": "আমাদের গ্রাম",
+    "grade": 2,
+    "text": "আমাদের গ্রামের নাম সোনাপুর। গ্রামের পাশ দিয়ে একটি ছোট নদী বয়ে গেছে। নদীর পাড়ে সবুজ ধানক্ষেত। কৃষকেরা সকালে মাঠে কাজ করতে যান। সন্ধ্যায় পাখিরা গাছে ফিরে আসে।",
+    "language": "bn"
+  },
+  {
+    "code": "P04",
+    "title": "স্কুলের প্রথম দিন",
+    "grade": 2,
+    "text": "আজ আমার স্কুলের প্রথম দিন। নতুন জামা পরে বাবার হাত ধরে গেলাম। শিক্ষক হাসিমুখে আমাদের স্বাগত জানালেন। নতুন বন্ধুদের সাথে খেলা করলাম। বাড়ি ফিরে মাকে সব গল্প বললাম।",
+    "language": "bn"
+  },
+  {
+    "code": "P05",
+    "title": "পরিষ্কার থাকি",
+    "grade": 3,
+    "text": "পরিষ্কার থাকা স্বাস্থ্যের জন্য খুব দরকারি। খাওয়ার আগে সাবান দিয়ে হাত ধুতে হয়। প্রতিদিন দুইবার দাঁত মাজা উচিত। ঘরের আশপাশে ময়লা জমতে দেওয়া যাবে না। পরিষ্কার পানি পান করলে অসুখ কম হয়।",
+    "language": "bn"
+  },
+  {
+    "code": "P06",
+    "title": "পদ্মা নদী",
+    "grade": 3,
+    "text": "পদ্মা বাংলাদেশের একটি বড় নদী। বর্ষাকালে নদীতে অনেক পানি থাকে। জেলেরা নৌকায় চড়ে ইলিশ মাছ ধরেন। নদীর বুকে সূর্যাস্ত দেখতে খুব সুন্দর লাগে। নদী আমাদের খাদ্য আর জীবিকা দেয়।",
+    "language": "bn"
+  },
+  {
+    "code": "P07",
+    "title": "বিজ্ঞান মেলা",
+    "grade": 3,
+    "text": "আমাদের স্কুলে বিজ্ঞান মেলা হয়েছিল। ছাত্রছাত্রীরা নানা রকম প্রকল্প তৈরি করেছিল। আমার বন্ধু সৌর বিদ্যুতের একটি ছোট্ট মডেল বানিয়েছিল। প্রধান শিক্ষক সবার কাজের প্রশংসা করলেন। মেলা শেষে পুরস্কার দেওয়া হলো।",
+    "language": "bn"
+  },
+  {
+    "code": "P08",
+    "title": "আমাদের বিজয়",
+    "grade": 4,
+    "text": "উনিশশো একাত্তর সালে বাংলাদেশের মুক্তিযুদ্ধ হয়েছিল। নয় মাস যুদ্ধের পর আমরা স্বাধীনতা অর্জন করি। লক্ষ লক্ষ মানুষ দেশের জন্য প্রাণ দিয়েছিলেন। ষোলোই ডিসেম্বর আমাদের বিজয় দিবস। আমরা শ্রদ্ধার সাথে মুক্তিযোদ্ধাদের স্মরণ করি।",
+    "language": "bn"
+  },
+  {
+    "code": "P09",
+    "title": "গাছ লাগাই",
+    "grade": 4,
+    "text": "গাছ আমাদের পরম বন্ধু। গাছ থেকে আমরা অক্সিজেন, ফল এবং কাঠ পাই। গাছ মাটির ক্ষয় রোধ করে এবং পরিবেশ ঠান্ডা রাখে। তাই প্রত্যেকের উচিত বছরে অন্তত একটি করে গাছ লাগানো। চারাগাছের নিয়মিত যত্ন নেওয়াও জরুরি।",
+    "language": "bn"
+  },
+  {
+    "code": "P10",
+    "title": "শীতের সকাল",
+    "grade": 4,
+    "text": "শীতের সকালে চারদিক কুয়াশায় ঢেকে থাকে। ঘাসের ডগায় শিশির বিন্দু চিকচিক করে। গ্রামের মানুষ খড়কুটো জ্বালিয়ে আগুন পোহায়। খেজুরের রস আর পিঠা শীতের প্রধান আকর্ষণ। সূর্য উঠলে ধীরে ধীরে কুয়াশা কেটে যায়।",
+    "language": "bn"
+  },
+  {
+    "code": "P11",
+    "title": "কম্পিউটার ও আমরা",
+    "grade": 5,
+    "text": "বর্তমান যুগে কম্পিউটার আমাদের দৈনন্দিন জীবনের অবিচ্ছেদ্য অংশ। শিক্ষা, চিকিৎসা ও ব্যবসায় কম্পিউটারের ব্যবহার দ্রুত বাড়ছে। ইন্টারনেটের মাধ্যমে আমরা মুহূর্তের মধ্যে পৃথিবীর খবর জানতে পারি। তবে অতিরিক্ত স্ক্রিন ব্যবহার স্বাস্থ্যের জন্য ক্ষতিকর। তাই প্রযুক্তির সঠিক ব্যবহার শিখতে হবে।",
+    "language": "bn"
+  },
+  {
+    "code": "P12",
+    "title": "সুন্দরবন",
+    "grade": 5,
+    "text": "সুন্দরবন পৃথিবীর বৃহত্তম ম্যানগ্রোভ বন। এটি বাংলাদেশের দক্ষিণ পশ্চিম অঞ্চলে অবস্থিত। এখানে রয়েল বেঙ্গল টাইগার, চিত্রা হরিণ ও নানা প্রজাতির পাখি বাস করে। ঘূর্ণিঝড়ের সময় সুন্দরবন উপকূলের মানুষকে রক্ষা করে। এই বনকে রক্ষা করা আমাদের সকলের দায়িত্ব।",
+    "language": "bn"
+  },
+  {
+    "code": "P13",
+    "title": "আমার মা",
+    "grade": 1,
+    "language": "bn",
+    "text": "আমার মা খুব ভালো। মা আমাকে ভাত খাওয়ান। মা আমাকে গল্প বলেন। আমি মাকে খুব ভালোবাসি।"
+  },
+  {
+    "code": "P14",
+    "title": "লাল ফুল",
+    "grade": 1,
+    "language": "bn",
+    "text": "আমাদের বাগানে একটি লাল ফুল ফুটেছে। ফুলের উপর একটি প্রজাপতি বসেছে। প্রজাপতির ডানা হলুদ। আমি ফুল দেখে খুশি হই।"
+  },
+  {
+    "code": "P15",
+    "title": "হাট বাজার",
+    "grade": 2,
+    "language": "bn",
+    "text": "প্রতি শুক্রবার আমাদের গ্রামে হাট বসে। কৃষকেরা শাকসবজি আর মাছ নিয়ে আসেন। বাবা আমাকে হাটে নিয়ে যান। আমি সেখান থেকে মিষ্টি কিনি। হাটে অনেক মানুষের ভিড় হয়।"
+  },
+  {
+    "code": "P16",
+    "title": "আমার খেলনা",
+    "grade": 2,
+    "language": "bn",
+    "text": "আমার একটি ছোট্ট লাল গাড়ি আছে। গাড়িটির চারটি চাকা। আমি বন্ধুদের সাথে গাড়ি নিয়ে খেলি। খেলা শেষে খেলনা গুছিয়ে রাখি। মা বলেন জিনিস যত্ন করে রাখতে হয়।"
+  },
+  {
+    "code": "P17",
+    "title": "বইমেলা",
+    "grade": 3,
+    "language": "bn",
+    "text": "ফেব্রুয়ারি মাসে ঢাকায় অমর একুশে বইমেলা হয়। মেলায় হাজার হাজার নতুন বই পাওয়া যায়। শিশুদের জন্য আলাদা কর্নার থাকে। আমি বাবার সাথে মেলায় গিয়ে ছবির বই কিনেছি। বই পড়লে জ্ঞান বাড়ে।"
+  },
+  {
+    "code": "P18",
+    "title": "আমাদের জাতীয় পতাকা",
+    "grade": 4,
+    "language": "bn",
+    "text": "আমাদের জাতীয় পতাকা সবুজ আর লাল রঙের। সবুজ রং দেশের সবুজ প্রকৃতির প্রতীক। মাঝখানের লাল বৃত্ত স্বাধীনতার জন্য শহিদদের রক্তের কথা মনে করিয়ে দেয়। জাতীয় দিবসে আমরা পতাকা উত্তোলন করি। পতাকাকে সম্মান করা আমাদের কর্তব্য।"
+  },
+  {
+    "code": "P19",
+    "title": "মহাকাশের গল্প",
+    "grade": 5,
+    "language": "bn",
+    "text": "রাতের আকাশে অসংখ্য তারা ঝিকমিক করে। সূর্যও আসলে একটি নক্ষত্র। পৃথিবী সূর্যের চারদিকে ঘুরতে প্রায় এক বছর সময় নেয়। বিজ্ঞানীরা দূরবীক্ষণ যন্ত্র দিয়ে গ্রহ ও নক্ষত্র পর্যবেক্ষণ করেন। মহাকাশ সম্পর্কে জানতে আমাদের কৌতূহলের শেষ নেই।"
+  },
+  {
+    "code": "P20",
+    "title": "বাংলা নববর্ষ",
+    "grade": 5,
+    "language": "bn",
+    "text": "পহেলা বৈশাখ বাংলা নববর্ষের প্রথম দিন। এই দিনে মানুষ নতুন পোশাক পরে উৎসবে যোগ দেয়। শহরে মঙ্গল শোভাযাত্রা বের হয়। গ্রামে বৈশাখী মেলায় নাগরদোলা আর মাটির খেলনা পাওয়া যায়। নববর্ষ আমাদের ঐতিহ্য ও সংস্কৃতির অংশ।"
+  },
+  {
+    "code": "P21",
+    "title": "আমার বন্ধু",
+    "grade": 1,
+    "language": "bn",
+    "text": "আমার বন্ধুর নাম রনি। সে আমার সাথে খেলে। আমরা এক সাথে স্কুলে যাই। রনি খুব ভালো ছেলে।"
+  },
+  {
+    "code": "P22",
+    "title": "চাঁদ মামা",
+    "grade": 1,
+    "language": "bn",
+    "text": "আকাশে চাঁদ উঠেছে। চাঁদের আলো খুব সুন্দর। ছোট্ট খোকা চাঁদ দেখে হাসে। মা তাকে গল্প বলেন।"
+  },
+  {
+    "code": "P23",
+    "title": "নৌকা ভ্রমণ",
+    "grade": 2,
+    "language": "bn",
+    "text": "ছুটির দিনে আমরা নৌকায় চড়লাম। মাঝি ভাই গান গাইছিলেন। নদীর দুই পাশে সবুজ গ্রাম। পানিতে মাছ লাফাচ্ছিল। আমার খুব আনন্দ হলো।"
+  },
+  {
+    "code": "P24",
+    "title": "পরিশ্রমী পিঁপড়া",
+    "grade": 2,
+    "language": "bn",
+    "text": "একটি পিঁপড়া সারাদিন খাবার জমায়। বৃষ্টির আগে সে ঘরে খাবার রাখে। পিঁপড়া কখনো আলস্য করে না। আমরাও পরিশ্রম করব।"
+  },
+  {
+    "code": "P25",
+    "title": "স্বাস্থ্যই সম্পদ",
+    "grade": 3,
+    "language": "bn",
+    "text": "সুস্থ থাকতে প্রতিদিন ব্যায়াম করা দরকার। পুষ্টিকর খাবার শরীরকে শক্তি দেয়। পর্যাপ্ত ঘুম মনকে সতেজ রাখে। তাই বলা হয়, স্বাস্থ্যই সকল সুখের মূল।"
+  },
+  {
+    "code": "P26",
+    "title": "আমাদের বিদ্যালয়",
+    "grade": 3,
+    "language": "bn",
+    "text": "আমাদের বিদ্যালয়টি গ্রামের মাঝখানে। এখানে একটি বড় খেলার মাঠ আছে। শিক্ষকরা আমাদের যত্ন করে পড়ান। গ্রন্থাগারে অনেক গল্পের বই আছে। আমি আমার বিদ্যালয়কে ভালোবাসি।"
+  },
+  {
+    "code": "P27",
+    "title": "মুক্তিযুদ্ধের গল্প",
+    "grade": 4,
+    "language": "bn",
+    "text": "উনিশশো একাত্তর সালে বাংলাদেশের মুক্তিযুদ্ধ হয়েছিল। লক্ষ লক্ষ মানুষ স্বাধীনতার জন্য যুদ্ধ করেছিলেন। মুক্তিযোদ্ধাদের ত্যাগ আমরা কখনো ভুলব না। ষোলোই ডিসেম্বর আমাদের বিজয় দিবস।"
+  },
+  {
+    "code": "P28",
+    "title": "পরিবেশ রক্ষা",
+    "grade": 4,
+    "language": "bn",
+    "text": "পরিবেশ দূষণ আজ একটি বড় সমস্যা। কারখানার ধোঁয়া বাতাসকে দূষিত করে। প্লাস্টিক নদী ও মাটির ক্ষতি করে। আমাদের উচিত বেশি করে গাছ লাগানো এবং ময়লা নির্দিষ্ট জায়গায় ফেলা।"
+  },
+  {
+    "code": "P29",
+    "title": "বিজ্ঞানী জগদীশচন্দ্র",
+    "grade": 5,
+    "language": "bn",
+    "text": "আচার্য জগদীশচন্দ্র বসু একজন বিখ্যাত বাঙালি বিজ্ঞানী। তিনি প্রমাণ করেছিলেন যে উদ্ভিদেরও প্রাণ আছে। বেতার যন্ত্র নিয়েও তিনি গুরুত্বপূর্ণ গবেষণা করেছিলেন। তাঁর আবিষ্কার সারা বিশ্বে প্রশংসিত হয়েছে।"
+  },
+  {
+    "code": "P30",
+    "title": "ডিজিটাল বাংলাদেশ",
+    "grade": 5,
+    "language": "bn",
+    "text": "প্রযুক্তির উন্নতিতে আমাদের জীবন বদলে যাচ্ছে। এখন গ্রামের মানুষও মোবাইলে টাকা পাঠাতে পারে। শিক্ষার্থীরা অনলাইনে পড়াশোনা করছে। তবে প্রযুক্তির সঠিক ও নিরাপদ ব্যবহার শেখা অত্যন্ত জরুরি।"
+  },
+  {
+    "code": "E01",
+    "title": "My Red Ball",
+    "grade": 1,
+    "language": "en",
+    "text": "I have a red ball. The ball is big. I kick the ball. My dog runs to get it. We play in the sun."
+  },
+  {
+    "code": "E02",
+    "title": "The Cat",
+    "grade": 1,
+    "language": "en",
+    "text": "This is my cat. Her name is Mini. She is white and soft. She likes milk. At night she sleeps on my bed."
+  },
+  {
+    "code": "E03",
+    "title": "A Rainy Day",
+    "grade": 2,
+    "language": "en",
+    "text": "It is raining today. The sky is dark and grey. I sit by the window and watch the rain. Frogs are singing in the pond. My mother is cooking hot rice for us."
+  },
+  {
+    "code": "E04",
+    "title": "My School",
+    "grade": 2,
+    "language": "en",
+    "text": "I go to school every day. My school has a big green field. We play games there after class. My teacher is kind and helpful. I like to read new books in the library."
+  },
+  {
+    "code": "E05",
+    "title": "The River",
+    "grade": 3,
+    "language": "en",
+    "text": "There is a river near our village. Fishermen go out in their boats every morning. They catch many kinds of fish. In the evening the water shines like gold. Children love to swim in the river in summer."
+  },
+  {
+    "code": "E06",
+    "title": "Keep Clean",
+    "grade": 3,
+    "language": "en",
+    "text": "We must keep our body clean. Wash your hands with soap before you eat. Brush your teeth twice a day. Do not throw rubbish on the road. A clean home keeps the whole family healthy."
+  },
+  {
+    "code": "E07",
+    "title": "Our Village Market",
+    "grade": 4,
+    "language": "en",
+    "text": "Every Friday there is a busy market in our village. Farmers bring fresh vegetables, rice and fruit to sell. People bargain loudly with the shopkeepers. My father buys fish and spices for the week. I always ask him for a sweet treat on the way home."
+  },
+  {
+    "code": "E08",
+    "title": "Planting Trees",
+    "grade": 4,
+    "language": "en",
+    "text": "Trees are our best friends. They give us fresh air, shade and delicious fruit. Their roots hold the soil together during heavy rain. Birds build their nests in the branches. Everyone should plant at least one tree every year and take care of it."
+  },
+  {
+    "code": "E09",
+    "title": "The Sundarbans",
+    "grade": 5,
+    "language": "en",
+    "text": "The Sundarbans is the largest mangrove forest in the world. It lies in the southwest of Bangladesh. The famous Royal Bengal Tiger lives there with spotted deer, crocodiles and many colourful birds. The forest protects coastal people from dangerous cyclones. It is our duty to protect this beautiful forest for the future."
+  },
+  {
+    "code": "E10",
+    "title": "Using Computers Wisely",
+    "grade": 5,
+    "language": "en",
+    "text": "Computers have become an important part of our daily lives. Students use them to learn, to write and to search for information. Through the internet we can talk to friends in faraway countries. However, sitting in front of a screen for too long can harm our eyes and health. We should use technology wisely and take regular breaks."
+  },
+  {
+    "code": "E11",
+    "title": "My Family",
+    "grade": 1,
+    "language": "en",
+    "text": "I live with my family. My father is a farmer. My mother cooks good food. I have one little sister. We eat together every night."
+  },
+  {
+    "code": "E12",
+    "title": "The Bird",
+    "grade": 1,
+    "language": "en",
+    "text": "A small bird sits on the tree. It is green and yellow. It sings a sweet song. Then it flies up into the sky."
+  },
+  {
+    "code": "E13",
+    "title": "At the Zoo",
+    "grade": 2,
+    "language": "en",
+    "text": "Last week we went to the zoo. We saw a tall giraffe and a big elephant. The monkeys were jumping from tree to tree. A tiger was sleeping in the shade. It was a very happy day."
+  },
+  {
+    "code": "E14",
+    "title": "My Garden",
+    "grade": 2,
+    "language": "en",
+    "text": "We have a small garden behind our house. My grandfather grows tomatoes and beans there. I water the plants every morning. Butterflies come to visit the flowers. I love to help in the garden."
+  },
+  {
+    "code": "E15",
+    "title": "A Good Friend",
+    "grade": 3,
+    "language": "en",
+    "text": "Rafi is my best friend. We sit together in class and share our lunch. When I was sick, he brought my homework to my house. He always tells the truth. A good friend helps you when you need it."
+  },
+  {
+    "code": "E16",
+    "title": "Saving Water",
+    "grade": 3,
+    "language": "en",
+    "text": "Water is very precious. We cannot live without it. Turn off the tap while you brush your teeth. Fix any pipe that is leaking. If we save water today, there will be enough for tomorrow."
+  },
+  {
+    "code": "E17",
+    "title": "The Boat Race",
+    "grade": 4,
+    "language": "en",
+    "text": "Every year our village holds a boat race on the river. Long wooden boats are painted in bright colours. Each boat has many rowers who pull their oars together. Crowds of people cheer from the banks. The winning team receives a trophy and great respect."
+  },
+  {
+    "code": "E18",
+    "title": "Healthy Food",
+    "grade": 4,
+    "language": "en",
+    "text": "Eating healthy food keeps our body strong. Fruits and vegetables give us vitamins. Rice and bread give us energy to work and play. We should drink plenty of clean water. Too many sweets and fried snacks can make us ill."
+  },
+  {
+    "code": "E19",
+    "title": "Mother Language Day",
+    "grade": 5,
+    "language": "en",
+    "text": "On the twenty first of February we celebrate International Mother Language Day. In nineteen fifty two, students in Dhaka gave their lives for the right to speak Bangla. Today the whole world remembers their sacrifice. People place flowers at the Shaheed Minar early in the morning. The day reminds us to respect every language."
+  },
+  {
+    "code": "E20",
+    "title": "Climate Change",
+    "grade": 5,
+    "language": "en",
+    "text": "Our planet is slowly getting warmer. Factories and vehicles release harmful gases into the air. As a result, ice is melting and sea levels are rising. Bangladesh faces more floods and stronger storms because of this change. We can help by planting trees, saving electricity and using less plastic."
+  },
+  {
+    "code": "E21",
+    "title": "My Pet Dog",
+    "grade": 1,
+    "language": "en",
+    "text": "I have a dog. His name is Tom. Tom is brown and white. He likes to run and play. I love my dog."
+  },
+  {
+    "code": "E22",
+    "title": "The Kite",
+    "grade": 2,
+    "language": "en",
+    "text": "Rina made a big kite. It was red and yellow. She ran in the field and the kite went up high. The wind took it over the trees."
+  },
+  {
+    "code": "E23",
+    "title": "Our Library",
+    "grade": 3,
+    "language": "en",
+    "text": "Our school has a small library. It has many books about animals, stars and stories. We must keep the books clean. Reading every day helps us learn new words."
+  },
+  {
+    "code": "E24",
+    "title": "The Rickshaw Puller",
+    "grade": 4,
+    "language": "en",
+    "text": "Karim pulls a rickshaw in the town. He starts work early in the morning. He takes children to school and people to the market. His work is hard, but he is always kind and honest."
+  },
+  {
+    "code": "E25",
+    "title": "Rivers of Bangladesh",
+    "grade": 5,
+    "language": "en",
+    "text": "Bangladesh is a land of rivers. The Padma, the Meghna and the Jamuna are the largest. Rivers give us fish, water for crops and a way to travel. We must protect them from pollution."
+  }
+]

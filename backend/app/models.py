@@ -1,0 +1,177 @@
+"""Database tables.
+
+Privacy by design: a student is a class roll code plus an optional nickname.
+No names, faces or birth dates are stored. Audio is deleted when the teacher
+finalises the review unless they choose to keep it.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .db import Base
+
+
+def utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def iso(dt: datetime | None) -> str | None:
+    """ISO-8601 with an explicit UTC offset (SQLite returns naive datetimes)."""
+    if dt is None:
+        return None
+    return (dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)).isoformat()
+
+
+class Classroom(Base):
+    __tablename__ = "classrooms"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(120))
+    grade: Mapped[int] = mapped_column(Integer, default=1)
+    school: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    students: Mapped[list["Student"]] = relationship(back_populates="classroom", cascade="all, delete-orphan",
+                                                     order_by="Student.code")
+
+
+class Student(Base):
+    __tablename__ = "students"
+    __table_args__ = (UniqueConstraint("classroom_id", "code"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    classroom_id: Mapped[int] = mapped_column(ForeignKey("classrooms.id", ondelete="CASCADE"), index=True)
+    code: Mapped[str] = mapped_column(String(40))  # roll number / code
+    nickname: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    classroom: Mapped[Classroom] = relationship(back_populates="students")
+    readings: Mapped[list["Reading"]] = relationship(back_populates="student", cascade="all, delete-orphan",
+                                                     order_by="Reading.created_at")
+    account: Mapped["User | None"] = relationship(back_populates="student", cascade="all, delete-orphan",
+                                                  uselist=False)
+
+
+class Passage(Base):
+    __tablename__ = "passages"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str | None] = mapped_column(String(20), nullable=True, unique=True)
+    title: Mapped[str] = mapped_column(String(200))
+    grade: Mapped[int] = mapped_column(Integer, default=1)
+    language: Mapped[str] = mapped_column(String(5), default="bn")  # bn | en
+    text: Mapped[str] = mapped_column(Text)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Reading(Base):
+    __tablename__ = "readings"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey("students.id", ondelete="CASCADE"), index=True)
+    passage_id: Mapped[int] = mapped_column(ForeignKey("passages.id"), index=True)
+    passage_text: Mapped[str] = mapped_column(Text)  # snapshot: passage edits never change old results
+    status: Mapped[str] = mapped_column(String(20), default="queued")  # queued|processing|done|rejected|failed
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    quality: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    transcript: Mapped[str | None] = mapped_column(Text, nullable=True)
+    metrics: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    duration_sec: Mapped[float | None] = mapped_column(Float, nullable=True)
+    processing_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    thresholds: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    forced_alignment_ok: Mapped[bool] = mapped_column(Boolean, default=False)
+    audio_path: Mapped[str | None] = mapped_column(String(400), nullable=True)
+    keep_audio: Mapped[bool] = mapped_column(Boolean, default=False)
+    reviewed: Mapped[bool] = mapped_column(Boolean, default=False)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    comparison: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    comparison_status: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    student: Mapped[Student] = relationship(back_populates="readings")
+    passage: Mapped[Passage] = relationship()
+    marks: Mapped[list["WordMark"]] = relationship(back_populates="reading", cascade="all, delete-orphan",
+                                                   order_by="WordMark.index")
+
+
+class WordMark(Base):
+    __tablename__ = "word_marks"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    reading_id: Mapped[int] = mapped_column(ForeignKey("readings.id", ondelete="CASCADE"), index=True)
+    index: Mapped[int] = mapped_column(Integer)
+    display: Mapped[str] = mapped_column(String(200))
+    expected: Mapped[str] = mapped_column(String(200))
+    heard: Mapped[str] = mapped_column(String(400), default="")
+    status: Mapped[str] = mapped_column(String(20))  # system decision
+    raw_status: Mapped[str] = mapped_column(String(20))
+    teacher_status: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    flags: Mapped[list] = mapped_column(JSON, default=list)
+    inserted: Mapped[list] = mapped_column(JSON, default=list)
+    start: Mapped[float | None] = mapped_column(Float, nullable=True)
+    end: Mapped[float | None] = mapped_column(Float, nullable=True)
+    free_conf: Mapped[float | None] = mapped_column(Float, nullable=True)
+    gop: Mapped[float | None] = mapped_column(Float, nullable=True)
+    units: Mapped[list] = mapped_column(JSON, default=list)
+    patterns: Mapped[list] = mapped_column(JSON, default=list)  # blamed patterns if final status is misread
+    error_patterns: Mapped[list] = mapped_column(JSON, default=list)  # all patterns the unit diff found
+    note_bn: Mapped[str] = mapped_column(String(300), default="")
+    note_en: Mapped[str] = mapped_column(String(300), default="")
+    reading: Mapped[Reading] = relationship(back_populates="marks")
+
+    @property
+    def final_status(self) -> str:
+        return self.teacher_status or self.status
+
+    def as_metric_dict(self) -> dict:
+        return {"status": self.status, "teacher_status": self.teacher_status, "start": self.start,
+                "end": self.end, "flags": self.flags, "expected": self.expected, "heard": self.heard,
+                # if the teacher confirms a misread the system was unsure about,
+                # the unit diff still says which pattern was involved
+                "patterns": self.error_patterns or self.patterns}
+
+
+class AcceptedVariant(Base):
+    """A pronunciation/spelling the school accepts as correct for a word."""
+
+    __tablename__ = "accepted_variants"
+    __table_args__ = (UniqueConstraint("word", "variant"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    word: Mapped[str] = mapped_column(String(200), index=True)
+    variant: Mapped[str] = mapped_column(String(200))
+    note: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class User(Base):
+    """A login. Teachers manage everything; a student account is tied to one Student row."""
+
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(60), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(200))
+    role: Mapped[str] = mapped_column(String(20))  # teacher | student
+    display_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    student_id: Mapped[int | None] = mapped_column(ForeignKey("students.id", ondelete="CASCADE"), nullable=True,
+                                                   unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    student: Mapped[Student | None] = relationship(back_populates="account")
+
+
+class AuthSession(Base):
+    """Server-side login session. Only a SHA-256 of the cookie token is stored."""
+
+    __tablename__ = "auth_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    user: Mapped[User] = relationship()
+
+
+class AppMeta(Base):
+    """Small key/value store (e.g. which demo seed version has been applied)."""
+
+    __tablename__ = "app_meta"
+    key: Mapped[str] = mapped_column(String(60), primary_key=True)
+    value: Mapped[str] = mapped_column(String(400))
