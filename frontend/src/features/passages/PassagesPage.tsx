@@ -113,17 +113,17 @@ export function PassagesPage() {
       {isLoading ? (
         <PageLoader />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
           {shown.map((p) => (
             <Card key={p.id} className="flex flex-col p-5">
               <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
                   <span className={`text-lg font-semibold ${langFont(p.language)}`}>{p.title}</span>
                   <GradeBadge grade={p.grade} />
                   <LanguageBadge language={p.language} />
                   {p.code && <span className="text-xs text-slate-400">{p.code}</span>}
                 </div>
-                <div className="flex gap-1">
+                <div className="flex shrink-0 gap-1">
                   <Button variant="ghost" size="sm" onClick={() => setEditing(p)} aria-label="Edit">
                     <Pencil className="size-4" />
                   </Button>

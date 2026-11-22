@@ -97,13 +97,13 @@ export function ReviewQueuePage() {
                 </FilterChip>
               ))}
             </div>
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex min-w-0 flex-wrap items-center gap-2">
               <Select value={lang} onChange={(e) => setLang(e.target.value as 'all' | Language)} className="h-9 !w-36" aria-label="Language">
                 <option value="all">All languages</option>
                 <option value="bn">বাংলা</option>
                 <option value="en">English</option>
               </Select>
-              <Select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="h-9 !w-64" aria-label="Sort">
+              <Select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="h-9 !w-full sm:!w-64" aria-label="Sort">
                 {Object.entries(SORTS).map(([k, v]) => (
                   <option key={k} value={k}>
                     {v}
@@ -131,7 +131,7 @@ export function ReviewQueuePage() {
                     <MarkBadge score={r.score} />
                     <div className="min-w-0 flex-1">
                       <div className={clsx('truncate text-slate-800', langFont(r.language))}>{r.passage_title}</div>
-                      <div className="flex items-center gap-3 text-xs text-slate-500">
+                      <div className="flex flex-wrap items-center gap-x-3 text-xs text-slate-500">
                         <span className={wcpmTone(r.wcpm)}>{num(r.wcpm)} WCPM</span>
                         <span>{r.errors ?? 0} errors</span>
                         {!!r.unsure && <span className="font-medium text-amber-700">{r.unsure} unsure</span>}

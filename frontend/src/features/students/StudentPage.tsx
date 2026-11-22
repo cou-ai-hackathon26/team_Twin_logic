@@ -253,7 +253,7 @@ export function StudentPage() {
         <Stat label="To review" value={data.unreviewed} />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-2">
         <Card>
           <CardHeader title="Progress" subtitle="Mark out of 10 and words correct per minute over time" />
           <ProgressChart data={data.progress} />

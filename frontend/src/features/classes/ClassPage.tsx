@@ -213,7 +213,7 @@ export function ClassPage() {
         <Stat label="To review" value={data.stats.unreviewed} hint="readings waiting for the teacher" />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Card>
           <CardHeader title="Students" subtitle="Latest reading and candidate weak patterns per child" />
           {!data.students.length ? (

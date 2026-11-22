@@ -51,7 +51,7 @@ export function StudentProgress() {
 
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          { l: 'Tests', v: String(tests.length), t: 'text-ink' },
+          { l: 'Checked tests', v: String(tests.length), t: 'text-ink' },
           { l: 'First mark', v: mark10(first), t: markTone(first) },
           { l: 'Latest mark', v: mark10(last), t: markTone(last) },
           { l: 'Change', v: gain === null ? '—' : `${gain >= 0 ? '+' : ''}${Number.isInteger(gain) ? gain : gain.toFixed(1)}`, t: gain === null ? 'text-slate-400' : gain >= 0 ? 'text-emerald-700' : 'text-rose-700' },
