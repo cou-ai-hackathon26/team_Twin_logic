@@ -30,6 +30,13 @@ class Settings(BaseSettings):
     count_unsure_as_correct: bool = True
     seed_demo: bool = True  # first start: demo teacher, one class per grade, student logins
     session_days: int = 14
+    # privacy: recordings not marked "keep" are deleted this many days after upload, reviewed or not.
+    # 0 = off (default, so a developer's existing local recordings are never removed unexpectedly);
+    # the hosted image sets 14, and .env.example recommends 14 for schools.
+    audio_retention_days: int = 0
+    # security: lock a login for lockout_minutes after this many wrong passwords in a row
+    max_failed_logins: int = 5
+    lockout_minutes: int = 10
     # "lax" for local use; "none" when the app runs inside an iframe (Hugging Face Spaces)
     cookie_samesite: str = "lax"
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"

@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import logging
 import threading
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -23,6 +24,8 @@ from sqlalchemy import select
 from .api.auth_routes import router as auth_router
 from .api.tts_routes import router as tts_router
 from .api.routes import router
+from .api.practice_routes import student as practice_student_router
+from .api.practice_routes import teacher as practice_teacher_router
 from .config import BACKEND_DIR, get_settings
 from .db import SessionLocal, init_db
 from .models import Passage
@@ -71,7 +74,22 @@ async def lifespan(_app: FastAPI):
         log.info("re-queued %d unfinished readings", q)
     if get_settings().preload_models:
         threading.Thread(target=registry.get_ctc, daemon=True).start()
+    threading.Thread(target=_audio_janitor, daemon=True, name="pb-audio-janitor").start()
     yield
+
+
+def _audio_janitor() -> None:
+    """Delete expired recordings at start-up and then every 6 hours."""
+    from .services.readings import purge_old_audio
+
+    while True:
+        try:
+            n = purge_old_audio()
+            if n:
+                log.info("deleted %d recordings older than %d days", n, get_settings().audio_retention_days)
+        except Exception:  # noqa: BLE001
+            log.exception("audio clean-up failed")
+        time.sleep(6 * 3600)
 
 
 app = FastAPI(title="PoraBondhu AI", version="1.0.0", lifespan=lifespan)
@@ -84,6 +102,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(router)
 app.include_router(tts_router)
+app.include_router(practice_teacher_router)
+app.include_router(practice_student_router)
 
 if FRONTEND_DIST.exists():
     app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")

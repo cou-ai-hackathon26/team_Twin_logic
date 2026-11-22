@@ -85,4 +85,4 @@ class AccountIn(BaseModel):
 
 class PasswordIn(BaseModel):
     current_password: str = Field(min_length=1, max_length=200)
-    new_password: str = Field(min_length=4, max_length=200)
+    new_password: str = Field(min_length=8, max_length=200)

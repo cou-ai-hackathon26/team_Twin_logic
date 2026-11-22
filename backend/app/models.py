@@ -159,6 +159,8 @@ class User(Base):
     student_id: Mapped[int | None] = mapped_column(ForeignKey("students.id", ondelete="CASCADE"), nullable=True,
                                                    unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    failed_logins: Mapped[int] = mapped_column(Integer, default=0)
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     student: Mapped[Student | None] = relationship(back_populates="account")
 
 
@@ -179,3 +181,23 @@ class AppMeta(Base):
     __tablename__ = "app_meta"
     key: Mapped[str] = mapped_column(String(60), primary_key=True)
     value: Mapped[str] = mapped_column(String(400))
+
+
+class Assignment(Base):
+    """Practice a teacher gives one child: a passage and/or words for a weak pattern.
+
+    A whole class or a weak-pattern group is stored as one row per child, so each child
+    sees and completes their own. Done when the child reads the passage (or ticks the words).
+    """
+
+    __tablename__ = "assignments"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey("students.id", ondelete="CASCADE"), index=True)
+    passage_id: Mapped[int | None] = mapped_column(ForeignKey("passages.id"), nullable=True)
+    pattern_key: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    words: Mapped[list] = mapped_column(JSON, default=list)
+    note: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    done_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    student: Mapped[Student] = relationship()
+    passage: Mapped[Passage | None] = relationship()

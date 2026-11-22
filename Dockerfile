@@ -24,7 +24,8 @@ ENV HOME=/home/user \
     PB_CTC_BACKEND=onnx-int8 \
     PB_PRELOAD_MODELS=true \
     PB_TORCH_THREADS=2 \
-    PB_COOKIE_SAMESITE=none
+    PB_COOKIE_SAMESITE=none \
+    PB_AUDIO_RETENTION_DAYS=14
 WORKDIR /home/user/app
 
 COPY --chown=user backend/requirements-deploy.txt backend/

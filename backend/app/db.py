@@ -52,7 +52,8 @@ def _add_missing_columns() -> None:
     """Tiny forward-only migration for databases created before a column existed."""
     from sqlalchemy import inspect, text
 
-    wanted = {"passages": {"language": "VARCHAR(5) NOT NULL DEFAULT 'bn'"}}
+    wanted = {"passages": {"language": "VARCHAR(5) NOT NULL DEFAULT 'bn'"},
+              "users": {"failed_logins": "INTEGER NOT NULL DEFAULT 0", "locked_until": "TIMESTAMP"}}
     insp = inspect(engine)
     with engine.begin() as conn:
         for table, cols in wanted.items():

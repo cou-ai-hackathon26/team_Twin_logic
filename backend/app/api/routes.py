@@ -20,7 +20,7 @@ from ..bangla.patterns import pattern_label
 from ..bangla.segment import segment_normalized
 from ..config import get_settings, load_thresholds
 from ..db import get_db
-from ..models import AcceptedVariant, Classroom, Passage, Reading, Student, User
+from ..models import AcceptedVariant, Assignment, Classroom, Passage, Reading, Student, User
 from ..schemas import (AccountIn, AnalyzeIn, DiffIn, ClassroomIn, FinalizeIn, MarkPatch, PassageIn, PassagePatch, StudentIn,
                        StudentPatch, StudentsBulkIn, VariantIn)
 from ..services import analytics
@@ -49,7 +49,9 @@ def system() -> dict:
         "thresholds": load_thresholds().to_dict(),
         "settings": {"weak_min_errors": s.weak_min_errors, "weak_min_readings": s.weak_min_readings,
                      "count_unsure_as_correct": s.count_unsure_as_correct,
-                     "database": "postgresql" if s.db_url.startswith("postgres") else "sqlite"},
+                     "database": "postgresql" if s.db_url.startswith("postgres") else "sqlite",
+                     "demo_mode": s.seed_demo, "audio_retention_days": s.audio_retention_days,
+                     "max_failed_logins": s.max_failed_logins, "lockout_minutes": s.lockout_minutes},
     }
 
 
@@ -259,6 +261,10 @@ async def accept_upload(db: Session, st: Student, p: Passage, audio: UploadFile)
     except ValueError as e:
         db.rollback()
         raise HTTPException(422, str(e)) from None
+    # reading an assigned passage completes that assignment
+    for a in db.scalars(select(Assignment).where(Assignment.student_id == st.id, Assignment.passage_id == p.id,
+                                                 Assignment.done_at.is_(None))):
+        a.done_at = datetime.now(timezone.utc)
     db.commit()
     reading_svc.submit(r.id)
     return r

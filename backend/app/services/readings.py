@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -50,6 +50,29 @@ def delete_audio(reading: Reading) -> None:
         except OSError:
             log.warning("could not delete %s", reading.audio_path)
     reading.audio_path = None
+
+
+def purge_old_audio(now: datetime | None = None) -> int:
+    """Privacy: delete recordings older than PB_AUDIO_RETENTION_DAYS unless the teacher chose to keep
+    them. Marks and metrics stay; only the voice is removed. Returns how many files were deleted."""
+    days = get_settings().audio_retention_days
+    if days <= 0:
+        return 0
+    cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
+    db = SessionLocal()
+    try:
+        rows = db.scalars(select(Reading).where(Reading.audio_path.is_not(None), Reading.keep_audio.is_(False),
+                                                Reading.status.not_in(["queued", "processing"]))).all()
+        n = 0
+        for r in rows:
+            created = r.created_at if r.created_at.tzinfo else r.created_at.replace(tzinfo=timezone.utc)
+            if created < cutoff:
+                delete_audio(r)
+                n += 1
+        db.commit()
+        return n
+    finally:
+        db.close()
 
 
 def reading_language(r: Reading) -> str:
