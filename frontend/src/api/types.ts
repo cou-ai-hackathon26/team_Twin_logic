@@ -246,6 +246,7 @@ export interface Reading {
   score: number | null
   student: { id: number; code: string; nickname: string | null; classroom_id: number } | null
   marks?: WordMark[]
+  progress?: ReadingProgress
 }
 
 export interface ModelStatus {
@@ -379,4 +380,15 @@ export interface PracticeWord {
   date: string
   clip: { start: number; end: number } | null
   patterns: PatternLabel[]
+}
+
+export type ProgressStage = 'queued' | 'loading' | 'quality' | 'listening' | 'aligning' | 'diagnosing'
+
+/** Live processing state, present while a reading is queued or processing. */
+export interface ReadingProgress {
+  stage: ProgressStage
+  elapsed_sec: number
+  stage_elapsed_sec: number
+  estimated_sec: number
+  audio_sec: number | null
 }

@@ -5,6 +5,7 @@ import os
 from ..assessment.metrics import score_of
 from ..bangla.patterns import pattern_label
 from ..models import iso, Passage, Reading, WordMark
+from ..services import progress
 from ..services.analytics import passage_pattern_counts
 
 
@@ -50,6 +51,8 @@ def reading_out(r: Reading, with_marks: bool = True) -> dict:
         "student": {"id": r.student.id, "code": r.student.code, "nickname": r.student.nickname,
                     "classroom_id": r.student.classroom_id} if r.student else None,
     }
+    if r.status in ("queued", "processing"):
+        d["progress"] = progress.snapshot(r.id, d["language"], r.duration_sec)
     if with_marks:
         d["marks"] = [mark_out(m) for m in r.marks]
     return d

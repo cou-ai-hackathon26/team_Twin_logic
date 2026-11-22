@@ -9,6 +9,7 @@ import { MarkBadge } from '@/components/domain'
 import { Button, ErrorBox, Spinner } from '@/components/ui/primitives'
 import { langFont } from '@/lib/format'
 import { startRecording, type RecorderHandle } from '@/lib/recorder'
+import { ProcessingProgress } from './ProcessingProgress'
 
 type Phase = 'ready' | 'recording' | 'uploading' | 'waiting'
 const MAX_SECONDS = 180
@@ -74,13 +75,7 @@ function WaitingForResult({
   const { data } = useReading(readingId, asStudent)
   const t = PROMPTS[language]
   if (!data || data.status === 'queued' || data.status === 'processing')
-    return (
-      <div className="flex flex-col items-center gap-4 text-center">
-        <Spinner className="size-12" />
-        <p className={clsx('text-2xl text-slate-700', langFont(language))}>{t.wait}</p>
-        <p className="text-sm text-slate-500">Listening to the reading on this computer</p>
-      </div>
-    )
+    return <ProcessingProgress progress={data?.progress} language={language} child={asStudent} />
   if (data.status === 'rejected')
     return (
       <div className="flex max-w-xl flex-col items-center gap-4 text-center">

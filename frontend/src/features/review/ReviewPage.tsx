@@ -5,7 +5,8 @@ import { audioUrl } from '@/api/client'
 import { useDeleteReading, useFinalize, useReading, useReprocess, useReviewQueue, useSetMark } from '@/api/hooks'
 import type { WordStatus } from '@/api/types'
 import { LanguageBadge, MarkBadge, ReadingStatusBadge } from '@/components/domain'
-import { Button, Card, CardHeader, EmptyState, ErrorBox, Modal, PageHeader, PageLoader, Spinner, Stat } from '@/components/ui/primitives'
+import { Button, Card, CardHeader, EmptyState, ErrorBox, Modal, PageHeader, PageLoader, Stat } from '@/components/ui/primitives'
+import { ProcessingProgress } from '@/features/assess/ProcessingProgress'
 import { accTone, dateTime, langFont, num, pct, secs, wcpmTone } from '@/lib/format'
 import { ComparisonPanel } from './ComparisonPanel'
 import { Legend, MarkedPassage } from './MarkedPassage'
@@ -131,9 +132,9 @@ export function ReviewPage() {
       <>
         {header}
         <Card>
-          <EmptyState icon={<Spinner className="size-10" />} title={r.status === 'queued' ? 'Waiting in the queue…' : 'Analysing the reading…'}>
-            The first reading after start-up also loads the speech model (about 15 seconds).
-          </EmptyState>
+          <div className="flex justify-center bg-gradient-to-b from-teal-50/60 to-transparent px-4 py-10">
+            <ProcessingProgress progress={r.progress} language={r.language} child={false} />
+          </div>
         </Card>
       </>
     )

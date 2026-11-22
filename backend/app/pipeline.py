@@ -8,6 +8,7 @@ exact same code path.
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -47,17 +48,23 @@ class PipelineResult:
 
 def run_porabondhu(audio: np.ndarray, passage_text: str, recognizer, th: T.Thresholds,
                    variant_pairs: set[tuple[str, str]] | None = None, skip_quality: bool = False,
-                   count_unsure_as_correct: bool = True) -> PipelineResult:
+                   count_unsure_as_correct: bool = True,
+                   on_stage: Callable[[str], None] | None = None) -> PipelineResult:
+    stage = on_stage or (lambda _s: None)
     t0 = time.perf_counter()
+    stage("quality")
     q = quality_check(audio)
     if not q.ok and not skip_quality:
         return PipelineResult("porabondhu", q, True, processing_ms=int((time.perf_counter() - t0) * 1000),
                               model_id=recognizer.model_id)
     pw = passage_words(passage_text)
+    stage("listening")
     logits = recognizer.logits(audio)
     lp = recognizer.log_probs(logits, th.temperature)
     rw = recognizer.greedy_decode(lp)
+    stage("aligning")
     ev = recognizer.expected_evidence(lp, pw)
+    stage("diagnosing")
     marks = assess(pw, rw, ev, th, variant_pairs)
     metrics = compute_metrics([m.to_dict() for m in marks], q.duration_sec, count_unsure_as_correct)
     return PipelineResult(

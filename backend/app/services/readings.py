@@ -22,6 +22,8 @@ from ..models import AcceptedVariant, Reading, WordMark
 from ..pipeline import run_ctc_word_compare, run_porabondhu, run_whisper_word_compare
 from ..speech.audio import load_audio_bytes, load_audio_file, save_wav
 from ..speech.registry import get_ctc, get_whisper
+from ..speech.registry import status as model_status
+from . import progress
 
 log = logging.getLogger(__name__)
 _executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pb-worker")
@@ -100,11 +102,18 @@ def _process_reading(reading_id: int) -> None:
             audio = load_audio_file(r.audio_path)
             th = load_thresholds()
             unsure_ok = get_settings().count_unsure_as_correct
-            if reading_language(r) == "en":
+            lang = reading_language(r)
+            if lang == "en":
+                progress.set_stage(reading_id, "listening")
                 res = run_english(audio, r.passage_text, get_whisper, th, count_unsure_as_correct=unsure_ok)
             else:
-                res = run_porabondhu(audio, r.passage_text, get_ctc(), th, variant_pairs(db),
-                                     count_unsure_as_correct=unsure_ok)
+                if model_status().get("ctc", {}).get("state") != "ready":
+                    progress.set_stage(reading_id, "loading")
+                ctc = get_ctc()
+                res = run_porabondhu(audio, r.passage_text, ctc, th, variant_pairs(db),
+                                     count_unsure_as_correct=unsure_ok,
+                                     on_stage=lambda st: progress.set_stage(reading_id, st))
+            progress.finish(reading_id, lang, res.quality.duration_sec, res.processing_ms)
             r.quality = res.quality.to_dict()
             r.duration_sec = res.quality.duration_sec
             r.processing_ms = res.processing_ms
@@ -131,6 +140,7 @@ def _process_reading(reading_id: int) -> None:
                 r.error = str(e)[:2000]
                 db.commit()
     finally:
+        progress.clear(reading_id)
         db.close()
 
 

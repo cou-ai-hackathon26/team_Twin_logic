@@ -4,7 +4,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMe, useMyPassage, useReading, useUploadMyReading } from '@/api/hooks'
 import { ListenAlong, MyVoicePlayer, useMyVoice, useSayWord } from '@/components/audio'
 import { LanguageBadge, MarkBadge } from '@/components/domain'
-import { Button, Card, CardHeader, EmptyState, ErrorBox, PageHeader, PageLoader, Spinner, Stat } from '@/components/ui/primitives'
+import { Button, Card, CardHeader, EmptyState, ErrorBox, PageHeader, PageLoader, Stat } from '@/components/ui/primitives'
+import { ProcessingProgress } from '@/features/assess/ProcessingProgress'
 import { dateTime, langFont, STATUS_META } from '@/lib/format'
 import { ReadingSession } from '../assess/ReadingSession'
 import { Legend, MarkedPassage } from '../review/MarkedPassage'
@@ -68,7 +69,9 @@ export function StudentResultPage() {
       <>
         <PageHeader back={back} title={title} />
         <Card>
-          <EmptyState icon={<Spinner className="size-10" />} title="Checking your reading…" />
+          <div className="flex justify-center px-4 py-10">
+            <ProcessingProgress progress={r.progress} language={r.language} child />
+          </div>
         </Card>
       </>
     )
