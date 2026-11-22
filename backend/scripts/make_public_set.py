@@ -122,7 +122,9 @@ def build(rec: dict, split: str, audio_rel: str, filler: list[str], rng: random.
     row = {"id": rid, "audio": audio_rel, "passage": "FLEURS", "speaker": f"fleurs-{split}-{rec['gender']}",
            "group": "adult", "split": split, "condition": "clean", "human_wcpm": "",
            "human_transcript": " ".join(w.norm for w in spoken), "passage_text": text}
-    ann = [{"recording_id": rid, "word_index": w.index, "word": w.norm, "label_a": lab, "label_b": lab,
+    # label_a/label_b stay empty: these labels are generated, not annotated by two people, so no
+    # inter-annotator agreement (kappa) may be computed or reported for this set
+    ann = [{"recording_id": rid, "word_index": w.index, "word": w.norm, "label_a": "", "label_b": "",
             "label": lab, "error_units": units.get(w.index, "")} for w, lab in zip(pw, labels)]
     return row, ann
 

@@ -4,7 +4,7 @@ import os
 
 from ..assessment.metrics import score_of
 from ..bangla.patterns import pattern_label
-from ..models import iso, Passage, Reading, WordMark
+from ..models import SIMULATED_MODEL_ID, iso, Passage, Reading, WordMark
 from ..services import progress
 from ..services.analytics import passage_pattern_counts
 
@@ -42,6 +42,7 @@ def reading_out(r: Reading, with_marks: bool = True) -> dict:
         "metrics": {**r.metrics, "score": score_of(r.metrics)} if r.metrics else None,
         "score": score_of(r.metrics), "language": (r.passage.language if r.passage else None) or "bn",
         "duration_sec": r.duration_sec, "processing_ms": r.processing_ms, "model_id": r.model_id,
+        "simulated": r.model_id == SIMULATED_MODEL_ID,
         "thresholds": r.thresholds, "forced_alignment_ok": r.forced_alignment_ok,
         "has_audio": bool(r.audio_path and os.path.exists(r.audio_path)), "keep_audio": r.keep_audio,
         "reviewed": r.reviewed, "reviewed_at": iso(r.reviewed_at),

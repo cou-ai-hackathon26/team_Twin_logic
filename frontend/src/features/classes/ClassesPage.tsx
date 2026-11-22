@@ -81,12 +81,15 @@ function WelcomeBanner({ classes }: { classes: ClassroomSummary[] | undefined })
       assessed: a.assessed + c.stats.assessed,
       readings: a.readings + c.stats.readings,
       unreviewed: a.unreviewed + c.stats.unreviewed,
+      simulated: a.simulated + (c.stats.simulated ?? 0),
     }),
-    { students: 0, assessed: 0, readings: 0, unreviewed: 0 },
+    { students: 0, assessed: 0, readings: 0, unreviewed: 0, simulated: 0 },
   )
+  const loading = classes === undefined
   const coverage = t.students ? t.assessed / t.students : 0
-  const message =
-    t.unreviewed > 0
+  const message = loading
+    ? 'Loading your classes…'
+    : t.unreviewed > 0
       ? `${t.unreviewed} reading${t.unreviewed > 1 ? 's are' : ' is'} waiting for your review.`
       : t.students
         ? `${t.students - t.assessed} of ${t.students} children still to hear reading.`
@@ -122,10 +125,19 @@ function WelcomeBanner({ classes }: { classes: ClassroomSummary[] | undefined })
         ).map(([l, v]) => (
           <div key={l} className="rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/15 backdrop-blur">
             <div className="text-xs font-medium uppercase tracking-wide text-teal-100/70">{l}</div>
-            <div className={clsx('mt-1 text-2xl font-semibold tabular-nums', l === 'To review' && v > 0 && 'text-marigold')}>{v}</div>
+            <div className={clsx('mt-1 text-2xl font-semibold tabular-nums', l === 'To review' && v > 0 && 'text-marigold')}>
+              {loading ? <span className="inline-block h-7 w-10 animate-pulse rounded bg-white/20 align-middle" /> : v}
+            </div>
           </div>
         ))}
       </div>
+      {t.simulated > 0 && (
+        <div className="relative mt-5 rounded-xl bg-white/10 px-4 py-2.5 text-sm text-teal-50 ring-1 ring-white/15">
+          <span className="mr-2 rounded bg-white px-1.5 py-0.5 text-[11px] font-bold text-ink">DEMO</span>
+          {t.simulated} of {t.readings} readings are <b>simulated</b> practice history (scripted errors run through the real
+          marking engine, no audio), so the dashboards are not empty. Every reading you record now is marked live by the models.
+        </div>
+      )}
       {t.students > 0 && (
         <div className="relative mt-5">
           <div className="mb-1.5 flex justify-between text-xs text-teal-100/80">
@@ -239,7 +251,7 @@ export function ClassesPage() {
                   <LanguageBadge language={r.language} />
                   <span className={`w-20 text-sm tabular-nums ${wcpmTone(r.wcpm)}`}>{num(r.wcpm)} WCPM</span>
                   <span className="w-32 text-sm text-slate-500">{dateTime(r.created_at)}</span>
-                  <ReadingStatusBadge status={r.status} reviewed={r.reviewed} />
+                  <ReadingStatusBadge status={r.status} reviewed={r.reviewed} simulated={r.simulated} />
                 </Link>
               </li>
             ))}

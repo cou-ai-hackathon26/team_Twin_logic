@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMyOverview, useMyPassages } from '@/api/hooks'
 import type { Language } from '@/api/types'
-import { LanguageBadge, MarkBadge, ReadingStatusBadge } from '@/components/domain'
+import { LanguageBadge, MarkBadge, ReadingStatusBadge, SimulatedBadge } from '@/components/domain'
 import { Button, Card, CardHeader, EmptyState, ErrorBox, PageLoader } from '@/components/ui/primitives'
 import { dateTime, langFont, mark10, markTone } from '@/lib/format'
 
@@ -133,6 +133,7 @@ export function StudentHome() {
                   )}
                   <span className="text-sm text-slate-500">{dateTime(r.created_at)}</span>
                   {r.status !== 'done' && <ReadingStatusBadge status={r.status} />}
+                  {r.simulated && <SimulatedBadge />}
                   {r.status === 'done' && r.reviewed && <span className="text-xs font-medium text-teal-700">Checked by teacher</span>}
                 </Link>
               </li>

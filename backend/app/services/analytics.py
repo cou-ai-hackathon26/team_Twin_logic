@@ -13,7 +13,7 @@ from ..bangla.normalize import tokenize_display
 from ..assessment.metrics import score_of
 from ..bangla.patterns import pattern_label
 from ..config import get_settings
-from ..models import iso, Classroom, Passage, Reading, Student
+from ..models import SIMULATED_MODEL_ID, iso, Classroom, Passage, Reading, Student
 
 
 def _reading_inputs(readings: list[Reading]):
@@ -38,6 +38,7 @@ def reading_summary(r: Reading) -> dict:
         "score": score_of(m), "correct": m.get("correct"), "total_words": m.get("total_words"),
         "wcpm": m.get("wcpm"), "accuracy": m.get("accuracy"), "errors": m.get("errors"),
         "unsure": m.get("unsure"), "student_id": r.student_id,
+        "simulated": r.model_id == SIMULATED_MODEL_ID,
     }
 
 
@@ -161,5 +162,6 @@ def class_overview(db: Session, c: Classroom) -> dict:
             "mean_accuracy": round(sum(accs) / len(accs), 3) if accs else None,
             "mean_score": _mean([score_of(r.metrics) for r in done]),
             "unreviewed": sum(card["unreviewed"] for card in cards),
+            "simulated": sum(1 for r in done if r.model_id == SIMULATED_MODEL_ID),
         },
     }

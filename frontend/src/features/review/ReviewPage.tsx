@@ -93,7 +93,7 @@ export function ReviewPage() {
       }
       subtitle={
         <span className="flex flex-wrap items-center gap-2">
-          {r.student?.code} · {dateTime(r.created_at)} <ReadingStatusBadge status={r.status} reviewed={r.reviewed} />
+          {r.student?.code} · {dateTime(r.created_at)} <ReadingStatusBadge status={r.status} reviewed={r.reviewed} simulated={r.simulated} />
         </span>
       }
       actions={

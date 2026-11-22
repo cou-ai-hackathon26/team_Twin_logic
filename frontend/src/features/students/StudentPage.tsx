@@ -305,7 +305,7 @@ export function StudentPage() {
                     <LanguageBadge language={r.language} />
                     <span className={`text-sm tabular-nums ${wcpmTone(r.wcpm)}`}>{num(r.wcpm)} WCPM</span>
                     <span className="text-sm text-slate-500">{dateTime(r.created_at)}</span>
-                    <ReadingStatusBadge status={r.status} reviewed={r.reviewed} />
+                    <ReadingStatusBadge status={r.status} reviewed={r.reviewed} simulated={r.simulated} />
                   </Link>
                 </li>
               ))}

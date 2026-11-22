@@ -30,7 +30,7 @@ from ..auth import STUDENT, TEACHER, hash_password
 from ..bangla.normalize import normalize_word
 from ..bangla.segment import segment_normalized
 from ..db import SessionLocal
-from ..models import AppMeta, Classroom, Passage, Reading, Student, User
+from ..models import SIMULATED_MODEL_ID, AppMeta, Classroom, Passage, Reading, Student, User
 
 DEMO_VERSION = 4  # v4: grades 1-3 practise the NCTB-aligned passages T01-T12 first (v3: richer history)
 META_KEY = "demo_seed_version"
@@ -38,7 +38,7 @@ TEACHER_LOGIN = ("teacher", "teacher123")
 STUDENT_PASSWORD = "student123"
 STUDENTS_PER_CLASS = 10
 SCHOOL = "PoraBondhu Demo School"
-SIM_MODEL = "demo-seed (simulated)"
+SIM_MODEL = SIMULATED_MODEL_ID
 NICKNAMES = ["Rafi", "Mitu", "Tanvir", "Nusrat", "Shuvo", "Riya", "Arif", "Lima", "Sakib", "Tania"]
 
 

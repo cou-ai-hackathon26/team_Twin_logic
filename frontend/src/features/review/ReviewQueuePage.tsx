@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useReviewQueue } from '@/api/hooks'
 import type { Language } from '@/api/types'
-import { LanguageBadge, MarkBadge } from '@/components/domain'
+import { LanguageBadge, MarkBadge, SimulatedBadge } from '@/components/domain'
 import { Button, Card, EmptyState, ErrorBox, PageHeader, PageLoader, Select } from '@/components/ui/primitives'
 import { dateTime, langFont, num, wcpmTone } from '@/lib/format'
 
@@ -137,6 +137,7 @@ export function ReviewQueuePage() {
                         {!!r.unsure && <span className="font-medium text-amber-700">{r.unsure} unsure</span>}
                       </div>
                     </div>
+                    {r.simulated && <SimulatedBadge />}
                     <LanguageBadge language={r.language} />
                     <span className="flex w-36 items-center gap-1.5 text-sm text-slate-500">
                       <Clock className="size-3.5" /> {dateTime(r.created_at)}
