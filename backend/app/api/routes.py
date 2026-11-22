@@ -456,7 +456,13 @@ def diff_words(body: DiffIn) -> dict:
 # --------------------------------------------------------------- benchmark
 @router.get("/benchmark")
 def benchmark_report() -> dict:
-    p = get_settings().reports_dir / "benchmark_latest.json"
-    if not p.exists():
+    # the published report (results/, tracked in git) unless a newer local run exists
+    from ..config import RESULTS_DIR
+
+    candidates = [get_settings().reports_dir / "benchmark_latest.json", RESULTS_DIR / "benchmark_latest.json"]
+    found = [p for p in candidates if p.exists()]
+    if not found:
         return {"available": False}
-    return {"available": True, **json.loads(p.read_text(encoding="utf-8"))}
+    rep = [json.loads(p.read_text(encoding="utf-8")) for p in found]
+    real = [r for r in rep if "SYNTHETIC" not in str(r.get("label", "")).upper()]
+    return {"available": True, **(real or rep)[0]}

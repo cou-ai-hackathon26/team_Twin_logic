@@ -7,6 +7,8 @@ recordings.csv
     group     = adult | child
     split     = tune | test      (tuning speakers are never reported)
     condition = clean | noisy
+    passage_text (optional) = the expected text, for recordings of text that is
+                not in the passage bank (e.g. public speech corpora)
 
 annotations.csv  (one row per passage word per recording)
     recording_id, word_index, word, label_a, label_b, label, error_units
@@ -65,7 +67,8 @@ def load_dataset(recordings_csv: Path, annotations_csv: Path, passages: dict[str
         for row in csv.DictReader(f):
             rid = row["id"].strip()
             code = row["passage"].strip()
-            if code not in passages:
+            text = (row.get("passage_text") or "").strip() or passages.get(code)
+            if not text:
                 raise ValueError(f"{rid}: unknown passage {code}")
             rows = sorted(ann.get(rid, []), key=lambda r: int(r["word_index"]))
             if not rows:
@@ -79,7 +82,7 @@ def load_dataset(recordings_csv: Path, annotations_csv: Path, passages: dict[str
             audio = Path(row["audio"].strip())
             out.append(Recording(
                 id=rid, audio=audio if audio.is_absolute() else base / audio, passage_code=code,
-                passage_text=passages[code], speaker=row.get("speaker", "").strip(),
+                passage_text=text, speaker=row.get("speaker", "").strip(),
                 group=(row.get("group") or "adult").strip(), split=(row.get("split") or "test").strip(),
                 condition=(row.get("condition") or "clean").strip(), labels=final,
                 labels_a=la if len(la) == len(rows) else [], labels_b=lb if len(lb) == len(rows) else [],
@@ -90,5 +93,10 @@ def load_dataset(recordings_csv: Path, annotations_csv: Path, passages: dict[str
 
 
 def load_seed_passages() -> dict[str, str]:
-    seed = Path(__file__).resolve().parent.parent / "seed" / "passages.json"
-    return {p["code"]: p["text"] for p in json.loads(seed.read_text(encoding="utf-8"))}
+    seed_dir = Path(__file__).resolve().parent.parent / "seed"
+    out: dict[str, str] = {}
+    for name in ("passages.json", "textbook_passages.json"):
+        f = seed_dir / name
+        if f.exists():
+            out.update({p["code"]: p["text"] for p in json.loads(f.read_text(encoding="utf-8"))})
+    return out

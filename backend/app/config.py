@@ -9,6 +9,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from .assessment.types import Thresholds
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
+# published evaluation results (tracked in git, so the hosted demo shows them)
+RESULTS_DIR = BACKEND_DIR / "results"
 
 
 class Settings(BaseSettings):
@@ -77,12 +79,13 @@ def get_settings() -> Settings:
 
 def load_thresholds(settings: Settings | None = None) -> Thresholds:
     s = settings or get_settings()
-    p = s.thresholds_path
-    if p.exists():
-        try:
-            return Thresholds.from_dict(json.loads(p.read_text(encoding="utf-8")))
-        except (ValueError, TypeError):
-            pass
+    # local calibration first, then the published one committed in results/
+    for p in (s.thresholds_path, RESULTS_DIR / "thresholds.json"):
+        if p.exists():
+            try:
+                return Thresholds.from_dict(json.loads(p.read_text(encoding="utf-8")))
+            except (ValueError, TypeError):
+                pass
     return Thresholds()
 
 
