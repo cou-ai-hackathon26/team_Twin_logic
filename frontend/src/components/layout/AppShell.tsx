@@ -151,7 +151,7 @@ export function AppShell() {
     <div className="flex min-h-full">
       <CommandPalette open={palette} onClose={() => setPalette(false)} />
       <ScrollRestoration />
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-y-auto bg-teal-950 px-4 py-5 text-teal-50 md:flex">
+      <aside className="sticky top-0 hidden print:hidden h-screen w-64 shrink-0 flex-col overflow-y-auto bg-teal-950 px-4 py-5 text-teal-50 md:flex">
         <Logo to="/dashboard" dark sub="শিক্ষকের ড্যাশবোর্ড" className="mb-6 px-2" />
         <button
           onClick={() => setPalette(true)}
@@ -205,7 +205,7 @@ export function AppShell() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* top bar */}
-        <header className="sticky top-0 z-30 border-b border-paper-200 bg-paper/85 backdrop-blur-md">
+        <header className="sticky top-0 z-30 print:hidden border-b border-paper-200 bg-paper/85 backdrop-blur-md">
           <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-10">
             <div className="md:hidden">
               <Logo to="/dashboard" sub="শিক্ষক" />

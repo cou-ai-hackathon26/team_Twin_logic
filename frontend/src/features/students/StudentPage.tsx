@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, KeyRound, Mic, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, KeyRound, Mic, Pencil, Printer, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -202,6 +202,9 @@ export function StudentPage() {
           <>
             <Button variant="ghost" onClick={() => setConfirmDel(true)} aria-label="Delete student">
               <Trash2 className="size-4" />
+            </Button>
+            <Button variant="secondary" onClick={() => window.print()} title="Print or save as PDF for the parent meeting">
+              <Printer className="size-4" /> Report
             </Button>
             <Button variant="secondary" onClick={() => setEditing(true)}>
               <Pencil className="size-4" /> Edit

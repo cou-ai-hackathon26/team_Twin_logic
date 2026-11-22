@@ -1,4 +1,4 @@
-import { ArrowLeft, Mic, Trash2, UserPlus, Users } from 'lucide-react'
+import { ArrowLeft, Mic, Printer, Trash2, UserPlus, Users } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAddStudent, useAddStudentsBulk, useClassroom, useDeleteClassroom } from '@/api/hooks'
@@ -145,6 +145,9 @@ export function ClassPage() {
           <>
             <Button variant="ghost" onClick={() => setConfirmDel(true)} aria-label="Delete class">
               <Trash2 className="size-4" />
+            </Button>
+            <Button variant="secondary" onClick={() => window.print()} title="Print or save the class report as PDF">
+              <Printer className="size-4" /> Report
             </Button>
             <Button variant="secondary" onClick={() => setAdding(true)}>
               <UserPlus className="size-4" /> Add students
