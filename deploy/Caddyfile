@@ -1,0 +1,24 @@
+# HTTPS front for the PoraBondhu demo on our VPS (browsers allow the microphone only on HTTPS).
+# Runs in a caddy:2-alpine container on the host network:
+#   docker run -d --name porabondhu-caddy --restart unless-stopped --network host \
+#     -v $PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro -v porabondhu_caddy:/data caddy:2-alpine
+# Port 80 on this host belongs to another service, so the Let's Encrypt certificate is
+# issued with the TLS-ALPN challenge on 443 and the HTTP->HTTPS redirect listener is off.
+{
+	admin off
+	auto_https disable_redirects
+}
+
+porabondhu.165-99-219-251.sslip.io {
+	tls {
+		issuer acme {
+			disable_http_challenge
+		}
+	}
+	encode gzip
+	request_body {
+		max_size 30MB
+	}
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy 127.0.0.1:8110
+}
