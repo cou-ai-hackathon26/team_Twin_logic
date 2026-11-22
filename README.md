@@ -217,6 +217,27 @@ PostgreSQL instead of SQLite: `docker compose up -d db` and set
    plain CTC on the same audio, side by side.
 7. **Grapheme engine** page shows the normaliser/segmenter/diff live.
 
+## What is new (and what is not)
+
+The building blocks are known: CTC speech recognition, and forced alignment with a
+goodness-of-pronunciation style score (Witt and Young, 2000) are standard in
+computer-assisted pronunciation training. Reading tutors and assessment tools for
+children exist (for example Google Read Along, Amira Learning), mostly giving
+word-level feedback. What PoraBondhu adds, as far as we know, is the combination below for
+**Bangla primary reading**:
+
+| | Typical approach | PoraBondhu |
+|---|---|---|
+| Unit of feedback | Word right or wrong, words per minute | The **Bangla written unit** behind the error (যুক্তাক্ষর, ফলা, রেফ, কার, চন্দ্রবিন্দু), from our own grapheme segmenter and unit diff |
+| Recognition | ASR with a language model, which tends to "correct" the child | Character-level CTC with **no language model**, plus a second, independent expected-text score; an error needs both to agree |
+| Uncertainty | Forced decision | **Abstention**: "unsure" goes to the teacher and never counts as an error |
+| Spelling vs reading | Spelling differences count as errors | Letters that sound the same (স/শ/ষ, ি/ী …) are not reading errors |
+| From diagnosis to teaching | Report | Repeated unit errors become weak patterns → class pattern map → **practice assigned to exactly the children who need it**, with passages tied to the **NCTB lesson and page** that teaches that unit |
+| Child safety | Score shown at once | Child sees the mark only after the teacher checks it |
+| Cost and privacy | Cloud service | Offline on a school laptop CPU, no API cost, no audio leaves the device |
+
+How well this works on children is **not yet known** (see [Evidence still needed](#evidence-still-needed)).
+
 ## How the AI works
 
 ```
