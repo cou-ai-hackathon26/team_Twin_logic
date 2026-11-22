@@ -55,18 +55,20 @@ def delete_audio(reading: Reading) -> None:
 def purge_old_audio(now: datetime | None = None) -> int:
     """Privacy: delete recordings older than PB_AUDIO_RETENTION_DAYS unless the teacher chose to keep
     them. Marks and metrics stay; only the voice is removed. Returns how many files were deleted."""
-    days = get_settings().audio_retention_days
-    if days <= 0:
+    s = get_settings()
+    now = now or datetime.now(timezone.utc)
+    limits = {False: s.audio_retention_days, True: s.kept_audio_days}  # keyed by keep_audio
+    if all(d <= 0 for d in limits.values()):
         return 0
-    cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
     db = SessionLocal()
     try:
-        rows = db.scalars(select(Reading).where(Reading.audio_path.is_not(None), Reading.keep_audio.is_(False),
+        rows = db.scalars(select(Reading).where(Reading.audio_path.is_not(None),
                                                 Reading.status.not_in(["queued", "processing"]))).all()
         n = 0
         for r in rows:
+            days = limits[bool(r.keep_audio)]
             created = r.created_at if r.created_at.tzinfo else r.created_at.replace(tzinfo=timezone.utc)
-            if created < cutoff:
+            if days > 0 and created < now - timedelta(days=days):
                 delete_audio(r)
                 n += 1
         db.commit()

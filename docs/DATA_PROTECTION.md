@@ -9,7 +9,7 @@ has been obtained. Before any real child is recorded, follow the safeguards in
 | Data | Where | Kept until |
 |---|---|---|
 | Roll code, optional nickname, class, grade | Database (`backend/data/porabondhu.db`, or PostgreSQL) | The teacher deletes the student or class |
-| Child's recording (16 kHz WAV) | `backend/data/audio/` on the computer running PoraBondhu | The teacher finalises the review (unless "keep audio" is ticked), or `PB_AUDIO_RETENTION_DAYS` after recording, whichever comes first |
+| Child's recording (16 kHz WAV) | `backend/data/audio/` on the computer running PoraBondhu | The teacher finalises the review (unless "Keep the audio" is ticked), or `PB_AUDIO_RETENTION_DAYS` after recording (default 14, failed readings included), whichever comes first. Kept recordings expire after `PB_KEPT_AUDIO_DAYS` (default 90) |
 | Word marks, transcript of what the model heard, scores | Database | The teacher deletes the reading, student or class |
 | Single-word practice checks | Not stored: processed in memory and discarded | — |
 | Optional child login (username, password hash) | Database | The teacher removes the login or the student |
@@ -20,8 +20,9 @@ outside AI or analytics service; the only outside call is Microsoft Edge TTS, wh
 
 ## Who can see it
 
-* **Every teacher login on that installation** can see every class (there are no per-class
-  permissions yet). Create teacher logins only for staff who should see all classes.
+* **A teacher** sees the classes they created, plus shared classes (classes with no owner, such as
+  the demo classes or classes created before per-teacher access existed). Another teacher's class
+  returns "not found".
 * A **child login** sees only that child's own readings and assignments, and sees marks and errors only
   after the teacher has reviewed the reading (enforced by the server).
 * Whoever has **administrator access to the computer or server** can read the files directly. Use an
@@ -46,6 +47,9 @@ outside AI or analytics service; the only outside call is Microsoft Edge TTS, wh
   minutes (per account on a real installation, per account and address on the public demo).
 * Changing a password logs that account out everywhere else. Teacher passwords need 8+ characters.
 * Uploads are limited to 25 MB; recordings longer than 5 minutes or too quiet are rejected and deleted.
+* Per-login limits: 30 reading uploads and 60 word checks per 10 minutes. The word check accepts only
+  assigned or teacher-checked practice words, keeps no audio, and is shown as a practice hint.
+* On the server, the app port is bound to 127.0.0.1 so only the HTTPS proxy can reach it.
 
 ## Real installation checklist
 

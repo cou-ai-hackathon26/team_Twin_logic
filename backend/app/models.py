@@ -36,6 +36,8 @@ class Classroom(Base):
     name: Mapped[str] = mapped_column(String(120))
     grade: Mapped[int] = mapped_column(Integer, default=1)
     school: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    # the teacher who created the class; NULL = shared with every teacher (e.g. the demo classes)
+    teacher_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     students: Mapped[list["Student"]] = relationship(back_populates="classroom", cascade="all, delete-orphan",
                                                      order_by="Student.code")

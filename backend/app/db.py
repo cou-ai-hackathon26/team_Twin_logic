@@ -53,7 +53,8 @@ def _add_missing_columns() -> None:
     from sqlalchemy import inspect, text
 
     wanted = {"passages": {"language": "VARCHAR(5) NOT NULL DEFAULT 'bn'"},
-              "users": {"failed_logins": "INTEGER NOT NULL DEFAULT 0", "locked_until": "TIMESTAMP"}}
+              "users": {"failed_logins": "INTEGER NOT NULL DEFAULT 0", "locked_until": "TIMESTAMP"},
+              "classrooms": {"teacher_id": "INTEGER"}}
     insp = inspect(engine)
     with engine.begin() as conn:
         for table, cols in wanted.items():

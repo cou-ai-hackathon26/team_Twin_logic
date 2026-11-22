@@ -82,6 +82,9 @@ export function WordCheck({ word, onRight }: { word: string; onRight?: () => voi
         >
           <span className="font-bn font-semibold">{res.message_bn}</span>
           <span className="block text-xs opacity-80">{res.message_en}</span>
+          <span className="mt-1 block text-[11px] opacity-60">
+            <span className="font-bn">শুধু অনুশীলনের ইঙ্গিত</span> · practice hint only, not a mark
+          </span>
         </p>
       )}
       {err && <p className="mt-2 text-center text-xs text-rose-700">{err}</p>}

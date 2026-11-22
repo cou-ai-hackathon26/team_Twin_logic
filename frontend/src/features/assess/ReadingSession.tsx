@@ -93,8 +93,13 @@ function WaitingForResult({
   if (data.status === 'failed')
     return (
       <div className="flex max-w-xl flex-col items-center gap-4 text-center">
-        <ErrorBox error={data.error || 'Processing failed'} />
-        <Button onClick={onRetry}>Try again</Button>
+        {/* this screen faces the child: a calm message, never the raw technical error (the teacher sees it on the review page) */}
+        <p className={clsx('text-2xl text-slate-800', langFont(language))}>{t.again}</p>
+        <p className="font-bn text-slate-600">কিছু একটা ঠিকমতো কাজ করেনি। আরেকবার পড়ো, অথবা শিক্ষককে বলো।</p>
+        <p className="text-sm text-slate-500">Something went wrong while checking. Please read again, or ask your teacher.</p>
+        <Button size="xl" onClick={onRetry}>
+          <RotateCcw className="size-6" /> {t.retry}
+        </Button>
       </div>
     )
   return (

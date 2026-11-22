@@ -19,7 +19,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..assessment.metrics import score_of
-from ..auth import require_student, require_teacher
+from ..auth import can_see, require_student, require_teacher
 from ..bangla.patterns import pattern_label
 from ..config import get_settings
 from ..db import get_db
@@ -73,7 +73,8 @@ def assignment_out(a: Assignment) -> dict:
 # ------------------------------------------------------------------ teacher
 @teacher.post("/assignments", status_code=201)
 def create_assignments(body: AssignIn, db: Session = Depends(get_db)) -> dict:
-    students = db.scalars(select(Student).where(Student.id.in_(body.student_ids))).all()
+    students = [s for s in db.scalars(select(Student).where(Student.id.in_(body.student_ids)))
+                if can_see(db, s.classroom)]
     if len(students) != len(set(body.student_ids)):
         raise HTTPException(404, "Student not found")
     passage = db.get(Passage, body.passage_id) if body.passage_id else None
@@ -95,6 +96,9 @@ def create_assignments(body: AssignIn, db: Session = Depends(get_db)) -> dict:
 
 @teacher.get("/students/{sid}/assignments")
 def student_assignments(sid: int, db: Session = Depends(get_db)) -> list[dict]:
+    st = db.get(Student, sid)
+    if st is None or not can_see(db, st.classroom):
+        raise HTTPException(404, "Student not found")
     rows = db.scalars(select(Assignment).where(Assignment.student_id == sid)
                       .order_by(Assignment.created_at.desc()).limit(50))
     return [assignment_out(a) for a in rows]
@@ -102,6 +106,9 @@ def student_assignments(sid: int, db: Session = Depends(get_db)) -> list[dict]:
 
 @teacher.get("/classrooms/{cid}/assignments")
 def class_assignments(cid: int, db: Session = Depends(get_db)) -> list[dict]:
+    c = db.get(Classroom, cid)
+    if c is None or not can_see(db, c):
+        raise HTTPException(404, "Class not found")
     rows = db.scalars(select(Assignment).join(Student).where(Student.classroom_id == cid)
                       .order_by(Assignment.created_at.desc()).limit(300))
     return [assignment_out(a) for a in rows]
@@ -110,7 +117,7 @@ def class_assignments(cid: int, db: Session = Depends(get_db)) -> list[dict]:
 @teacher.delete("/assignments/{aid}", status_code=204)
 def delete_assignment(aid: int, db: Session = Depends(get_db)) -> None:
     a = db.get(Assignment, aid)
-    if a is None:
+    if a is None or not can_see(db, a.student.classroom if a.student else None):
         raise HTTPException(404, "Assignment not found")
     db.delete(a)
     db.commit()
@@ -120,7 +127,7 @@ def delete_assignment(aid: int, db: Session = Depends(get_db)) -> None:
 def export_class(cid: int, db: Session = Depends(get_db)) -> StreamingResponse:
     """Every reading of the class as CSV (opens in Excel), for school records."""
     c = db.get(Classroom, cid)
-    if c is None:
+    if c is None or not can_see(db, c):
         raise HTTPException(404, "Class not found")
     buf = io.StringIO()
     buf.write("﻿")  # BOM so Excel shows Bangla correctly
@@ -200,6 +207,25 @@ def my_assignment_done(aid: int, user: User = Depends(require_student), db: Sess
 _check_lock = __import__("threading").Lock()
 
 
+def _practice_words(user: User) -> set[str]:
+    from ..bangla.normalize import normalize_word
+
+    st = user.student
+    words = {normalize_word(w) for a in st_assignments(st) for w in (a.words or [])}
+    for r in st.readings:
+        if r.status == "done" and r.reviewed:
+            words.update(normalize_word(m.expected or m.display) for m in r.marks
+                         if m.final_status in ("misread", "skipped"))
+    return words
+
+
+def st_assignments(st: Student) -> list[Assignment]:
+    from sqlalchemy.orm import object_session
+
+    db = object_session(st)
+    return list(db.scalars(select(Assignment).where(Assignment.student_id == st.id))) if db else []
+
+
 @student.post("/my/practice/check")
 async def my_practice_check(word: str = Form(..., max_length=60), audio: UploadFile = File(...),
                             user: User = Depends(require_student)) -> dict:
@@ -214,9 +240,17 @@ async def my_practice_check(word: str = Form(..., max_length=60), audio: UploadF
     from ..speech.audio import load_audio_bytes
     from ..speech.registry import get_ctc
 
+    from .. import ratelimit
+    from ..bangla.normalize import normalize_word
+
     word = word.strip()
     if not word or not any("ঀ" <= ch <= "৿" for ch in word):
         raise HTTPException(422, "Word check works for Bangla words")
+    # only words the teacher assigned or the child's own teacher-checked practice words: the check is a
+    # practice hint for known words, not a free-for-all AI marker
+    if normalize_word(word) not in _practice_words(user):
+        raise HTTPException(403, "You can check your practice words and the words your teacher gave you.")
+    ratelimit.check("word_check", user.id, get_settings().max_word_checks_per_10min)
     data = await audio.read()
     if not data or len(data) > 2_000_000:
         raise HTTPException(422, "Record the word again (1-5 seconds)")

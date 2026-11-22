@@ -65,7 +65,7 @@ Full details: [DATA_PROTECTION.md](DATA_PROTECTION.md).
 
 * Use roll codes, not names. Do not take photos.
 * Recordings are deleted when you finalise a review (unless you tick "Keep the audio"), and automatically after
-  the number of days set by `PB_AUDIO_RETENTION_DAYS` (we recommend 14).
+  14 days (`PB_AUDIO_RETENTION_DAYS`); recordings you chose to keep are deleted after 90 days.
 * Five wrong passwords lock a login for 10 minutes. Changing your password logs you out on other devices.
 * Never use the public demo website for real children. Before any real use, see the safeguards in
   [CLASSROOM_AND_PILOT.md](CLASSROOM_AND_PILOT.md#7-safeguards-required-before-any-real-child-pilot).

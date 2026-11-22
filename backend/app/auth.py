@@ -94,10 +94,29 @@ def current_user(request: Request, db: Session = Depends(get_db)) -> User:
     return sess.user
 
 
-def require_teacher(user: User = Depends(current_user)) -> User:
+def require_teacher(user: User = Depends(current_user), db: Session = Depends(get_db)) -> User:
     if user.role != TEACHER:
         raise HTTPException(403, "Teacher account required")
+    db.info["teacher_id"] = user.id  # read by can_see(): a teacher sees shared classes and their own
     return user
+
+
+def can_see(db: Session, classroom) -> bool:
+    """Class-level access: shared classes (no owner) and the teacher's own classes."""
+    tid = db.info.get("teacher_id")
+    return tid is None or classroom is None or classroom.teacher_id in (None, tid)
+
+
+def classroom_of(obj):
+    from .models import Classroom, Reading, Student
+
+    if isinstance(obj, Classroom):
+        return obj
+    if isinstance(obj, Student):
+        return obj.classroom
+    if isinstance(obj, Reading):
+        return obj.student.classroom if obj.student else None
+    return None
 
 
 def require_student(user: User = Depends(current_user)) -> User:

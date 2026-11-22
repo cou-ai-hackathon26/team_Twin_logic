@@ -216,7 +216,7 @@ def my_passage(pid: int, user: User = Depends(require_student), db: Session = De
 async def my_create_reading(passage_id: int = Form(...), audio: UploadFile = File(...),
                             user: User = Depends(require_student), db: Session = Depends(get_db)) -> dict:
     p = _own_passage(db, user, passage_id)
-    r = await accept_upload(db, user.student, p, audio)
+    r = await accept_upload(db, user.student, p, audio, uploader_id=user.id)
     return reading_out(r, with_marks=False)
 
 
@@ -242,6 +242,8 @@ def my_reading(rid: int, user: User = Depends(require_student), db: Session = De
     d = reading_out(r)
     for k in ("comparison", "comparison_status", "thresholds", "transcript"):  # teacher tools only
         d[k] = None
+    if d.get("error"):
+        d["error"] = "Something went wrong while checking this reading. Please ask your teacher."
     d["pending_review"] = r.status == "done" and not r.reviewed
     if d["pending_review"]:  # AI suggestions stay with the teacher until reviewed
         d["metrics"] = None

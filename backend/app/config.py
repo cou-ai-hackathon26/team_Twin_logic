@@ -30,10 +30,14 @@ class Settings(BaseSettings):
     count_unsure_as_correct: bool = True
     seed_demo: bool = True  # first start: demo teacher, one class per grade, student logins
     session_days: int = 14
-    # privacy: recordings not marked "keep" are deleted this many days after upload, reviewed or not.
-    # 0 = off (default, so a developer's existing local recordings are never removed unexpectedly);
-    # the hosted image sets 14, and .env.example recommends 14 for schools.
-    audio_retention_days: int = 0
+    # privacy (safe by default): recordings not marked "keep" are deleted this many days after
+    # upload, reviewed or not (failed ones too, after the teacher had time to retry). 0 = never.
+    audio_retention_days: int = 14
+    # recordings the teacher chose to keep are still deleted after this many days. 0 = never.
+    kept_audio_days: int = 90
+    # abuse limits per login: reading uploads and single-word checks per 10 minutes
+    max_uploads_per_10min: int = 30
+    max_word_checks_per_10min: int = 60
     # security: lock a login for lockout_minutes after this many wrong passwords in a row
     max_failed_logins: int = 5
     lockout_minutes: int = 10

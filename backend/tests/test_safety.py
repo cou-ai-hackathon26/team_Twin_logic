@@ -85,9 +85,12 @@ def test_old_audio_is_purged(client, monkeypatch):  # noqa: F811
     assert not c.get(f"/api/readings/{rid}").json()["has_audio"]
 
 
-def test_word_check(monkeypatch):
+def test_word_check(client, monkeypatch):  # noqa: F811
     from app.speech import registry
 
+    cls = next(x for x in client.get("/api/classrooms").json() if x["name"] == "Class 3")
+    sid = next(st["id"] for st in client.get(f"/api/classrooms/{cls['id']}").json()["students"] if st["code"] == "Roll 03")
+    client.post("/api/assignments", json={"student_ids": [sid], "words": ["প্রথম"]})
     s = _student_login("c3r03")
     monkeypatch.setattr(registry, "get_ctc", lambda: FakeRecognizer(["প্রথম"]))
     r = s.post("/api/my/practice/check", data={"word": "প্রথম"}, files={"audio": ("w.wav", wav_bytes(1.2), "audio/wav")})
@@ -160,3 +163,59 @@ def test_unreviewed_reading_hidden_from_child_everywhere(monkeypatch):
     assert h["score"] is None and h["errors"] is None and h["correct"] is None
     assert all(w["reading_id"] != rid for w in s.get("/api/my/practice").json())
     s.__exit__(None, None, None)
+
+
+def test_teacher_sees_only_own_and_shared_classes(client):  # noqa: F811
+    from app.auth import TEACHER, hash_password
+    from app.db import SessionLocal
+    from app.models import User
+
+    with SessionLocal() as db:
+        if not db.query(User).filter(User.username == "teacher2").first():
+            db.add(User(username="teacher2", password_hash=hash_password("second-pass1"), role=TEACHER))
+            db.commit()
+    mine = client.post("/api/classrooms", json={"name": "Private A", "grade": 2}).json()
+    sid = client.post(f"/api/classrooms/{mine['id']}/students", json={"code": "PA1"}).json()["id"]
+    with TestClient(app) as t2:
+        t2.post("/api/auth/login", json={"username": "teacher2", "password": "second-pass1"})
+        names = [c["name"] for c in t2.get("/api/classrooms").json()]
+        assert "Private A" not in names and "Class 1" in names  # shared demo classes stay visible
+        assert t2.get(f"/api/classrooms/{mine['id']}").status_code == 404
+        assert t2.get(f"/api/students/{sid}").status_code == 404
+        assert t2.get(f"/api/classrooms/{mine['id']}/export.csv").status_code == 404
+        assert t2.post("/api/assignments", json={"student_ids": [sid], "pattern_key": "phala:র"}).status_code == 404
+        assert t2.post("/api/readings", data={"student_id": sid, "passage_id": 1},
+                       files={"audio": ("a.wav", wav_bytes(), "audio/wav")}).status_code == 404
+    assert client.get(f"/api/classrooms/{mine['id']}").status_code == 200
+
+
+def test_word_check_only_for_practice_words(monkeypatch):
+    from app.speech import registry
+
+    s = _student_login("c4r06")
+    monkeypatch.setattr(registry, "get_ctc", lambda: FakeRecognizer(["কলম"]))
+    r = s.post("/api/my/practice/check", data={"word": "কলম"}, files={"audio": ("w.wav", wav_bytes(1.2), "audio/wav")})
+    assert r.status_code == 403  # not assigned and not one of the child's checked practice words
+    s.__exit__(None, None, None)
+
+
+def test_kept_audio_expires(client, monkeypatch):  # noqa: F811
+    from app.config import get_settings
+    from app.db import SessionLocal
+    from app.models import Reading
+
+    cls = c = client.get("/api/classrooms").json()[0]
+    sid = client.get(f"/api/classrooms/{cls['id']}").json()["students"][1]["id"]
+    pid = next(p["id"] for p in client.get("/api/passages").json() if p["language"] == "bn")
+    monkeypatch.setattr(svc, "get_ctc", lambda: FakeRecognizer([]))
+    rid = client.post("/api/readings", data={"student_id": sid, "passage_id": pid},
+                      files={"audio": ("a.wav", wav_bytes(), "audio/wav")}).json()["id"]
+    wait_done(client, rid)
+    client.post(f"/api/readings/{rid}/finalize", json={"keep_audio": True})
+    with SessionLocal() as db:
+        db.get(Reading, rid).created_at = datetime.now(timezone.utc) - timedelta(days=100)
+        db.commit()
+    monkeypatch.setattr(get_settings(), "kept_audio_days", 90)
+    svc.purge_old_audio()
+    assert not client.get(f"/api/readings/{rid}").json()["has_audio"]
+    del c

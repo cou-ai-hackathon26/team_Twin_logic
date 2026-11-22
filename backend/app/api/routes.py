@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from ..assessment.english import english_words
 from ..assessment.marking import passage_words
-from ..auth import STUDENT, end_other_sessions, hash_password, require_teacher, verify_password
+from ..auth import STUDENT, can_see, classroom_of, end_other_sessions, hash_password, require_teacher, verify_password
 from ..bangla.normalize import normalize_word
 from ..bangla.patterns import pattern_label
 from ..bangla.segment import segment_normalized
@@ -36,7 +36,7 @@ MAX_UPLOAD = 25 * 1024 * 1024
 
 def _get(db: Session, model, id_: int):
     obj = db.get(model, id_)
-    if obj is None:
+    if obj is None or not can_see(db, classroom_of(obj)):  # another teacher's class looks like "not found"
         raise HTTPException(404, f"{model.__name__} {id_} not found")
     return obj
 
@@ -73,6 +73,8 @@ def warmup(include_whisper: bool = False) -> dict:
 def list_classrooms(db: Session = Depends(get_db)) -> list[dict]:
     out = []
     for c in db.scalars(select(Classroom).order_by(Classroom.grade, Classroom.name)):
+        if not can_see(db, c):
+            continue
         ov = analytics.class_overview(db, c)
         out.append({k: ov[k] for k in ("id", "name", "grade", "school", "stats")})
     return out
@@ -80,7 +82,7 @@ def list_classrooms(db: Session = Depends(get_db)) -> list[dict]:
 
 @router.post("/classrooms", status_code=201)
 def create_classroom(body: ClassroomIn, db: Session = Depends(get_db)) -> dict:
-    c = Classroom(name=body.name.strip(), grade=body.grade, school=body.school)
+    c = Classroom(name=body.name.strip(), grade=body.grade, school=body.school, teacher_id=db.info.get("teacher_id"))
     db.add(c)
     db.commit()
     return analytics.class_overview(db, c)
@@ -256,13 +258,18 @@ def delete_passage(pid: int, db: Session = Depends(get_db)) -> None:
 
 
 # -------------------------------------------------------------- readings
-async def accept_upload(db: Session, st: Student, p: Passage, audio: UploadFile) -> Reading:
+async def accept_upload(db: Session, st: Student, p: Passage, audio: UploadFile,
+                        uploader_id: int | None = None) -> Reading:
     """Store an uploaded recording and queue it for marking (shared by teacher and student routes)."""
     data = await audio.read()
     if not data:
         raise HTTPException(422, "Empty audio upload")
     if len(data) > MAX_UPLOAD:
         raise HTTPException(413, "Audio file too large")
+    if uploader_id is not None:
+        from .. import ratelimit
+
+        ratelimit.check("upload", uploader_id, get_settings().max_uploads_per_10min)
     r = Reading(student_id=st.id, passage_id=p.id, passage_text=p.text, status="queued")
     db.add(r)
     db.flush()
@@ -282,10 +289,10 @@ async def accept_upload(db: Session, st: Student, p: Passage, audio: UploadFile)
 
 @router.post("/readings", status_code=202)
 async def create_reading(student_id: int = Form(...), passage_id: int = Form(...), audio: UploadFile = File(...),
-                         db: Session = Depends(get_db)) -> dict:
+                         db: Session = Depends(get_db), user: User = Depends(require_teacher)) -> dict:
     st = _get(db, Student, student_id)
     p = _get(db, Passage, passage_id)
-    r = await accept_upload(db, st, p, audio)
+    r = await accept_upload(db, st, p, audio, uploader_id=user.id)
     return reading_out(r, with_marks=False)
 
 
@@ -300,7 +307,7 @@ def list_readings(limit: int = 50, status: str | None = None, reviewed: bool | N
     return [analytics.reading_summary(r) | {
         "student_code": r.student.code, "student_nickname": r.student.nickname,
         "classroom_id": r.student.classroom_id, "classroom_name": r.student.classroom.name,
-    } for r in db.scalars(q)]
+    } for r in db.scalars(q) if can_see(db, r.student.classroom)]
 
 
 @router.get("/search")
@@ -309,6 +316,8 @@ def search(q: str = "", db: Session = Depends(get_db)) -> dict:
     term = q.strip().lower()
     students, classes, passages = [], [], []
     for c in db.scalars(select(Classroom).order_by(Classroom.grade, Classroom.name)):
+        if not can_see(db, c):
+            continue
         if not term or term in c.name.lower() or term in (c.school or "").lower():
             classes.append({"id": c.id, "name": c.name, "grade": c.grade})
         for st in c.students:
