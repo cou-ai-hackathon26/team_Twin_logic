@@ -54,15 +54,21 @@ def main() -> None:
     ap.add_argument("--split", default="test")
     ap.add_argument("--no-whisper", action="store_true")
     ap.add_argument("--label", default="")
+    ap.add_argument("--name", default="benchmark", help="report file prefix (e.g. robust_unseen)")
+    ap.add_argument("--no-latest", action="store_true", help="do not replace benchmark_latest.json")
+    ap.add_argument("--systems", nargs="+", default=list(SYSTEMS), help="subset of systems to run")
+    ap.add_argument("--limit", type=int, default=0, help="use only the first N recordings of the split (0 = all)")
     args = ap.parse_args()
 
     data = [r for r in load_dataset(args.recordings, args.annotations, load_seed_passages()) if r.split == args.split]
     if not data:
         sys.exit(f"No recordings with split={args.split}")
+    if args.limit:
+        data = data[: args.limit]
     th = load_thresholds()
     ctc = get_ctc()
     whisper = None if args.no_whisper else get_whisper()
-    systems = [s for s in SYSTEMS if not (s == "whisper_word" and whisper is None)]
+    systems = [s for s in SYSTEMS if s in args.systems and not (s == "whisper_word" and whisper is None)]
 
     tallies: dict[str, dict[str, Tally]] = {s: {} for s in systems}
     per_recording = []
@@ -125,8 +131,9 @@ def main() -> None:
     }
     out_dir = get_settings().reports_dir
     stamp = now.strftime("%Y%m%d_%H%M%S")
-    (out_dir / f"benchmark_{stamp}.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), "utf-8")
-    (out_dir / "benchmark_latest.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), "utf-8")
+    (out_dir / f"{args.name}_{stamp}.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), "utf-8")
+    if not args.no_latest:
+        (out_dir / "benchmark_latest.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), "utf-8")
 
     md = [f"# PoraBondhu benchmark ({args.split} split)", "", f"Generated {now:%Y-%m-%d %H:%M} UTC. "
           f"{len(data)} recordings, speakers: {', '.join(report['speakers'])}.", ""]
@@ -151,9 +158,9 @@ def main() -> None:
             md.append(f"| {r['measure']} | {r['target']} | {'n/a' if v is None else round(v, 3)} | "
                       f"{'n/a' if r['met'] is None else ('yes' if r['met'] else 'no')} |")
         md.append("")
-    (out_dir / f"benchmark_{stamp}.md").write_text("\n".join(md), "utf-8")
+    (out_dir / f"{args.name}_{stamp}.md").write_text("\n".join(md), "utf-8")
     print("\n".join(md))
-    print(f"\nreport: {out_dir / f'benchmark_{stamp}.json'}")
+    print(f"\nreport: {out_dir / f'{args.name}_{stamp}.json'}")
 
 
 if __name__ == "__main__":
