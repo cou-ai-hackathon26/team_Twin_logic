@@ -10,11 +10,11 @@ main buttons to Bangla.
 | Need | Value | Evidence |
 |---|---|---|
 | CPU | 4 cores comfortable; 2 cores work but slower | **Measured** on an Intel i5-10310U laptop (4 cores) and a 2-core VPS; no other machines tested |
-| Marking time | About 4.5-5 s per 14-16 s of audio on the 4-core laptop, i.e. roughly 18-20 s for a 60 s reading | **Measured**, a handful of recordings (see README); the 2-core VPS is slower, not yet timed |
+| Marking time | 4-core laptop: about 4.5-5 s per 14-16 s of audio (roughly 18-20 s for a 60 s reading). 2-core server: 8.2-8.4 s per 16.2 s of audio (roughly 31 s for a 60 s reading); loading the model once takes about 10 s | **Measured**, a handful of recordings, 22 Nov 2026 |
 | Memory | About 0.7 GB for the running app with the Bangla model loaded; 8 GB RAM laptop recommended | **Measured** on the VPS container (idle, model loaded); the 8 GB recommendation is an **estimate** |
 | Disk | About 3.5 GB on our laptop: Python environment 1.4 GB, model folder 1.6 GB (the int8 model used is 339 MB; `setup.ps1` also keeps the 1.2 GB fp32 export), Whisper small 464 MB (English passages and the comparison only). The Docker image is 3.4 GB | **Measured** on our laptop and VPS |
 | Microphone | USB or wired headset in a noisy classroom | **Recommendation**, not tested in a classroom |
-| Internet | Only for setup (`setup.ps1` downloads the model). Afterwards it works offline, except the optional "Listen first" voice, which can be prepared in advance (`python -m scripts.pregen_tts`) | From the code (models run locally); offline classroom use **not yet tried** |
+| Internet | Only for setup (`setup.ps1` downloads the model). Afterwards it works offline, except the optional "Listen first" voice, which can be prepared in advance (`python -m scripts.pregen_tts`) | **Measured**: marking ran with networking switched off (Docker `--network none`, 22 Nov 2026); a full offline classroom session is not yet tried |
 | Browser | Chrome or Edge. Recording needs `http://localhost` (same laptop) or an `https://` address | Browser rule |
 
 The first reading after starting the program takes longer while the model loads. You can keep

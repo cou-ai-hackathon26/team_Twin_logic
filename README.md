@@ -15,7 +15,7 @@ never sent to a third-party AI service.
 |---|---|
 | **Event** | CoU AI Hackathon 2026, Comilla University |
 | **Team** | Twin logic (duo) |
-| **Members** | Md Yak Safu · Munny Rahaman Dristy |
+| **Members** | Md Yak Safu · Munny Rahaman Dristy. Md Yak Safu designed, built and committed the project; Munny Rahaman Dristy was unable to take part in the build |
 | **Domain** | Education (primary), Accessibility (secondary) |
 | **Live demo** | **https://porabondhu.165-99-219-251.sslip.io** (HTTPS only; the app port is reachable only through the HTTPS proxy) |
 | **Demo video** | Not recorded yet (optional under rule 12 when the live link works). Follow the [5-minute demo script](#demo-in-5-minutes) and its recording checklist |
@@ -87,11 +87,16 @@ login: `python -m scripts.create_teacher <username>` (asks for an 8+ character p
 
 ## Problem
 
-Bangladesh's National Student Assessment (NSA 2022, Directorate of Primary
-Education) and the World Bank's learning-poverty estimates both report that a large
-share of primary pupils cannot read and understand a grade-level Bangla text. (We
-quote no exact percentage here until each figure is checked against the original
-report.) A teacher with 50 to 60 students cannot listen to each child read, weak
+According to the World Bank, in 2022 **51% of children in Bangladesh could not read and
+understand a simple text by age 10** (learning poverty; *Human Capital Complementary
+Indicators: Bangladesh* country brief, World Bank, 2025,
+[PDF](https://thedocs.worldbank.org/en/doc/24459fe03f47e132c41e1e9823b1c765-0140012025/original/Bangladesh.pdf)).
+The National Student Assessment 2022 (Directorate of Primary Education with UNICEF; tested
+Grades 3 and 5 in Bangla and mathematics) found that only about half of the students showed
+grade-level proficiency in Bangla, as reported by its technical partner ACER
+([ACER presentation, UNESCO NEQMAP 2024](https://neqmap.bangkok.unesco.org/wp-content/uploads/2024/01/Session-3-Priyanka-Sharma.pdf);
+[DPE report](https://dpe.portal.gov.bd/sites/default/files/files/dpe.portal.gov.bd/publications/27a08801_1d5d_4e08_8fdb_25a4a693a2f3/NSA-2022%20Final%20Report.pdf),
+which we could not open from our network, so the exact grade-wise figures are not quoted). A teacher with 50 to 60 students cannot listen to each child read, weak
 readers stay hidden, and a teacher who knows a child reads poorly still does not
 know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
 
@@ -381,7 +386,7 @@ What exists today is a working, tested prototype; these claims are **not** yet s
 | Teachers can use it unaided | The [usability test](docs/USABILITY_TEST.md) with at least 5 teachers, task success and SUS reported |
 | Teachers want it / it saves time | At least 2 real [teacher interviews](docs/CLASSROOM_AND_PILOT.md#6-teacher-interviews-not-done-yet), quoted with permission |
 | Works in schools | A [pilot](docs/CLASSROOM_AND_PILOT.md#4-pilot-plan-8-weeks-proposed) (proposed only) meeting every safeguard |
-| Runs on school laptops | Timing measured on the actual school hardware (only our laptop and VPS so far) |
+| Runs on school laptops | Timing on actual school hardware. So far measured on our 4-core laptop (~18-20 s per 60 s reading) and a 2-core server (8.2-8.4 s per 16.2 s of audio, i.e. ~31 s per 60 s; works with networking switched off) |
 
 ## Limitations
 
