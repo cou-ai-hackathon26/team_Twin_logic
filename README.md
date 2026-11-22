@@ -17,7 +17,7 @@ never sent to a third-party AI service.
 | **Team** | Twin logic (duo) |
 | **Members** | Md Yak Safu · Munny Rahaman Dristy |
 | **Domain** | Education (primary), Accessibility (secondary) |
-| **Live demo** | **https://porabondhu.165-99-219-251.sslip.io** (HTTPS, microphone works) · plain-HTTP fallback http://165.99.219.251:8110 (browsers block the microphone on HTTP; use *Upload a recording* there) |
+| **Live demo** | **https://porabondhu.165-99-219-251.sslip.io** (HTTPS only; the app port is reachable only through the HTTPS proxy) |
 | **Demo video** | Not recorded yet (optional under rule 12 when the live link works). Follow the [5-minute demo script](#demo-in-5-minutes) and its recording checklist |
 | **Repository** | https://github.com/mohammadyaksafu/porabondhu-ai |
 | **Docs** | [Teacher guide](docs/TEACHER_GUIDE.md) · [Children's data and security](docs/DATA_PROTECTION.md) · [Teacher usability test (not run yet)](docs/USABILITY_TEST.md) · [Curriculum alignment](docs/CURRICULUM_ALIGNMENT.md) · [Classroom workflow, pilot plan, safeguards and interview questions](docs/CLASSROOM_AND_PILOT.md) · [Technical defence and demo script](docs/TECHNICAL_DEFENSE.md) · [Data collection](docs/DATA_COLLECTION.md) |
@@ -57,7 +57,7 @@ server); the progress bar shows the real stages, so do not cut the wait out of a
 | 4 | **Review** | Click a red word: heard vs expected unit by unit, play just that word. Change one mark with a tap, then **Finalise review** (audio is deleted unless "Keep the audio" is ticked) |
 | 5 | Student page → **Assign practice** on a weak pattern | Words and a passage containing that unit are picked for the child |
 | 6 | Log out, log in as `c2r01` / `student123` | The checked reading now shows its mark; an unchecked one says "your teacher will check". **From your teacher** shows the assigned words with a **Say it** check |
-| 7 | Teacher → **Benchmark** | The measured numbers, including the targets we miss, and what they do not prove |
+| 7 | Teacher → **Benchmark** | The published benchmark (adult speech with simulated errors, see [Evaluation](#evaluation)), including the targets we miss, and what it does not prove |
 | 8 | Teacher → **Settings** → **Reset demo recordings** | Clean up for the next visitor |
 
 **Recording checklist for a demo video (3 minutes max):** use the HTTPS link in Chrome or
@@ -87,10 +87,11 @@ login: `python -m scripts.create_teacher <username>` (asks for an 8+ character p
 
 ## Problem
 
-About half of Grade 3 and Grade 5 students in Bangladesh do not read Bangla at
-grade level (National Student Assessment 2022, DPE), and the World Bank (2024)
-estimates that 51% of late-primary children cannot read and understand a simple
-text. A teacher with 50 to 60 students cannot listen to each child read, weak
+Bangladesh's National Student Assessment (NSA 2022, Directorate of Primary
+Education) and the World Bank's learning-poverty estimates both report that a large
+share of primary pupils cannot read and understand a grade-level Bangla text. (We
+quote no exact percentage here until each figure is checked against the original
+report.) A teacher with 50 to 60 students cannot listen to each child read, weak
 readers stay hidden, and a teacher who knows a child reads poorly still does not
 know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
 
@@ -137,7 +138,7 @@ know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
 | Model reading (TTS) | Microsoft Edge neural voices via edge-tts (passage text only) |
 | Team-built AI parts | Bangla normaliser and grapheme segmenter, weighted word/unit alignment, CTC forced alignment and expected-text score, two-signal marking, weak-pattern tracking |
 | Passages | 42 Bangla and 25 English graded passages, Grades 1-5. **T01-T12** (`backend/app/seed/textbook_passages.json`) are aligned to the NCTB textbooks *আমার বাংলা বই* (Grades 1-3, 2025 reprint): each practises the কার, ফলা, রেফ or যুক্তাক্ষর of one lesson and cites its page ([evidence table](docs/CURRICULUM_ALIGNMENT.md), checked by `scripts/curriculum_evidence.py`). All passage text is written by the team (AI-assisted); no textbook text is copied |
-| Evaluation data | So far only a TTS-generated test set that checks the scripts run; human-recorded results are listed under [Evaluation](#evaluation) once measured |
+| Evaluation data | [Google FLEURS](https://huggingface.co/datasets/google/fleurs) Bengali (`bn_in`, CC BY 4.0): real adult read speech; reading errors simulated by changing the expected text (`scripts/make_public_set.py`). Tuning on FLEURS dev speakers, testing on FLEURS test speakers. **No child speech yet** |
 | Hosting | The repository's `Dockerfile` (ONNX int8 model, no PyTorch) on a 2-core / 4 GB Ubuntu VPS, behind Caddy with a Let's Encrypt certificate. Backup: the same code on a laptop behind an ngrok tunnel (`deploy/run-public.ps1`) |
 
 ## AI tools used
@@ -187,8 +188,9 @@ Live demo on a VPS (what the link above runs):
 ```bash
 git clone https://github.com/mohammadyaksafu/porabondhu-ai && cd porabondhu-ai
 docker build -t porabondhu .
-docker run -d --name porabondhu --restart unless-stopped --memory 2g -p 8110:7860   -e PB_COOKIE_SAMESITE=lax -v porabondhu_data:/home/user/app/backend/data porabondhu
-# then put an HTTPS reverse proxy (we use Caddy) in front of 127.0.0.1:8110
+docker run -d --name porabondhu --restart unless-stopped --memory 2g -p 127.0.0.1:8110:7860 \n  -v porabondhu_data:/home/user/app/backend/data porabondhu
+# bound to 127.0.0.1 so only the HTTPS proxy reaches it (the app trusts the proxy's X-Forwarded-For)
+docker run -d --name porabondhu-caddy --restart unless-stopped --network host \n  -v $PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro -v porabondhu_caddy:/data caddy:2-alpine
 ```
 
 Backup demo from a laptop (separate demo database on port 8100, ngrok HTTPS tunnel):
@@ -302,7 +304,7 @@ backend/
     api/           FastAPI routes and serializers
     pipeline.py    one function per system, shared by the app and the benchmark
     models.py      SQLAlchemy tables (SQLite or PostgreSQL)
-    seed/          30 Bangla + 25 English graded passages (Grades 1-5)
+    seed/          42 Bangla (incl. T01-T12) + 25 English graded passages (Grades 1-5)
   scripts/         export_onnx, calibrate, benchmark, annotation_template,
                    adapt_child_voice, make_synthetic_set, smoke_test
   tests/           engine unit tests
@@ -328,8 +330,13 @@ frontend/          React 19 + TypeScript + Tailwind 4 + TanStack Query + Rechart
   checked the reading** (enforced by the API, not only the screen). Before that the child
   sees "your teacher will check your reading". Stars reward effort (readings finished,
   words practised), never rankings against other children.
-* Recordings not marked "keep" are deleted automatically after `PB_AUDIO_RETENTION_DAYS`
-  (14 on the hosted demo), as well as when the teacher finalises a review.
+* Recordings are deleted when the teacher finalises a review, and automatically after
+  `PB_AUDIO_RETENTION_DAYS` (default 14, failed readings included); recordings the teacher
+  chose to keep expire after `PB_KEPT_AUDIO_DAYS` (default 90).
+* Each teacher sees only the classes they created (plus shared classes such as the demo ones).
+* Per-login limits: 30 reading uploads and 60 word checks per 10 minutes. The word check only
+  accepts the child's assigned or teacher-checked practice words and is labelled a practice hint.
+* Children never see raw technical errors, only a calm "read again / ask your teacher" message.
 * A login is locked for 10 minutes after 5 wrong passwords. Teachers change their own
   password in Settings (8+ characters), which logs that account out on every other device;
   a teacher resetting a child's password also logs the child out and unlocks the login.
@@ -358,14 +365,16 @@ What exists today is a working, tested prototype; these claims are **not** yet s
 ## Limitations
 
 * The CTC model can still miss or invent errors; uncertain cases are shown as unsure.
-* Public Bangla speech is mostly adult; child results come from a small sample.
+* All evaluation so far uses adult speech (FLEURS, simulated errors). **No child has been recorded**, so accuracy on children is unknown.
 * Regional accents may appear as errors until added as accepted variants.
 * Whisper `small` often writes Bangla in Devanagari; the baseline maps it back
   to Bengali script by Unicode block offset before comparing.
 
 ## Credits and third-party components
 
-* Speech model: [arijitx/wav2vec2-xls-r-300m-bengali](https://huggingface.co/arijitx/wav2vec2-xls-r-300m-bengali) (check the model card for its licence), built on Meta XLS-R.
+* Speech model: [arijitx/wav2vec2-xls-r-300m-bengali](https://huggingface.co/arijitx/wav2vec2-xls-r-300m-bengali) (Apache-2.0), built on Meta XLS-R; our ONNX int8 export is redistributed under the same licence.
+* Evaluation data: [Google FLEURS](https://huggingface.co/datasets/google/fleurs) (Conneau et al., 2022), CC BY 4.0.
+* Deployment: [Caddy](https://caddyserver.com) (Apache-2.0) with Let's Encrypt; [sslip.io](https://sslip.io) for the hostname; ngrok for the laptop backup.
 * Baseline: OpenAI Whisper via [faster-whisper](https://github.com/SYSTRAN/faster-whisper).
 * Libraries: PyTorch, Hugging Face Transformers, ONNX Runtime, FastAPI, SQLAlchemy,
   librosa, SciPy, React, Vite, Tailwind CSS, TanStack Query, Recharts, lucide-react,
