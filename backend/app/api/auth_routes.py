@@ -18,6 +18,7 @@ from ..assessment.metrics import score_of
 from ..bangla.patterns import pattern_label
 from ..auth import (COOKIE, create_session, current_user, end_session, hash_password, require_student, user_out,
                     verify_password)
+from ..config import get_settings
 from ..db import get_db
 from ..models import Passage, Reading, User
 from ..schemas import LoginIn, PasswordIn
@@ -42,8 +43,10 @@ def login(body: LoginIn, request: Request, response: Response, db: Session = Dep
     if body.role and body.role != user.role:
         raise HTTPException(403, f"This is a {user.role} account. Use the {user.role.capitalize()} login.")
     token, max_age = create_session(db, user)
-    response.set_cookie(COOKIE, token, max_age=max_age, httponly=True, samesite="lax",
-                        secure=request.url.scheme == "https", path="/")
+    samesite = get_settings().cookie_samesite.lower()
+    secure = request.url.scheme == "https" or samesite == "none"
+    response.set_cookie(COOKIE, token, max_age=max_age, httponly=True, samesite=samesite,
+                        secure=secure, path="/")
     return user_out(user)
 
 

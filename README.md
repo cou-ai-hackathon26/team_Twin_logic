@@ -6,8 +6,87 @@ error to the Bangla written unit behind it (যুক্তাক্ষর, ক�
 and tells the teacher which patterns each child needs next. The teacher can
 correct any mark with one tap.
 
-**Everything runs locally on a CPU.** No audio leaves the computer and no
-language-model API is called.
+**Everything runs on a CPU, with no language-model API.** Run locally, no audio
+leaves the computer. In the hosted demo, audio goes only to our own server
+(the Hugging Face Space) and is never sent to a third party.
+
+| | |
+|---|---|
+| **Event** | CoU AI Hackathon 2026, Comilla University |
+| **Team** | Twin logic (duo) |
+| **Members** | [MEMBER 1 NAME] (speech models, benchmark, deployment) · [MEMBER 2 NAME] (grapheme and alignment engines, backend, interface) |
+| **Domain** | Education (primary), Accessibility (secondary) |
+| **Live demo** | **https://safu58-porabondhu.hf.space** (open it directly so the microphone works; the [Space page](https://huggingface.co/spaces/safu58/porabondhu) shows the build) |
+| **Demo video** | [ADD LINK, 3 minutes max] |
+| **Repository** | https://github.com/mohammadyaksafu/porabondhu-ai |
+
+### Test logins for the live demo
+
+| Role | Username | Password |
+|---|---|---|
+| Teacher | `teacher` | `teacher123` |
+| Student (class 3, roll 01) | `c3r01` | `student123` |
+
+Any student `c1r01` … `c5r05` works with `student123`. The free Space keeps no
+data between restarts: every restart brings back the clean demo accounts. The
+first reading after a restart takes longer while the models load.
+
+## Problem
+
+About half of Grade 3 and Grade 5 students in Bangladesh do not read Bangla at
+grade level (National Student Assessment 2022, DPE), and the World Bank (2024)
+estimates that 51% of late-primary children cannot read and understand a simple
+text. A teacher with 50 to 60 students cannot listen to each child read, weak
+readers stay hidden, and a teacher who knows a child reads poorly still does not
+know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
+
+## Solution
+
+1. **Listen.** The child reads a short graded passage aloud in the browser.
+2. **Mark.** A character-level Bangla speech model (no language model, so it does
+   not "fix" the child's mistakes) transcribes the reading, and our alignment
+   engine marks every word: correct, misread, skipped, repeated, hesitated or unsure.
+3. **Diagnose.** Each error is traced to the written unit behind it (যুক্তাক্ষর,
+   কার, র-ফলা, য-ফলা, রেফ, চন্দ্রবিন্দু). Repeated errors become candidate weak patterns.
+4. **Inform the teacher.** Speed (WCPM), accuracy, a mark out of 10, weak
+   patterns, practice words and a class pattern map. The teacher confirms or
+   corrects any mark with one tap and has the final word.
+
+## Features
+
+* Teacher and student logins; classes and students by roll code (no names stored)
+* In-browser recording (16 kHz WAV) with an audio quality check
+* Marked passage with a per-word inspector: heard vs expected unit by unit,
+  Bangla diagnosis, both confidence signals, and playback of just that word
+* Student progress (WCPM and accuracy over time), weak patterns, practice suggestions
+* Class pattern map: which units most children misread
+* "Listen first" model reading for students (neural TTS, word highlighting)
+* Side-by-side comparison with Whisper and plain CTC on the same audio
+* Live grapheme engine page (normaliser, segmenter, unit diff)
+* English passages (marked by Whisper) next to Bangla
+* Evaluation scripts: calibration on tuning speakers, benchmark with 95% CIs
+
+## Tech stack, models and data
+
+| Part | Technology |
+|---|---|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, TanStack Query, Recharts |
+| Backend | Python 3.10, FastAPI, SQLAlchemy (SQLite, or PostgreSQL) |
+| Speech model | [arijitx/wav2vec2-xls-r-300m-bengali](https://huggingface.co/arijitx/wav2vec2-xls-r-300m-bengali) (Apache-2.0), exported by us to ONNX int8: [safu58/porabondhu-wav2vec2-bn-onnx-int8](https://huggingface.co/safu58/porabondhu-wav2vec2-bn-onnx-int8) |
+| Baseline and English | OpenAI Whisper `small` via faster-whisper (CTranslate2, int8) |
+| Model reading (TTS) | Microsoft Edge neural voices via edge-tts (passage text only) |
+| Team-built AI parts | Bangla normaliser and grapheme segmenter, weighted word/unit alignment, CTC forced alignment and expected-text score, two-signal marking, weak-pattern tracking |
+| Passages | 30 Bangla and 25 English graded passages, Grades 1-5 (`backend/app/seed/passages.json`) [ADD SOURCE: written by the team, or which textbook/source] |
+| Evaluation data | So far only a TTS-generated test set that checks the scripts run; human-recorded results are listed under [Evaluation](#evaluation) once measured |
+| Hosting | Hugging Face Spaces (Docker, free CPU), built from this repository's `Dockerfile` |
+
+## AI tools used
+
+| Tool | What we used it for |
+|---|---|
+| Claude (Anthropic), through Claude Code | Helping write and review code, tests, scripts and documentation, and helping with deployment setup. We designed the system and can explain every part |
+
+No language-model API is called by the app itself.
 
 ---
 
@@ -35,6 +114,16 @@ uvicorn app.main:app --port 8000
 
 cd ../frontend && npm install && npm run build      # served by the backend at :8000
 ```
+
+Docker (the same image as the live demo, no PyTorch needed):
+
+```bash
+docker build -t porabondhu .
+docker run -p 7860:7860 porabondhu   # http://localhost:7860
+```
+
+Deploy the committed code to the Hugging Face Space (needs `huggingface-cli login`):
+`backend/.venv/Scripts/python deploy/push_space.py`
 
 PostgreSQL instead of SQLite: `docker compose up -d db` and set
 `PB_DATABASE_URL` in `backend/.env` (see `.env.example`).
@@ -142,7 +231,7 @@ backend/
     api/           FastAPI routes and serializers
     pipeline.py    one function per system, shared by the app and the benchmark
     models.py      SQLAlchemy tables (SQLite or PostgreSQL)
-    seed/          12 graded passages (Grades 1-5)
+    seed/          30 Bangla + 25 English graded passages (Grades 1-5)
   scripts/         export_onnx, calibrate, benchmark, annotation_template,
                    adapt_child_voice, make_synthetic_set, smoke_test
   tests/           engine unit tests
@@ -191,6 +280,6 @@ frontend/          React 19 + TypeScript + Tailwind 4 + TanStack Query + Rechart
 
 It also creates `Class 1` … `Class 5` (one per grade) with five students each. A teacher can create, change or remove a student's login on that student's page. Change the demo passwords before real use, or set `PB_SEED_DEMO=false`.
 
-**English.** Each grade has Bangla passages (`P01`–`P12`) and English passages (`E01`–`E10`, two per grade). English readings are marked by Whisper in English (greedy decoding, no carried-over context) plus a letter-distance word alignment. The grapheme engine, weak-pattern analysis and system comparison stay Bangla-only.
+**English.** Each grade has Bangla passages (`P01`–`P30`) and English passages (`E01`–`E25`). English readings are marked by Whisper in English (greedy decoding, no carried-over context) plus a letter-distance word alignment. The grapheme engine, weak-pattern analysis and system comparison stay Bangla-only.
 
 **Marks.** Every reading test gets a mark out of 10: words read correctly ÷ words in the passage × 10, to one decimal. Skipped, misread and not-reached words earn nothing, and unsure words count as correct (same as accuracy, see `PB_COUNT_UNSURE_AS_CORRECT`). The mark updates when the teacher corrects a word.
