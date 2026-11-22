@@ -278,6 +278,7 @@ export interface SystemInfo {
     audio_retention_days?: number
     max_failed_logins?: number
     lockout_minutes?: number
+    default_password_in_use?: boolean
   }
 }
 

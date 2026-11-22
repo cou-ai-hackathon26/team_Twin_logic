@@ -4,7 +4,7 @@ import { useChangePassword, useDemoReset } from '@/api/practice'
 import type { SystemInfo } from '@/api/types'
 import { Button, Card, CardHeader, ErrorBox, Input, Label, Modal } from '@/components/ui/primitives'
 
-export function PasswordCard() {
+export function PasswordCard({ demo }: { demo?: boolean }) {
   const change = useChangePassword()
   const [cur, setCur] = useState('')
   const [next, setNext] = useState('')
@@ -20,6 +20,12 @@ export function PasswordCard() {
         }
         subtitle="Do this before using PoraBondhu with real children: the demo password is public."
       />
+      {demo ? (
+        <p className="px-5 py-4 text-sm text-slate-600">
+          This is the shared public demo, so the published demo logins keep their passwords (otherwise one visitor could lock everyone else out). On a
+          real installation (<code>PB_SEED_DEMO=false</code>) you change your password here.
+        </p>
+      ) : (
       <form
         className="grid gap-3 p-5 sm:grid-cols-3"
         onSubmit={(e) => {
@@ -48,6 +54,7 @@ export function PasswordCard() {
           <ErrorBox error={change.error} />
         </div>
       </form>
+      )}
     </Card>
   )
 }
@@ -65,6 +72,11 @@ export function PrivacyCard({ settings }: { settings: SystemInfo['settings'] }) 
           </span>
         }
       />
+      {settings.default_password_in_use && (
+        <p className="mx-5 mt-4 rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 ring-1 ring-rose-200">
+          A teacher login still uses the published demo password. Change it now (below) before any child is recorded.
+        </p>
+      )}
       <ul className="space-y-2 px-5 py-4 text-sm text-slate-700">
         <li>
           • Recordings are deleted when you finalise a review

@@ -24,13 +24,12 @@ def test_lockout_after_wrong_passwords(anon):  # noqa: F811
         assert c.post("/api/auth/login", json={"username": "c5r09", "password": "wrong"}).status_code == 401
     r = c.post("/api/auth/login", json={"username": "c5r09", "password": "student123"})
     assert r.status_code == 429 and "Try again" in r.json()["detail"]
-    from app.db import SessionLocal
-    from app.models import User
+    # on the shared demo the lock is per address: someone else can still log in with that demo login
+    with TestClient(app, client=("10.9.8.7", 50000)) as other:
+        assert other.post("/api/auth/login", json={"username": "c5r09", "password": "student123"}).status_code == 200
+    from app.api.auth_routes import _demo_failures
 
-    with SessionLocal() as db:  # unlock so other tests can use the account
-        u = db.query(User).filter(User.username == "c5r09").one()
-        u.locked_until = None
-        db.commit()
+    _demo_failures.clear()
     assert c.post("/api/auth/login", json={"username": "c5r09", "password": "student123"}).status_code == 200
 
 
@@ -99,17 +98,50 @@ def test_word_check(monkeypatch):
     s.__exit__(None, None, None)
 
 
-def test_password_change_logs_out_other_devices(anon):  # noqa: F811
+def test_password_change_logs_out_other_devices(client):  # noqa: F811
+    cid = client.post("/api/classrooms", json={"name": "Pw", "grade": 4}).json()["id"]
+    sid = client.post(f"/api/classrooms/{cid}/students", json={"code": "P1"}).json()["id"]
+    client.put(f"/api/students/{sid}/account", json={"username": "pwkid", "password": "abcd1234"})
     with TestClient(app) as phone, TestClient(app) as laptop:
         for c in (phone, laptop):
-            assert c.post("/api/auth/login", json={"username": "c4r04", "password": "student123"}).status_code == 200
-        r = laptop.post("/api/auth/password", json={"current_password": "student123", "new_password": "newpass123"})
+            assert c.post("/api/auth/login", json={"username": "pwkid", "password": "abcd1234"}).status_code == 200
+        r = laptop.post("/api/auth/password", json={"current_password": "abcd1234", "new_password": "newpass123"})
         assert r.status_code == 204, r.text
         assert laptop.get("/api/auth/me").status_code == 200  # this browser stays logged in
         assert phone.get("/api/auth/me").status_code == 401   # the other device is logged out
         assert laptop.post("/api/auth/password", json={"current_password": "newpass123",
                                                        "new_password": "short"}).status_code == 422
-        laptop.post("/api/auth/password", json={"current_password": "newpass123", "new_password": "student123"})
+        # a teacher reset logs the child out too
+        client.put(f"/api/students/{sid}/account", json={"username": "pwkid", "password": "teacher-set1"})
+        assert laptop.get("/api/auth/me").status_code == 401
+
+
+def test_demo_logins_are_protected_and_restored(client):  # noqa: F811
+    with TestClient(app) as kid:
+        kid.post("/api/auth/login", json={"username": "c1r02", "password": "student123"})
+        r = kid.post("/api/auth/password", json={"current_password": "student123", "new_password": "hijacked1"})
+        assert r.status_code == 403  # a visitor cannot change a published demo password
+    cls = next(x for x in client.get("/api/classrooms").json() if x["name"] == "Class 1")
+    sid = next(s["id"] for s in client.get(f"/api/classrooms/{cls['id']}").json()["students"] if s["code"] == "Roll 02")
+    assert client.put(f"/api/students/{sid}/account", json={"username": "c1r02", "password": "xxxx1234"}).status_code == 403
+    # something changed it anyway (e.g. directly in the database): demo reset puts it back
+    from app.auth import hash_password
+    from app.db import SessionLocal
+    from app.models import User
+
+    with SessionLocal() as db:
+        db.query(User).filter(User.username == "c1r02").one().password_hash = hash_password("changed99")
+        db.commit()
+    assert client.post("/api/demo/reset").json()["logins_restored"] >= 1
+    with TestClient(app) as kid:
+        assert kid.post("/api/auth/login", json={"username": "c1r02", "password": "student123"}).status_code == 200
+
+
+def test_cross_site_writes_blocked(client):  # noqa: F811
+    r = client.post("/api/demo/reset", headers={"Origin": "https://evil.example"})
+    assert r.status_code == 403 and "Cross-site" in r.json()["detail"]
+    assert client.get("/api/classrooms", headers={"Origin": "https://evil.example"}).status_code == 200  # reads ok
+    assert client.post("/api/auth/logout", headers={"Origin": "http://testserver"}).status_code == 204
 
 
 def test_unreviewed_reading_hidden_from_child_everywhere(monkeypatch):

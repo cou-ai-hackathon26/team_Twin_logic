@@ -26,7 +26,7 @@ from ..assessment import types as T
 from ..assessment.english import assess_english, english_words
 from ..assessment.marking import assess, passage_words
 from ..assessment.metrics import compute_metrics
-from ..auth import STUDENT, TEACHER, hash_password
+from ..auth import STUDENT, TEACHER, hash_password, verify_password
 from ..bangla.normalize import normalize_word
 from ..bangla.segment import segment_normalized
 from ..db import SessionLocal
@@ -266,3 +266,40 @@ def seed_demo() -> str | None:
                 f"{student_username(5, STUDENTS_PER_CLASS)}, {readings} simulated readings")
     finally:
         db.close()
+
+
+def is_demo_login(username: str | None) -> bool:
+    """The published demo logins (teacher, c1r01 … c5r10) that the README tells visitors to use."""
+    if not username:
+        return False
+    if username == TEACHER_LOGIN[0]:
+        return True
+    return any(username == student_username(g, r) for g in range(1, 6) for r in range(1, STUDENTS_PER_CLASS + 1))
+
+
+def restore_demo(db: Session) -> dict:
+    """Demo reset: put back what a visitor may have changed, so the README instructions work again.
+
+    Restores the published passwords and clears lockouts of the demo logins, re-creates any deleted
+    demo class, student or simulated history. Real readings are removed by the caller."""
+    restored = 0
+    teacher = db.scalar(select(User).where(User.username == TEACHER_LOGIN[0]))
+    if teacher is None:
+        db.add(User(username=TEACHER_LOGIN[0], password_hash=hash_password(TEACHER_LOGIN[1]), role=TEACHER,
+                    display_name="Demo Teacher"))
+        restored += 1
+    student_hash = hash_password(STUDENT_PASSWORD)
+    for grade in range(1, 6):
+        c = _ensure_class(db, grade, student_hash)
+        if c.school == SCHOOL:
+            _seed_results(db, c)  # only children with no readings get their simulated history back
+    for u in db.scalars(select(User)):
+        if not is_demo_login(u.username):
+            continue
+        want = TEACHER_LOGIN[1] if u.username == TEACHER_LOGIN[0] else STUDENT_PASSWORD
+        if not verify_password(want, u.password_hash) or u.failed_logins or u.locked_until:
+            u.password_hash = hash_password(want) if not verify_password(want, u.password_hash) else u.password_hash
+            u.failed_logins, u.locked_until = 0, None
+            restored += 1
+    db.commit()
+    return {"logins_restored": restored}

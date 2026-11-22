@@ -99,6 +99,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def same_origin_writes(request, call_next):
+    """CSRF guard: a browser request that changes data must come from this site (or an allowed
+    dev origin). Matters most when cookies are SameSite=None (e.g. inside a Hugging Face iframe)."""
+    from urllib.parse import urlsplit
+
+    from fastapi.responses import JSONResponse
+
+    origin = request.headers.get("origin")
+    if origin and request.method in ("POST", "PUT", "PATCH", "DELETE") and request.url.path.startswith("/api/"):
+        host = request.headers.get("x-forwarded-host") or request.headers.get("host", "")
+        allowed = {o.strip() for o in get_settings().cors_origins.split(",") if o.strip()}
+        if urlsplit(origin).netloc != host and origin not in allowed:
+            return JSONResponse({"detail": "Cross-site request blocked"}, status_code=403)
+    return await call_next(request)
+
+
 app.include_router(auth_router)
 app.include_router(router)
 app.include_router(tts_router)

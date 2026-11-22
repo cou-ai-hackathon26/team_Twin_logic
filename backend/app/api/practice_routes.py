@@ -169,7 +169,13 @@ def demo_reset(db: Session = Depends(get_db)) -> dict:
                 orphans += 1
             except OSError:
                 pass
-    return {"readings_deleted": len(readings), "assignments_deleted": n_assign, "orphan_audio_deleted": orphans}
+    from ..seed.demo import restore_demo
+    from .auth_routes import _demo_failures
+
+    restored = restore_demo(db)
+    _demo_failures.clear()
+    return {"readings_deleted": len(readings), "assignments_deleted": n_assign, "orphan_audio_deleted": orphans,
+            **restored}
 
 
 # ------------------------------------------------------------------ student

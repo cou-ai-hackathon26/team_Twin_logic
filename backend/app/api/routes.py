@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from ..assessment.english import english_words
 from ..assessment.marking import passage_words
-from ..auth import STUDENT, end_other_sessions, hash_password, require_teacher
+from ..auth import STUDENT, end_other_sessions, hash_password, require_teacher, verify_password
 from ..bangla.normalize import normalize_word
 from ..bangla.patterns import pattern_label
 from ..bangla.segment import segment_normalized
@@ -23,6 +23,7 @@ from ..db import get_db
 from ..models import AcceptedVariant, Assignment, Classroom, Passage, Reading, Student, User
 from ..schemas import (AccountIn, AnalyzeIn, DiffIn, ClassroomIn, FinalizeIn, MarkPatch, PassageIn, PassagePatch, StudentIn,
                        StudentPatch, StudentsBulkIn, VariantIn)
+from ..seed.demo import is_demo_login
 from ..services import analytics
 from ..services import readings as reading_svc
 from ..speech import registry
@@ -42,7 +43,7 @@ def _get(db: Session, model, id_: int):
 
 # ---------------------------------------------------------------- system
 @router.get("/system")
-def system() -> dict:
+def system(db: Session = Depends(get_db)) -> dict:
     s = get_settings()
     return {
         "models": registry.status(),
@@ -51,7 +52,11 @@ def system() -> dict:
                      "count_unsure_as_correct": s.count_unsure_as_correct,
                      "database": "postgresql" if s.db_url.startswith("postgres") else "sqlite",
                      "demo_mode": s.seed_demo, "audio_retention_days": s.audio_retention_days,
-                     "max_failed_logins": s.max_failed_logins, "lockout_minutes": s.lockout_minutes},
+                     "max_failed_logins": s.max_failed_logins, "lockout_minutes": s.lockout_minutes,
+                     # a real installation still using the published demo password must be told loudly
+                     "default_password_in_use": (not s.seed_demo) and any(
+                         verify_password("teacher123", u.password_hash)
+                         for u in db.scalars(select(User).where(User.role == "teacher")))},
     }
 
 
@@ -138,6 +143,8 @@ def set_student_account(sid: int, body: AccountIn, db: Session = Depends(get_db)
     """Create the student's login, or change its username/password."""
     st = _get(db, Student, sid)
     username = body.username.strip().lower()
+    if get_settings().seed_demo and st.account is not None and is_demo_login(st.account.username):
+        raise HTTPException(403, "This child uses a shared demo login on the public demo, so it cannot be changed here.")
     clash = db.scalar(select(User).where(User.username == username))
     if clash is not None and clash.student_id != st.id:
         raise HTTPException(409, "This username is already taken")

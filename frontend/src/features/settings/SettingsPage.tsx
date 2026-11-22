@@ -33,7 +33,7 @@ export function SettingsPage() {
       <PageHeader title="Settings" subtitle="Speech models run on this server's CPU. No audio is sent to any outside AI service." />
       <div className="grid gap-6 xl:grid-cols-2">
         <PrivacyCard settings={data.settings} />
-        <PasswordCard />
+        <PasswordCard demo={data.settings.demo_mode} />
         <Card>
           <CardHeader
             title="Speech models"

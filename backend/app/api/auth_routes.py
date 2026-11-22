@@ -26,6 +26,7 @@ from ..config import get_settings
 from ..db import get_db
 from ..models import Passage, Reading, User
 from ..schemas import LoginIn, PasswordIn
+from ..seed.demo import is_demo_login
 from ..services import analytics
 from .routes import accept_upload
 from .serializers import passage_out, reading_out
@@ -40,6 +41,7 @@ def health() -> dict:
 
 
 # ------------------------------------------------------------------ auth
+_demo_failures: dict[tuple[str, str], tuple[int, datetime | None]] = {}  # demo server only, in memory
 @router.post("/auth/login")
 def login(body: LoginIn, request: Request, response: Response, db: Session = Depends(get_db)) -> dict:
     user = db.scalar(select(User).where(User.username == body.username.strip().lower()))
@@ -47,20 +49,33 @@ def login(body: LoginIn, request: Request, response: Response, db: Session = Dep
         raise HTTPException(401, "Wrong username or password")
     s = get_settings()
     now = datetime.now(timezone.utc)
-    locked = user.locked_until
-    if locked is not None and locked.tzinfo is None:
-        locked = locked.replace(tzinfo=timezone.utc)  # SQLite returns naive UTC datetimes
+    if s.seed_demo:
+        # public demo: lock per (login, client address), so a stranger typing wrong passwords for
+        # "teacher" cannot lock every judge out of the shared demo login
+        key = (user.username, request.client.host if request.client else "?")
+        fails, locked = _demo_failures.get(key, (0, None))
+    else:
+        # real installation: the whole account locks, which also stops guessing from many addresses
+        key, fails, locked = None, user.failed_logins or 0, user.locked_until
+        if locked is not None and locked.tzinfo is None:
+            locked = locked.replace(tzinfo=timezone.utc)  # SQLite returns naive UTC datetimes
     if locked is not None and locked > now:
         mins = max(1, round((locked - now).total_seconds() / 60))
         raise HTTPException(429, f"Too many wrong passwords. Try again in {mins} minute{'s' if mins > 1 else ''}.")
     if not verify_password(body.password, user.password_hash):
-        user.failed_logins = (user.failed_logins or 0) + 1
-        if user.failed_logins >= s.max_failed_logins:
-            user.locked_until = now + timedelta(minutes=s.lockout_minutes)
-            user.failed_logins = 0
-        db.commit()
+        fails += 1
+        locked = now + timedelta(minutes=s.lockout_minutes) if fails >= s.max_failed_logins else None
+        if locked:
+            fails = 0
+        if key is not None:
+            _demo_failures[key] = (fails, locked)
+        else:
+            user.failed_logins, user.locked_until = fails, locked
+            db.commit()
         raise HTTPException(401, "Wrong username or password")
-    if user.failed_logins or user.locked_until:
+    if key is not None:
+        _demo_failures.pop(key, None)
+    elif user.failed_logins or user.locked_until:
         user.failed_logins, user.locked_until = 0, None
         db.commit()
     if body.role and body.role != user.role:
@@ -87,6 +102,9 @@ def me(user: User = Depends(current_user)) -> dict:
 @router.post("/auth/password", status_code=204)
 def change_password(body: PasswordIn, request: Request, user: User = Depends(current_user),
                     db: Session = Depends(get_db)) -> None:
+    if get_settings().seed_demo and is_demo_login(user.username):
+        raise HTTPException(403, "This is a shared demo login, so its password stays as published. "
+                                 "On a real installation (PB_SEED_DEMO=false) you can change it here.")
     if not verify_password(body.current_password, user.password_hash):
         raise HTTPException(403, "The current password is wrong")
     user.password_hash = hash_password(body.new_password)

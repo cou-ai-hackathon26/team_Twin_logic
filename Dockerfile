@@ -1,4 +1,6 @@
-# Hosted demo image (Hugging Face Spaces, Docker SDK, CPU).
+# Hosted demo image (our VPS behind Caddy, or Hugging Face Spaces, Docker SDK, CPU).
+# Cookies are SameSite=Lax. Inside a Hugging Face Space iframe set the Space variable
+# PB_COOKIE_SAMESITE=none (cross-site writes are still blocked by the Origin check in app/main.py).
 #   docker build -t porabondhu . && docker run -p 7860:7860 porabondhu
 # The speech model is the int8 ONNX export made by backend/scripts/export_onnx.py,
 # published at https://huggingface.co/safu58/porabondhu-wav2vec2-bn-onnx-int8
@@ -24,7 +26,7 @@ ENV HOME=/home/user \
     PB_CTC_BACKEND=onnx-int8 \
     PB_PRELOAD_MODELS=true \
     PB_TORCH_THREADS=2 \
-    PB_COOKIE_SAMESITE=none \
+    PB_COOKIE_SAMESITE=lax \
     PB_AUDIO_RETENTION_DAYS=14
 WORKDIR /home/user/app
 
