@@ -1,0 +1,122 @@
+{
+  "generated": "2026-11-23T07:56:53",
+  "server": "http://127.0.0.1:8200",
+  "workers": 2,
+  "machine": "author's laptop (8 logical cores, 16 GB RAM, Windows 10), server and load generator on the same machine",
+  "audio": "10 real FLEURS bn_in test recordings (adult speech), cycled",
+  "ctc_backend": {
+    "ctc": {
+      "state": "not_loaded",
+      "error": null,
+      "load_sec": null,
+      "model_id": "arijitx/wav2vec2-xls-r-300m-bengali",
+      "backend": "onnx-int8"
+    },
+    "whisper": {
+      "state": "not_loaded",
+      "error": null,
+      "load_sec": null,
+      "model": "small",
+      "enabled": false
+    },
+    "device": "cpu"
+  },
+  "bursts": [
+    {
+      "burst": 10,
+      "accepted": 10,
+      "refused_busy_503": 0,
+      "other_errors": 0,
+      "done": 9,
+      "failed_or_rejected": 1,
+      "rejected_by_audio_check": 1,
+      "unfinished": 0,
+      "wall_seconds": 29.6,
+      "readings_per_hour": 1095,
+      "audio_seconds_marked": 107.8,
+      "audio_seconds_per_wall_second": 3.64,
+      "latency_upload_to_marks_s": {
+        "p50": 14.07,
+        "p95": 27.38,
+        "max": 29.07
+      },
+      "marking_time_per_reading_s": {
+        "p50": 6.21,
+        "p95": 7.96,
+        "mean": 5.82
+      },
+      "server_cpu_percent_all_cores": {
+        "mean": 49.3,
+        "max": 52.8
+      },
+      "server_memory_mb": {
+        "max": 1199,
+        "mean": 1131
+      }
+    },
+    {
+      "burst": 25,
+      "accepted": 25,
+      "refused_busy_503": 0,
+      "other_errors": 0,
+      "done": 22,
+      "failed_or_rejected": 3,
+      "rejected_by_audio_check": 3,
+      "unfinished": 0,
+      "wall_seconds": 75.8,
+      "readings_per_hour": 1046,
+      "audio_seconds_marked": 259.1,
+      "audio_seconds_per_wall_second": 3.42,
+      "latency_upload_to_marks_s": {
+        "p50": 39.1,
+        "p95": 71.29,
+        "max": 74.45
+      },
+      "marking_time_per_reading_s": {
+        "p50": 6.49,
+        "p95": 8.78,
+        "mean": 6.6
+      },
+      "server_cpu_percent_all_cores": {
+        "mean": 50.6,
+        "max": 55.1
+      },
+      "server_memory_mb": {
+        "max": 1558,
+        "mean": 1388
+      }
+    },
+    {
+      "burst": 50,
+      "accepted": 50,
+      "refused_busy_503": 0,
+      "other_errors": 0,
+      "done": 45,
+      "failed_or_rejected": 5,
+      "rejected_by_audio_check": 5,
+      "unfinished": 0,
+      "wall_seconds": 157.4,
+      "readings_per_hour": 1029,
+      "audio_seconds_marked": 539.1,
+      "audio_seconds_per_wall_second": 3.43,
+      "latency_upload_to_marks_s": {
+        "p50": 81.32,
+        "p95": 147.2,
+        "max": 154.3
+      },
+      "marking_time_per_reading_s": {
+        "p50": 6.83,
+        "p95": 9.01,
+        "mean": 6.8
+      },
+      "server_cpu_percent_all_cores": {
+        "mean": 52.8,
+        "max": 59.5
+      },
+      "server_memory_mb": {
+        "max": 1575,
+        "mean": 1565
+      }
+    }
+  ]
+}

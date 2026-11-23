@@ -1,13 +1,16 @@
 """Reading lifecycle: upload -> queued -> processing -> done | rejected | failed.
 
-Model inference runs in a single background worker thread so that the CPU is
-never shared by two recordings at once and the API stays responsive.
+Model inference runs in a pool of background worker threads (PB_MARKING_WORKERS, default 1 so the
+CPU is never shared by two recordings at once) and the API stays responsive. At most PB_MAX_QUEUE
+readings may wait; beyond that an upload is refused with 503 so a busy server degrades politely.
 """
 
 from __future__ import annotations
 
 import logging
 import os
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
@@ -23,10 +26,52 @@ from ..pipeline import run_ctc_word_compare, run_porabondhu, run_whisper_word_co
 from ..speech.audio import load_audio_bytes, load_audio_file, save_wav
 from ..speech.registry import get_ctc, get_whisper
 from ..speech.registry import status as model_status
+from .. import metrics
 from . import progress
 
 log = logging.getLogger(__name__)
-_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pb-worker")
+_executor = ThreadPoolExecutor(max_workers=max(1, get_settings().marking_workers), thread_name_prefix="pb-worker")
+_qlock = threading.Lock()
+_waiting = 0
+
+
+class QueueFull(Exception):
+    """Too many readings are already waiting to be marked."""
+
+
+def queue_state() -> dict:
+    s = get_settings()
+    return {"waiting": _waiting, "workers": max(1, s.marking_workers), "limit": s.max_queue}
+
+
+def ensure_capacity() -> None:
+    """Raise QueueFull when the queue is at its limit (called before an upload is stored)."""
+    limit = get_settings().max_queue
+    if limit > 0 and _waiting >= limit:
+        metrics.inc("pb_readings_rejected_queue_full_total")
+        raise QueueFull()
+
+
+def _enqueue(fn, reading_id: int) -> None:
+    global _waiting
+    with _qlock:
+        _waiting += 1
+    metrics.gauge_add("pb_queue_waiting", 1)
+    queued_at = time.perf_counter()
+
+    def run() -> None:
+        global _waiting
+        with _qlock:
+            _waiting -= 1
+        metrics.gauge_add("pb_queue_waiting", -1)
+        metrics.observe("pb_queue_wait_seconds", time.perf_counter() - queued_at)
+        metrics.gauge_add("pb_workers_busy", 1)
+        try:
+            fn(reading_id)
+        finally:
+            metrics.gauge_add("pb_workers_busy", -1)
+
+    _executor.submit(run)
 
 
 def variant_pairs(db: Session) -> set[tuple[str, str]]:
@@ -82,11 +127,11 @@ def reading_language(r: Reading) -> str:
 
 
 def submit(reading_id: int) -> None:
-    _executor.submit(_process_reading, reading_id)
+    _enqueue(_process_reading, reading_id)
 
 
 def submit_comparison(reading_id: int) -> None:
-    _executor.submit(_process_comparison, reading_id)
+    _enqueue(_process_comparison, reading_id)
 
 
 def recompute_metrics(reading: Reading) -> None:
@@ -139,6 +184,9 @@ def _process_reading(reading_id: int) -> None:
                                      count_unsure_as_correct=unsure_ok,
                                      on_stage=lambda st: progress.set_stage(reading_id, st))
             progress.finish(reading_id, lang, res.quality.duration_sec, res.processing_ms)
+            if res.processing_ms:
+                metrics.observe("pb_marking_seconds", res.processing_ms / 1000)
+            metrics.inc("pb_audio_seconds_total", res.quality.duration_sec or 0.0)
             r.quality = res.quality.to_dict()
             r.duration_sec = res.quality.duration_sec
             r.processing_ms = res.processing_ms
@@ -147,6 +195,7 @@ def _process_reading(reading_id: int) -> None:
             r.processed_at = datetime.now(timezone.utc)
             if res.rejected:
                 r.status = "rejected"
+                metrics.inc("pb_readings_total", status="rejected")
                 delete_audio(r)
                 db.commit()
                 return
@@ -156,6 +205,7 @@ def _process_reading(reading_id: int) -> None:
             r.metrics = res.metrics.to_dict() if res.metrics else None
             r.status = "done"
             db.commit()
+            metrics.inc("pb_readings_total", status="done")
         except Exception as e:  # noqa: BLE001
             log.exception("reading %s failed", reading_id)
             db.rollback()
@@ -164,6 +214,7 @@ def _process_reading(reading_id: int) -> None:
                 r.status = "failed"
                 r.error = str(e)[:2000]
                 db.commit()
+            metrics.inc("pb_readings_total", status="failed")
     finally:
         progress.clear(reading_id)
         db.close()

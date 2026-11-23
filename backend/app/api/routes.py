@@ -270,6 +270,11 @@ async def accept_upload(db: Session, st: Student, p: Passage, audio: UploadFile,
         from .. import ratelimit
 
         ratelimit.check("upload", uploader_id, get_settings().max_uploads_per_10min)
+    try:
+        reading_svc.ensure_capacity()
+    except reading_svc.QueueFull:
+        raise HTTPException(503, "PoraBondhu is busy marking other readings. Please try again in a minute.",
+                            headers={"Retry-After": "60"}) from None
     r = Reading(student_id=st.id, passage_id=p.id, passage_text=p.text, status="queued")
     db.add(r)
     db.flush()

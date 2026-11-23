@@ -1,0 +1,32 @@
+# LOCAL ONLY: Prometheus + Grafana for load tests and demos on your own machine.
+# Not part of the hosted demo (the 2-core / 4 GB VPS has no room for it). See docs/SCALING.md.
+#
+#   1. run PoraBondhu locally with metrics on, e.g. on port 8200:
+#        set PB_METRICS_ENABLED=true && python -m uvicorn app.main:app --port 8200
+#   2. docker compose -f docker-compose.monitoring.yml up -d
+#   3. Grafana: http://localhost:3000 (anonymous viewer; dashboard "PoraBondhu marking")
+#      Prometheus: http://localhost:9090
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=2d"]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["127.0.0.1:9090:9090"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    mem_limit: 300m
+  grafana:
+    image: grafana/grafana-oss:12.1.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_AUTH_DISABLE_LOGIN_FORM: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/porabondhu.json
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [prometheus]
+    mem_limit: 300m

@@ -412,6 +412,36 @@ ONNX int8 CTC processes ~14 s of audio in ~4.5 s, i.e. roughly 18-20 s per
 60 s reading (target ≤ 15 s; use `PB_TORCH_THREADS` and close other apps).
 The PyTorch fp32 path is ~2x slower.
 
+## Scaling and monitoring (local only, not deployed)
+
+> **Not part of the hosted demo.** Prometheus, Grafana and the load test run only on our own laptop. The
+> demo VPS (2 cores, ~4 GB RAM) is too small to run them next to the speech model, so there the new
+> settings stay at their safe defaults (`PB_METRICS_ENABLED=false` → `/metrics` returns 404,
+> `PB_MARKING_WORKERS=1`).
+
+* **Marking queue with workers** (`PB_MARKING_WORKERS`) and a **queue limit** (`PB_MAX_QUEUE`, default
+  200): when the queue is full, an upload gets *503, busy, try again in a minute* instead of the server
+  falling over.
+* **Prometheus `/metrics`** (no extra library): readings marked, marking time, queue wait and length,
+  busy workers, audio minutes, API requests. Counts and timings only, never names, text or audio.
+* **Grafana dashboard** provisioned by `docker compose -f docker-compose.monitoring.yml up -d`.
+* **Load test** (`backend/scripts/loadtest.py`), real FLEURS Bangla recordings sent in bursts, measured
+  on 23 Nov 2026 on our laptop with the demo's speech model (ONNX int8, CPU):
+
+| Children pressing "stop" at once | 1 worker: all marked after | 2 workers: all marked after | Failed |
+|---|---|---|---|
+| 10 | 34 s | 30 s | 0 |
+| 25 | 88 s | 76 s | 0 |
+| 50 | 268 s | 157 s | 0 |
+
+With 2 workers the laptop marks about **200 one-minute readings per hour** using under 1.6 GB of memory:
+enough for a 300-pupil school reading once a week in about 1.5 hours. A 2-core server (measured at about
+2× real time) marks about 115 per hour. These are calculations from our measurements, not a school trial.
+Full tables, the Grafana screenshot, the school capacity calculation and how to run it:
+[docs/SCALING.md](docs/SCALING.md).
+
+![Grafana during the load test](docs/scaling/grafana-loadtest.jpg)
+
 ## Child-voice adaptation (optional)
 
 `scripts/adapt_child_voice.py` fine-tunes the top transformer layers on public

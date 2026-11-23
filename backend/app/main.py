@@ -119,6 +119,43 @@ async def same_origin_writes(request, call_next):
     return await call_next(request)
 
 
+def _route_group(path: str) -> str:
+    """/api/readings/17/marks/3 -> /api/readings (keeps metric labels few and free of ids)."""
+    parts = [p for p in path.split("/") if p][:2]
+    return "/" + "/".join(parts) if parts and parts[0] == "api" else "/static"
+
+
+@app.middleware("http")
+async def http_metrics(request, call_next):
+    if not get_settings().metrics_enabled or request.url.path == "/metrics":
+        return await call_next(request)
+    from . import metrics
+
+    t0 = time.perf_counter()
+    response = await call_next(request)
+    metrics.observe("pb_http_request_seconds", time.perf_counter() - t0)
+    metrics.inc("pb_http_requests_total", method=request.method, route=_route_group(request.url.path),
+                status=f"{response.status_code // 100}xx")
+    return response
+
+
+@app.get("/metrics", include_in_schema=False)
+def prometheus_metrics():
+    """Prometheus scrape endpoint; 404 unless PB_METRICS_ENABLED=true (off on the hosted demo)."""
+    from fastapi import HTTPException
+    from fastapi.responses import PlainTextResponse
+
+    from . import metrics
+    from .services.readings import queue_state
+
+    if not get_settings().metrics_enabled:
+        raise HTTPException(404, "Not found")
+    st = queue_state()
+    metrics.gauge_set("pb_workers", st["workers"])
+    metrics.gauge_set("pb_queue_limit", st["limit"])
+    return PlainTextResponse(metrics.render(), media_type="text/plain; version=0.0.4")
+
+
 app.include_router(auth_router)
 app.include_router(router)
 app.include_router(tts_router)

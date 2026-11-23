@@ -38,6 +38,13 @@ class Settings(BaseSettings):
     # abuse limits per login: reading uploads and single-word checks per 10 minutes
     max_uploads_per_10min: int = 30
     max_word_checks_per_10min: int = 60
+    # scaling: marking worker threads (1 = one recording at a time, safest on a small server) and the
+    # most readings allowed to wait; uploads beyond that get HTTP 503 "busy, try again" instead of
+    # piling up. Raise workers only on machines with spare cores (see docs/SCALING.md).
+    marking_workers: int = 1
+    max_queue: int = 200
+    # Prometheus metrics at /metrics (counts and timings only). Off on the hosted demo.
+    metrics_enabled: bool = False
     # security: lock a login for lockout_minutes after this many wrong passwords in a row
     max_failed_logins: int = 5
     lockout_minutes: int = 10
