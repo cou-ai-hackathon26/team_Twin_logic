@@ -23,6 +23,11 @@ outside AI or analytics service; the only outside call is Microsoft Edge TTS, wh
 * **A teacher** sees the classes they created, plus shared classes (classes with no owner, such as
   the demo classes or classes created before per-teacher access existed). Another teacher's class
   returns "not found".
+* A **district officer** sees only the district view: per school, how many children were assessed,
+  the median reading speed and error rates per kind of written unit, from **teacher-checked readings
+  only**. No child, roll number, nickname, class list, recording or single reading is ever sent to this
+  role; any school, unit or week with **fewer than 5 children is hidden**, so one child cannot be
+  singled out. The server refuses every other page for this role (tested).
 * A **child login** sees only that child's own readings and assignments, and sees marks and errors only
   after the teacher has reviewed the reading (enforced by the server).
 * Whoever has **administrator access to the computer or server** can read the files directly. Use an

@@ -24,10 +24,12 @@ def test_metrics_count_readings_without_personal_data(client, monkeypatch):  # n
     metrics.reset()
     c = client
     sid, pid = _class3_student_and_passage(c)
+    words = next(p for p in c.get("/api/passages").json() if p["id"] == pid)["text"].replace("।", "").split()
+    monkeypatch.setattr(svc, "get_ctc", lambda: FakeRecognizer(words))  # fast and deterministic
     r = c.post("/api/readings", data={"student_id": sid, "passage_id": pid},
                files={"audio": ("a.wav", wav_bytes(), "audio/wav")})
     assert r.status_code == 202
-    wait_done(c, r.json()["id"])
+    assert wait_done(c, r.json()["id"], timeout=60)["status"] == "done"
     text = c.get("/metrics").text
     assert "# TYPE pb_marking_seconds histogram" in text
     assert 'pb_readings_total{status="done"} 1' in text

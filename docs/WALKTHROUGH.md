@@ -3,7 +3,7 @@
 Screenshots taken on 23 Nov 2026 from the app running locally with the demo data. Readings marked
 **DEMO · simulated** are generated practice history (scripted errors run through the real marking
 engine, no audio), so the screens are not empty; every reading you record yourself is marked live by
-the speech model. Demo logins: admin `admin` / `admin123`, teacher `teacher` / `teacher123`, student `c2r01` / `student123`.
+the speech model. Demo logins: admin `admin` / `admin123`, teacher `teacher` / `teacher123`, district officer `district` / `district123`, student `c2r01` / `student123`.
 
 ---
 
@@ -14,12 +14,20 @@ the speech model. Demo logins: admin `admin` / `admin123`, teacher `teacher` / `
 | **Admin** | Created once at installation: `python -m scripts.create_teacher <name> --admin` (demo: `admin` / `admin123`) | Logs in on the **Teacher** tab | Every class, plus **Teachers** in the menu |
 | **Teacher** | The admin: **Teachers → Add a teacher** (username, name, first password of 8+ characters) | **Teacher** tab | Their own classes and shared classes |
 | **Student** | The teacher: open the class → **Add students** → open a student → **Student login → Create login** | **Student** tab | Only their own readings, marks (after review) and practice |
+| **District officer** | The admin: **Teachers → Add an account → Account type: District officer** | **Teacher** tab (opens the district view) | Only counts per school (Part 3); never children, readings or recordings |
 
 The admin can also reset a teacher's password (the teacher is logged out everywhere) or remove a teacher
 (their classes stay and become shared). On the public demo, the published demo logins cannot be changed
 and teacher accounts created by visitors are removed by **Reset demo recordings**.
 
 ![Admin: Teachers](walkthrough/a01-admin-teachers.jpg)
+
+**Schools.** The admin adds schools (name, upazila, district) on **Schools**, and places each teacher in a
+school on **Teachers** (their own classes move with them; their new classes join that school). Shared
+classes are placed directly under **Classes without a school**. Removing a school removes nothing else.
+
+![Admin: Schools](walkthrough/a02-admin-schools.jpg)
+![Admin: Teachers with schools and a district officer](walkthrough/a03-admin-teachers-schools.jpg)
 
 ---
 
@@ -174,3 +182,35 @@ tick **I can read it now**.
 Marks over time (Bangla and English) and badges for effort.
 
 ![Progress](walkthrough/s08-progress.jpg)
+
+---
+
+## Part 3 · District view (district officer or admin)
+
+Log in on the **Teacher** tab as `district` / `district123` (or open **District view** in the admin menu).
+The demo shows three fictional schools with **simulated** practice history, and says so at the top.
+
+### 1. Totals and the hardest units
+Schools, children, how many were assessed, teacher-checked readings and the median reading speed. Then the
+written units misread most across the district (error rate = misread ÷ times read), how many children
+that covers, and the passages (T01-T12 follow NCTB lessons) that practise each unit.
+
+![District: hardest units](walkthrough/d01-district-top.jpg)
+
+### 2. School × unit
+One row per school, one column per kind of unit (যুক্তাক্ষর, কার, ফলা, রেফ, বর্ণ…). Darker = more errors.
+A cell read by fewer than 5 children shows "–"; a school with fewer than 5 assessed children shows only
+"too few to show".
+
+![District: school by unit](walkthrough/d02-district-heat.jpg)
+
+### 3. Each school and the weekly trend
+The three hardest units per school with practice passages, and the median words correct per minute by
+week (weeks with fewer than 5 children are hidden). **Download CSV** gives the same counts for a
+spreadsheet.
+
+![District: schools](walkthrough/d03-district-schools.jpg)
+![District: trend](walkthrough/d04-district-trend.jpg)
+
+What the officer **cannot** do: open any class, child, reading, recording, the review queue or the admin
+pages (the server answers 403; tested in `backend/tests/test_district.py`).

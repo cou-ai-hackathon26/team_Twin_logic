@@ -20,7 +20,7 @@ from ..bangla.patterns import pattern_label
 from ..bangla.segment import segment_normalized
 from ..config import get_settings, load_thresholds
 from ..db import get_db
-from ..models import SIMULATED_MODEL_ID, AcceptedVariant, Assignment, Classroom, Passage, Reading, Student, User
+from ..models import SIMULATED_MODEL_ID, AcceptedVariant, Assignment, Classroom, Passage, Reading, School, Student, User
 from ..schemas import (AccountIn, AnalyzeIn, DiffIn, ClassroomIn, FinalizeIn, MarkPatch, PassageIn, PassagePatch, StudentIn,
                        StudentPatch, StudentsBulkIn, VariantIn)
 from ..seed.demo import is_demo_login
@@ -82,7 +82,13 @@ def list_classrooms(db: Session = Depends(get_db)) -> list[dict]:
 
 @router.post("/classrooms", status_code=201)
 def create_classroom(body: ClassroomIn, db: Session = Depends(get_db)) -> dict:
-    c = Classroom(name=body.name.strip(), grade=body.grade, school=body.school, teacher_id=db.info.get("teacher_id"))
+    tid = db.info.get("teacher_id")
+    owner = db.get(User, tid) if tid else None
+    c = Classroom(name=body.name.strip(), grade=body.grade, school=body.school, teacher_id=tid,
+                  school_id=owner.school_id if owner else None)
+    if owner is not None and owner.school_id and not body.school:
+        sch = db.get(School, owner.school_id)
+        c.school = sch.name if sch else None
     db.add(c)
     db.commit()
     return analytics.class_overview(db, c)

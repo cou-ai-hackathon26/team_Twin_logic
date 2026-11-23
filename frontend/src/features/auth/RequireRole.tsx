@@ -12,8 +12,8 @@ export function RequireRole({ role, children }: { role: Role; children: ReactNod
   if (isLoading) return <PageLoader />
   if (error) return <ErrorBox className="m-6" error={error} />
   if (!me) return <Navigate to="/login" replace state={{ from: loc.pathname + loc.search }} />
-  // an admin can do everything a teacher can (and manages teacher accounts)
-  const allowed = me.role === role || (role === 'teacher' && me.role === 'admin')
+  // an admin can do everything a teacher can (manages accounts and schools) and sees the district view
+  const allowed = me.role === role || ((role === 'teacher' || role === 'district') && me.role === 'admin')
   if (!allowed) return <Navigate to={homeFor(me.role)} replace />
   return <>{children}</>
 }

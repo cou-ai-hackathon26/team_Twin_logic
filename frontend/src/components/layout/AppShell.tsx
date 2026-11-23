@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { setUiLang, tr, useUiLang } from '@/lib/i18n'
-import { Bell, BookOpenText, ExternalLink, FlaskConical, HardDrive, Inbox, LayoutDashboard, LogOut, Mic, Search, Settings, Sparkles, UsersRound } from 'lucide-react'
+import { Bell, BookOpenText, Building2, ExternalLink, FlaskConical, HardDrive, Inbox, LayoutDashboard, LogOut, Map as MapIcon, Mic, Search, Settings, Sparkles, UsersRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation, useNavigate } from 'react-router-dom'
 import { useClassrooms, useLogout, useMe, useReviewQueue, useSystem } from '@/api/hooks'
@@ -32,6 +32,8 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     title: 'Account',
     items: [
       { to: '/admin/teachers', label: 'Teachers', short: 'Teachers', icon: UsersRound, adminOnly: true },
+      { to: '/admin/schools', label: 'Schools', short: 'Schools', icon: Building2, adminOnly: true },
+      { to: '/district', label: 'District view', short: 'District', icon: MapIcon, adminOnly: true },
       { to: '/settings', label: 'Settings', short: 'Settings', icon: Settings },
     ],
   },
@@ -42,6 +44,7 @@ const MOBILE = ALL.filter((i) => ['/dashboard', '/assess', '/review', '/passages
 const TITLES: [RegExp, string, string][] = [
   [/^\/dashboard/, 'Dashboard', 'ড্যাশবোর্ড'],
   [/^\/admin\/teachers/, 'Teachers', 'শিক্ষকবৃন্দ'],
+  [/^\/admin\/schools/, 'Schools', 'বিদ্যালয়'],
   [/^\/assess/, 'New assessment', 'নতুন মূল্যায়ন'],
   [/^\/review/, 'Review queue', 'যাচাইয়ের তালিকা'],
   [/^\/readings\//, 'Reading review', 'পড়া যাচাই'],

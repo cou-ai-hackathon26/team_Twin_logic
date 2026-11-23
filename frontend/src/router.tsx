@@ -48,6 +48,11 @@ export const router = createBrowserRouter([
     ],
   },
   {
+    // district officer (and admin): counts per school only, its own simple layout
+    path: '/district',
+    element: <RequireRole role="district">{page(() => import('@/features/district/DistrictPage'), 'DistrictPage')}</RequireRole>,
+  },
+  {
     // teacher role
     element: (
       <RequireRole role="teacher">
@@ -67,6 +72,7 @@ export const router = createBrowserRouter([
       { path: '/benchmark', element: page(() => import('@/features/benchmark/BenchmarkPage'), 'BenchmarkPage') },
       { path: '/settings', element: page(() => import('@/features/settings/SettingsPage'), 'SettingsPage') },
       { path: '/admin/teachers', element: page(() => import('@/features/admin/TeachersPage'), 'TeachersPage') },
+      { path: '/admin/schools', element: page(() => import('@/features/admin/SchoolsPage'), 'SchoolsPage') },
       { path: '*', element: page(() => import('@/features/NotFound'), 'NotFound') },
     ],
   },

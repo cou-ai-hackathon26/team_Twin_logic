@@ -1,4 +1,4 @@
-"""Role-based login: two roles, ``teacher`` and ``student``.
+"""Role-based login: ``admin``, ``teacher``, ``district`` (district officer) and ``student``.
 
 Passwords are stored as salted PBKDF2-SHA256 hashes. A login creates a
 server-side session; the browser holds only a random token in an HttpOnly
@@ -21,7 +21,7 @@ from .db import get_db
 from .models import AuthSession, Student, User
 
 COOKIE = "pb_session"
-TEACHER, STUDENT, ADMIN = "teacher", "student", "admin"
+TEACHER, STUDENT, ADMIN, DISTRICT = "teacher", "student", "admin", "district"
 ROLES = (TEACHER, STUDENT)
 _ITER = 200_000
 
@@ -106,6 +106,13 @@ def require_admin(user: User = Depends(current_user), db: Session = Depends(get_
     if user.role != ADMIN:
         raise HTTPException(403, "Admin account required")
     db.info["teacher_id"] = None
+    return user
+
+
+def require_district(user: User = Depends(current_user)) -> User:
+    """District officers (counts per school only, never children or recordings) and admins."""
+    if user.role not in (DISTRICT, ADMIN):
+        raise HTTPException(403, "District account required")
     return user
 
 

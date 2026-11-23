@@ -30,6 +30,17 @@ def iso(dt: datetime | None) -> str | None:
 # "Simulated" everywhere in the UI and never mixed into evaluation results.
 SIMULATED_MODEL_ID = "demo-seed (simulated)"
 
+class School(Base):
+    """A school, grouped by upazila and district for the district summary (counts only)."""
+
+    __tablename__ = "schools"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(160), unique=True)
+    upazila: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    district: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class Classroom(Base):
     __tablename__ = "classrooms"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -38,6 +49,8 @@ class Classroom(Base):
     school: Mapped[str | None] = mapped_column(String(160), nullable=True)
     # the teacher who created the class; NULL = shared with every teacher (e.g. the demo classes)
     teacher_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    # the school this class belongs to (NULL = not assigned; such classes are left out of the district summary)
+    school_id: Mapped[int | None] = mapped_column(ForeignKey("schools.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     students: Mapped[list["Student"]] = relationship(back_populates="classroom", cascade="all, delete-orphan",
                                                      order_by="Student.code")
@@ -157,13 +170,15 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(60), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(200))
-    role: Mapped[str] = mapped_column(String(20))  # teacher | student
+    role: Mapped[str] = mapped_column(String(20))  # admin | teacher | district | student
     display_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
     student_id: Mapped[int | None] = mapped_column(ForeignKey("students.id", ondelete="CASCADE"), nullable=True,
                                                    unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     failed_logins: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # teacher: their school (new classes join it). district officer: unused (sees every school).
+    school_id: Mapped[int | None] = mapped_column(ForeignKey("schools.id", ondelete="SET NULL"), nullable=True)
     student: Mapped[Student | None] = relationship(back_populates="account")
 
 

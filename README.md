@@ -30,7 +30,8 @@ never sent to a third-party AI service.
 
 | Role | Username | Password |
 |---|---|---|
-| Admin (creates teacher accounts; Teacher tab) | `admin` | `admin123` |
+| Admin (schools, teacher and district accounts; Teacher tab) | `admin` | `admin123` |
+| District officer (district view, counts only; Teacher tab) | `district` | `district123` |
 | Teacher | `teacher` | `teacher123` |
 | Student (class 3, roll 01) | `c3r01` | `student123` |
 
@@ -128,10 +129,20 @@ step-by-step guide: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
 </details>
 
 <details>
-<summary><b>Admin: creating teacher accounts</b></summary>
+<summary><b>Admin: schools, teacher and district accounts</b></summary>
 
 <table>
-<tr><td width="50%" valign="top"><img src="docs/walkthrough/a01-admin-teachers.jpg" alt="Admin → Teachers: create teacher accounts, reset passwords, remove; teachers create student logins on each student's page" width="100%"><br><sub>Admin → Teachers: create teacher accounts, reset passwords, remove; teachers create student logins on each student's page</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/a02-admin-schools.jpg" alt="Admin → Schools: schools with upazila and district, their classes, classes not yet in a school" width="100%"><br><sub>Admin → Schools: schools with upazila and district, their classes, classes not yet in a school</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/a03-admin-teachers-schools.jpg" alt="Admin → Teachers: teacher and district-officer accounts; each teacher placed in a school" width="100%"><br><sub>Admin → Teachers: teacher and district-officer accounts; each teacher placed in a school</sub></td></tr>
+</table>
+
+</details>
+
+<details open>
+<summary><b>District view (district officer): counts per school only</b></summary>
+
+<table>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/d01-district-top.jpg" alt="District view: totals and the hardest written units across the district, each linked to passages that practise it" width="100%"><br><sub>Hardest written units across the district, each linked to passages that practise it (demo schools, simulated data)</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/d02-district-heat.jpg" alt="School × unit heat table: error rate per kind of written unit; too-small groups hidden" width="100%"><br><sub>School × unit heat table; any group under 5 children is hidden</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/d03-district-schools.jpg" alt="Per school: the three hardest units and practice passages" width="100%"><br><sub>Per school: the three hardest units and practice passages</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/d04-district-trend.jpg" alt="Reading speed by week; weeks with too few children hidden" width="100%"><br><sub>Reading speed by week; weeks with too few children hidden</sub></td></tr>
 </table>
 
 </details>
@@ -179,9 +190,15 @@ calculation and a 10-minute teacher interview script: [docs/PROBLEM_EVIDENCE.md]
 * Live grapheme engine page (normaliser, segmenter, unit diff)
 * English passages (marked by Whisper) next to Bangla
 * Evaluation scripts: calibration on tuning speakers, benchmark with 95% CIs
-* **Three roles:** an admin creates teacher accounts (**Teachers** page), each teacher creates the
-  logins of their own students (student page → **Create login**), students see only their own work.
+* **Four roles:** an admin creates schools and teacher accounts (**Schools**, **Teachers** pages),
+  each teacher creates the logins of their own students (student page → **Create login**), students
+  see only their own work, and a **district officer** sees only the district view.
   See [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) for every screen.
+* **Schools and district view:** schools (with upazila and district) sit above teachers; a teacher's
+  classes belong to their school. The district view shows, school by school, which written units
+  (যুক্তাক্ষর, কার, ফলা, রেফ…) children misread most, with passages that practise each one, a school ×
+  unit heat table, reading speed by week and a CSV export. **Counts only:** teacher-checked readings
+  only, no child, recording or single reading, and any group under 5 children is hidden
 * **Learns from teacher reviews** (no model retraining, nothing leaves the device): a pronunciation
   teachers accept 3 times for a word becomes an accepted variant, and after 10 reviewed readings the
   marking thresholds are re-tuned to agree with the teachers' final marks (false alarms kept ≤5%,
@@ -545,14 +562,16 @@ What exists today is a working, tested prototype; these claims are **not** yet s
 
 ## Logins, English reading and marks
 
-**Two roles.** Every page needs a login. On the first start (while the users table is empty) the app seeds demo accounts:
+**Four roles.** Every page needs a login. On the first start (while the users table is empty) the app seeds demo accounts:
 
 | Role | Username | Password | Can do |
 |---|---|---|---|
-| Teacher | `teacher` | `teacher123` | everything: classes, students, passages, assessments, review |
+| Admin | `admin` | `admin123` | everything a teacher can, plus schools, teacher and district-officer accounts |
+| Teacher | `teacher` | `teacher123` | classes, students, passages, assessments, review |
+| District officer | `district` | `district123` | only the district view: counts per school, never children, readings or recordings |
 | Student | `c1r01` … `c5r10` (class N, roll NN) | `student123` | take reading tests for their own grade, see their own marks |
 
-It also creates `Class 1` … `Class 5` (one per grade) with ten students each. A teacher can create, change or remove a student's login on that student's page. Change the demo passwords before real use, or set `PB_SEED_DEMO=false`.
+It also creates `Class 1` … `Class 5` (one per grade) with ten students each, placed in three fictional demo schools (`Demo School A` = classes 1-2, `B` = 3-4, `C` = 5) in `Demo Upazila`, `Demo District`. A teacher can create, change or remove a student's login on that student's page. Change the demo passwords before real use, or set `PB_SEED_DEMO=false`.
 
 **English.** Each grade has Bangla passages (`P01`–`P30`) and English passages (`E01`–`E25`). English readings are marked by Whisper in English (greedy decoding, no carried-over context) plus a letter-distance word alignment. The grapheme engine, weak-pattern analysis and system comparison stay Bangla-only.
 

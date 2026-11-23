@@ -91,11 +91,18 @@ docker compose -f docker-compose.monitoring.yml up -d
 The load test refuses any address other than `127.0.0.1`/`localhost`, so it cannot be pointed at the
 hosted demo by mistake.
 
-## 5. Not built yet (next steps)
+## 5. Built since: schools and the district view
+
+Admin → schools → teachers → classes, and a district view (role `district`) that shows which written
+units children misread most, school by school, with practice passages, a school × unit table, a weekly
+trend and a CSV, all from teacher-checked readings, counts only, groups under 5 children hidden. It is a
+normal app feature (no extra service), so unlike Prometheus/Grafana it can run on the small demo server.
+See [WALKTHROUGH.md Part 3](WALKTHROUGH.md#part-3--district-view-district-officer-or-admin).
+
+## 6. Not built yet (next steps)
 
 | Step | Why |
 |---|---|
-| Schools level above teachers (admin → schools → teachers → classes) and a district summary of weak letter patterns | One upazila or district office could see where help is needed, with counts only |
 | Offline laptop that sends only anonymous pattern counts when online (no audio, no names) | Fits schools with poor internet and keeps children's data on the school laptop |
 | Load test on a real school laptop and on a 4-core server | The numbers above are from one developer laptop |
 | Separate marking workers in their own processes or machines (e.g. a job table in PostgreSQL) | Today the workers are threads inside the web server; that is enough for one school or one small server |

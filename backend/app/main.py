@@ -25,6 +25,7 @@ from .api.auth_routes import router as auth_router
 from .api.tts_routes import router as tts_router
 from .api.routes import router
 from .api.admin_routes import router as admin_router
+from .api.district_routes import router as district_router
 from .api.practice_routes import student as practice_student_router
 from .api.practice_routes import teacher as practice_teacher_router
 from .config import BACKEND_DIR, get_settings
@@ -162,6 +163,7 @@ app.include_router(tts_router)
 app.include_router(practice_teacher_router)
 app.include_router(practice_student_router)
 app.include_router(admin_router)
+app.include_router(district_router)
 
 if FRONTEND_DIST.exists():
     app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")

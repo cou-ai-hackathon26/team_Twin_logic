@@ -30,12 +30,16 @@ from ..auth import ADMIN, STUDENT, TEACHER, hash_password, verify_password
 from ..bangla.normalize import normalize_word
 from ..bangla.segment import segment_normalized
 from ..db import SessionLocal
-from ..models import SIMULATED_MODEL_ID, AppMeta, Classroom, Passage, Reading, Student, User
+from ..models import SIMULATED_MODEL_ID, AppMeta, Classroom, Passage, Reading, School, Student, User
 
 DEMO_VERSION = 4  # v4: grades 1-3 practise the NCTB-aligned passages T01-T12 first (v3: richer history)
 META_KEY = "demo_seed_version"
 TEACHER_LOGIN = ("teacher", "teacher123")
 ADMIN_LOGIN = ("admin", "admin123")  # demo only: creates and removes teacher accounts
+DISTRICT_LOGIN = ("district", "district123")  # demo only: district summary (counts per school)
+# demo schools (clearly fictional) and which demo class grades belong to each
+DEMO_SCHOOLS = [("Demo School A", (1, 2)), ("Demo School B", (3, 4)), ("Demo School C", (5,))]
+DEMO_UPAZILA, DEMO_DISTRICT = "Demo Upazila", "Demo District"
 STUDENT_PASSWORD = "student123"
 STUDENTS_PER_CLASS = 10
 SCHOOL = "PoraBondhu Demo School"
@@ -247,10 +251,41 @@ def ensure_demo_admin(db: Session) -> bool:
     return True
 
 
+def ensure_demo_schools(db: Session, commit: bool = True) -> int:
+    """Demo schools, the demo classes placed in them, and the demo district login (checked on every start).
+
+    Only on a demo database (the demo teacher exists). Returns how many things were (re)created."""
+    if db.scalar(select(User.id).where(User.username == TEACHER_LOGIN[0])) is None:
+        return 0
+    made = 0
+    for name, grades in DEMO_SCHOOLS:
+        s = db.scalar(select(School).where(School.name == name))
+        if s is None:
+            s = School(name=name, upazila=DEMO_UPAZILA, district=DEMO_DISTRICT)
+            db.add(s)
+            db.flush()
+            made += 1
+        for c in db.scalars(select(Classroom).where(Classroom.name.in_([f"Class {g}" for g in grades]),
+                                                    Classroom.school == SCHOOL)):
+            if c.school_id is None:
+                c.school_id = s.id
+                made += 1
+    teacher = db.scalar(select(User).where(User.username == TEACHER_LOGIN[0]))
+    if teacher.school_id is None:
+        teacher.school_id = db.scalar(select(School.id).where(School.name == DEMO_SCHOOLS[0][0]))
+    if db.scalar(select(User.id).where(User.username == DISTRICT_LOGIN[0])) is None:
+        db.add(User(username=DISTRICT_LOGIN[0], password_hash=hash_password(DISTRICT_LOGIN[1]), role="district",
+                    display_name="Demo District Officer"))
+        made += 1
+    db.commit() if commit else db.flush()
+    return made
+
+
 def seed_demo() -> str | None:
     db = SessionLocal()
     try:
         ensure_demo_admin(db)
+        ensure_demo_schools(db)
         meta = db.get(AppMeta, META_KEY)
         version = int(meta.value) if meta else 0
         if version >= DEMO_VERSION:
@@ -277,6 +312,7 @@ def seed_demo() -> str | None:
             meta.value = str(DEMO_VERSION)
         db.commit()
         ensure_demo_admin(db)
+        ensure_demo_schools(db)
         return (f"v{DEMO_VERSION}: teacher={TEACHER_LOGIN[0]}, students={student_username(1, 1)}..."
                 f"{student_username(5, STUDENTS_PER_CLASS)}, {readings} simulated readings")
     finally:
@@ -287,7 +323,7 @@ def is_demo_login(username: str | None) -> bool:
     """The published demo logins (teacher, c1r01 … c5r10) that the README tells visitors to use."""
     if not username:
         return False
-    if username in (TEACHER_LOGIN[0], ADMIN_LOGIN[0]):
+    if username in (TEACHER_LOGIN[0], ADMIN_LOGIN[0], DISTRICT_LOGIN[0]):
         return True
     return any(username == student_username(g, r) for g in range(1, 6) for r in range(1, STUDENTS_PER_CLASS + 1))
 
@@ -306,19 +342,31 @@ def restore_demo(db: Session) -> dict:
     db.flush()
     if ensure_demo_admin(db):
         restored += 1
-    # teacher accounts visitors created through the admin page are removed (their classes stay, shared)
-    for u in db.scalars(select(User).where(User.role == TEACHER, User.username != TEACHER_LOGIN[0])):
+    # teacher and district accounts visitors created through the admin page are removed (classes stay, shared)
+    for u in db.scalars(select(User).where(User.role.in_([TEACHER, "district"]),
+                                           User.username.not_in([TEACHER_LOGIN[0], DISTRICT_LOGIN[0]]))):
         db.delete(u)
         restored += 1
+    # schools visitors added are removed; their classes stay without a school
+    demo_names = [n for n, _ in DEMO_SCHOOLS]
+    for s in db.scalars(select(School).where(School.name.not_in(demo_names))):
+        for c in db.scalars(select(Classroom).where(Classroom.school_id == s.id)):
+            c.school_id = None
+        db.delete(s)
+        restored += 1
+    db.flush()
     student_hash = hash_password(STUDENT_PASSWORD)
     for grade in range(1, 6):
         c = _ensure_class(db, grade, student_hash)
         if c.school == SCHOOL:
             _seed_results(db, c)  # only children with no readings get their simulated history back
+    db.flush()
+    restored += ensure_demo_schools(db, commit=False)
     for u in db.scalars(select(User)):
         if not is_demo_login(u.username):
             continue
-        want = {TEACHER_LOGIN[0]: TEACHER_LOGIN[1], ADMIN_LOGIN[0]: ADMIN_LOGIN[1]}.get(u.username, STUDENT_PASSWORD)
+        want = {TEACHER_LOGIN[0]: TEACHER_LOGIN[1], ADMIN_LOGIN[0]: ADMIN_LOGIN[1],
+                DISTRICT_LOGIN[0]: DISTRICT_LOGIN[1]}.get(u.username, STUDENT_PASSWORD)
         if not verify_password(want, u.password_hash) or u.failed_logins or u.locked_until:
             u.password_hash = hash_password(want) if not verify_password(want, u.password_hash) else u.password_hash
             u.failed_logins, u.locked_until = 0, None

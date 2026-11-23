@@ -8,9 +8,9 @@ import { Button, ErrorBox, Input, Label, PageLoader } from '@/components/ui/prim
 import { Logo } from '@/components/brand'
 import { homeFor } from './home'
 
-type LoginTab = 'teacher' | 'student' // admins log in on the Teacher tab
+type LoginTab = 'teacher' | 'student' // admins and district officers log in on the Teacher tab
 const TABS: { role: LoginTab; label: string; bn: string; icon: typeof School; hint: string }[] = [
-  { role: 'teacher', label: 'Teacher', bn: 'শিক্ষক', icon: School, hint: 'Demo: teacher / teacher123 · admin / admin123 (manages teachers)' },
+  { role: 'teacher', label: 'Teacher', bn: 'শিক্ষক', icon: School, hint: 'Demo: teacher / teacher123 · admin / admin123 (manages schools and teachers) · district / district123 (district view)' },
   { role: 'student', label: 'Student', bn: 'শিক্ষার্থী', icon: GraduationCap, hint: 'Demo: c3r01 / student123 (class 3, roll 01)' },
 ]
 

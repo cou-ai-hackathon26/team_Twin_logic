@@ -78,7 +78,7 @@ def login(body: LoginIn, request: Request, response: Response, db: Session = Dep
     elif user.failed_logins or user.locked_until:
         user.failed_logins, user.locked_until = 0, None
         db.commit()
-    if body.role and body.role != user.role and not (body.role == "teacher" and user.role == "admin"):
+    if body.role and body.role != user.role and not (body.role == "teacher" and user.role in ("admin", "district")):
         raise HTTPException(403, f"This is a {user.role} account. Use the {user.role.capitalize()} login.")
     token, max_age = create_session(db, user)
     samesite = get_settings().cookie_samesite.lower()
