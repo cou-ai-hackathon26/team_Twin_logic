@@ -177,9 +177,11 @@ def demo_reset(db: Session = Depends(get_db)) -> dict:
             except OSError:
                 pass
     from ..seed.demo import restore_demo
+    from ..services import learning
     from .auth_routes import _demo_failures
 
     restored = restore_demo(db)
+    restored.update(learning.reset_learning(db))
     _demo_failures.clear()
     return {"readings_deleted": len(readings), "assignments_deleted": n_assign, "orphan_audio_deleted": orphans,
             **restored}
@@ -277,3 +279,25 @@ async def my_practice_check(word: str = Form(..., max_length=60), audio: UploadF
         "again": ("পরিষ্কার শোনা যায়নি, আরেকবার বলো", "Not clear. Say it once more."),
     }[result]
     return {"word": word, "result": result, "heard": m.heard if m else "", "message_bn": msg[0], "message_en": msg[1]}
+
+
+# ------------------------------------------------------- learning from reviews
+@teacher.get("/learning")
+def learning_status(db: Session = Depends(get_db)) -> dict:
+    from ..services import learning
+
+    return learning.status(db)
+
+
+@teacher.post("/learning/run")
+def learning_run(db: Session = Depends(get_db)) -> dict:
+    from ..services import learning
+
+    return learning.learn(db)
+
+
+@teacher.post("/learning/undo")
+def learning_undo() -> dict:
+    from ..services import learning
+
+    return learning.undo_thresholds()

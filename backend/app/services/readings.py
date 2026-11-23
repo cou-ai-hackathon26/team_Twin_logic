@@ -108,7 +108,7 @@ def store_marks(r: Reading, marks) -> None:
         r.marks.append(WordMark(
             index=m.index, display=m.display, expected=m.expected, heard=m.heard, status=m.status,
             raw_status=m.raw_status, flags=m.flags, inserted=m.inserted, start=m.start, end=m.end,
-            free_conf=m.free_conf, gop=m.gop, units=[u.__dict__ for u in m.units],
+            free_conf=m.free_conf, gop=m.gop, err_free=getattr(m, "err_free", None), units=[u.__dict__ for u in m.units],
             patterns=m.patterns, error_patterns=err_pats, note_bn=m.note_bn, note_en=m.note_en))
 
 

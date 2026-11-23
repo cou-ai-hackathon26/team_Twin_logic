@@ -206,7 +206,7 @@ def _assess_group(
         results.append(T.WordMarkResult(
             index=i, display=pw[i].display, expected=pw[i].norm, heard=heard, status=status,
             raw_status=T.MISREAD, flags=flags, start=start, end=end, free_conf=free_word, gop=gop_err,
-            units=units, patterns=patterns, note_bn=bn, note_en=en))
+            units=units, patterns=patterns, note_bn=bn, note_en=en, err_free=free_err))
     return results
 
 

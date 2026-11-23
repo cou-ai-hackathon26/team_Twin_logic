@@ -107,6 +107,9 @@ class WordMarkResult:
     units: list[UnitResult] = field(default_factory=list)
     patterns: list[str] = field(default_factory=list)
     note_bn: str = ""
+    # free-decoding confidence of the units that differ (the value the misread rule compares with
+    # free_high); stored so decisions can be replayed with new thresholds after teacher reviews
+    err_free: float | None = None
     note_en: str = ""
 
     def to_dict(self) -> dict:

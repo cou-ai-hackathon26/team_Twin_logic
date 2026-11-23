@@ -118,6 +118,7 @@ class WordMark(Base):
     end: Mapped[float | None] = mapped_column(Float, nullable=True)
     free_conf: Mapped[float | None] = mapped_column(Float, nullable=True)
     gop: Mapped[float | None] = mapped_column(Float, nullable=True)
+    err_free: Mapped[float | None] = mapped_column(Float, nullable=True)  # see WordMarkResult.err_free
     units: Mapped[list] = mapped_column(JSON, default=list)
     patterns: Mapped[list] = mapped_column(JSON, default=list)  # blamed patterns if final status is misread
     error_patterns: Mapped[list] = mapped_column(JSON, default=list)  # all patterns the unit diff found

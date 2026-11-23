@@ -20,7 +20,7 @@ from ..bangla.patterns import pattern_label
 from ..bangla.segment import segment_normalized
 from ..config import get_settings, load_thresholds
 from ..db import get_db
-from ..models import AcceptedVariant, Assignment, Classroom, Passage, Reading, Student, User
+from ..models import SIMULATED_MODEL_ID, AcceptedVariant, Assignment, Classroom, Passage, Reading, Student, User
 from ..schemas import (AccountIn, AnalyzeIn, DiffIn, ClassroomIn, FinalizeIn, MarkPatch, PassageIn, PassagePatch, StudentIn,
                        StudentPatch, StudentsBulkIn, VariantIn)
 from ..seed.demo import is_demo_login
@@ -372,6 +372,10 @@ def finalize_reading(rid: int, body: FinalizeIn, db: Session = Depends(get_db)) 
     if not body.keep_audio:
         reading_svc.delete_audio(r)
     db.commit()
+    if r.model_id != SIMULATED_MODEL_ID:
+        from ..services import learning
+
+        learning.learn_in_background()  # every review teaches PoraBondhu (variants, thresholds)
     return reading_out(r)
 
 
