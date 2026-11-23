@@ -1,0 +1,617 @@
+{
+  "generated_at": "2026-11-23T00:13:18.621427+00:00",
+  "main_report": "fleurs_test100_20261122_173539.json",
+  "notes": [
+    "The first child-like set ('childlike') used phase-vocoder pitch shifting. Control on 20 dev recordings: shifting pitch +4 then -4 semitones (no net change) already dropped recall from 87.5% to 22.9%, so that set mostly measures processing artifacts. 'childlike_rs' (plain resampling, pitch and formants x1.10-1.20, 10-20% faster) is the better proxy. Neither is child speech.",
+    "Test-time voice normalisation by inverse phase-vocoder warps (app/speech/voicenorm.py, tuned on dev only, scripts/voicenorm_experiment.py) did not help (child-like recall 13.5% -> 14.9%, adult unchanged) and is not used by the app."
+  ],
+  "comparisons": {
+    "porabondhu_minus_whisper_word": {
+      "recordings": 100,
+      "recall": {
+        "diff": -0.1756,
+        "ci_low": -0.2263,
+        "ci_high": -0.1289,
+        "excludes_zero": true
+      },
+      "precision": {
+        "diff": 0.6143,
+        "ci_low": 0.5626,
+        "ci_high": 0.6614,
+        "excludes_zero": true
+      },
+      "false_alarm": {
+        "diff": -0.9086,
+        "ci_low": -0.9235,
+        "ci_high": -0.8914,
+        "excludes_zero": true
+      },
+      "unsure_rate": {
+        "diff": 0.177,
+        "ci_low": 0.1564,
+        "ci_high": 0.1994,
+        "excludes_zero": true
+      }
+    },
+    "porabondhu_minus_ctc_word": {
+      "recordings": 100,
+      "recall": {
+        "diff": -0.1756,
+        "ci_low": -0.2263,
+        "ci_high": -0.1289,
+        "excludes_zero": true
+      },
+      "precision": {
+        "diff": 0.4862,
+        "ci_low": 0.443,
+        "ci_high": 0.5272,
+        "excludes_zero": true
+      },
+      "false_alarm": {
+        "diff": -0.3887,
+        "ci_low": -0.422,
+        "ci_high": -0.3561,
+        "excludes_zero": true
+      },
+      "unsure_rate": {
+        "diff": 0.177,
+        "ci_low": 0.1564,
+        "ci_high": 0.1994,
+        "excludes_zero": true
+      }
+    },
+    "childlike_minus_original": {
+      "recordings": 100,
+      "recall": {
+        "diff": -0.6908,
+        "ci_low": -0.7537,
+        "ci_high": -0.6304,
+        "excludes_zero": true
+      },
+      "precision": {
+        "diff": -0.5617,
+        "ci_low": -0.6273,
+        "ci_high": -0.4905,
+        "excludes_zero": true
+      },
+      "false_alarm": {
+        "diff": 0.0454,
+        "ci_low": 0.0257,
+        "ci_high": 0.0664,
+        "excludes_zero": true
+      },
+      "unsure_rate": {
+        "diff": 0.3679,
+        "ci_low": 0.2978,
+        "ci_high": 0.4339,
+        "excludes_zero": true
+      }
+    },
+    "childlike_rs_minus_original": {
+      "recordings": 100,
+      "recall": {
+        "diff": -0.0305,
+        "ci_low": -0.0629,
+        "ci_high": 0.0,
+        "excludes_zero": false
+      },
+      "precision": {
+        "diff": -0.015,
+        "ci_low": -0.0639,
+        "ci_high": 0.0324,
+        "excludes_zero": false
+      },
+      "false_alarm": {
+        "diff": 0.0019,
+        "ci_low": -0.0083,
+        "ci_high": 0.0123,
+        "excludes_zero": false
+      },
+      "unsure_rate": {
+        "diff": 0.0396,
+        "ci_low": 0.0232,
+        "ci_high": 0.0562,
+        "excludes_zero": true
+      }
+    }
+  },
+  "robustness": {
+    "original": {
+      "recordings": 100,
+      "label": "robustness: original (FLEURS test speakers, 100 recordings)",
+      "porabondhu": {
+        "recall": {
+          "k": 216,
+          "n": 262,
+          "value": 0.8244274809160306,
+          "ci_low": 0.7737645679617914,
+          "ci_high": 0.865713978661461
+        },
+        "precision": {
+          "k": 216,
+          "n": 284,
+          "value": 0.7605633802816901,
+          "ci_low": 0.7076638689668601,
+          "ci_high": 0.806507814347852
+        },
+        "false_alarm": {
+          "k": 68,
+          "n": 1608,
+          "value": 0.04228855721393035,
+          "ci_low": 0.03349427217556519,
+          "ci_high": 0.0532646252247749
+        },
+        "unsure_rate": {
+          "k": 331,
+          "n": 1870,
+          "value": 0.17700534759358288,
+          "ci_low": 0.1603733477002902,
+          "ci_high": 0.1949617030318528
+        },
+        "grapheme_accuracy": {
+          "k": 155,
+          "n": 155,
+          "value": 1.0,
+          "ci_low": 0.9758148998750957,
+          "ci_high": 1.0
+        },
+        "words": 1870,
+        "sec_per_60s": 19.41
+      }
+    },
+    "childlike_rs": {
+      "recordings": 100,
+      "label": "robustness: child-like voice by resampling x1.10-1.20 (no phase vocoder), FLEURS test speakers, 100 recordings",
+      "porabondhu": {
+        "recall": {
+          "k": 208,
+          "n": 262,
+          "value": 0.7938931297709924,
+          "ci_low": 0.7408346846912196,
+          "ci_high": 0.838457645779256
+        },
+        "precision": {
+          "k": 208,
+          "n": 279,
+          "value": 0.7455197132616488,
+          "ci_low": 0.6913133376431724,
+          "ci_high": 0.7930567125898911
+        },
+        "false_alarm": {
+          "k": 71,
+          "n": 1608,
+          "value": 0.04415422885572139,
+          "ci_low": 0.03515260021942654,
+          "ci_high": 0.055328747327379565
+        },
+        "unsure_rate": {
+          "k": 405,
+          "n": 1870,
+          "value": 0.21657754010695188,
+          "ci_low": 0.19849887495113006,
+          "ci_high": 0.23581830532707493
+        },
+        "grapheme_accuracy": {
+          "k": 148,
+          "n": 148,
+          "value": 1.0,
+          "ci_low": 0.9746999504747053,
+          "ci_high": 1.0
+        },
+        "words": 1870,
+        "sec_per_60s": 17.29
+      }
+    },
+    "unseen": {
+      "recordings": 100,
+      "label": "robustness: unseen (FLEURS test speakers, 100 recordings)",
+      "porabondhu": {
+        "recall": {
+          "k": 194,
+          "n": 215,
+          "value": 0.9023255813953488,
+          "ci_low": 0.8553004795160786,
+          "ci_high": 0.9352256361767328
+        },
+        "precision": {
+          "k": 194,
+          "n": 261,
+          "value": 0.7432950191570882,
+          "ci_low": 0.6870386422772685,
+          "ci_high": 0.7924932741588202
+        },
+        "false_alarm": {
+          "k": 67,
+          "n": 1594,
+          "value": 0.04203262233375157,
+          "ci_low": 0.03323311565716122,
+          "ci_high": 0.053034259031293496
+        },
+        "unsure_rate": {
+          "k": 319,
+          "n": 1809,
+          "value": 0.17634051962410172,
+          "ci_low": 0.1594690897876782,
+          "ci_high": 0.19458368570026296
+        },
+        "grapheme_accuracy": {
+          "k": 101,
+          "n": 102,
+          "value": 0.9901960784313726,
+          "ci_low": 0.9465407803733753,
+          "ci_high": 0.9982673102072662
+        },
+        "words": 1809,
+        "sec_per_60s": 15.8
+      }
+    },
+    "skipcut": {
+      "recordings": 100,
+      "label": "robustness: skipcut (FLEURS test speakers, 100 recordings)",
+      "porabondhu": {
+        "recall": {
+          "k": 113,
+          "n": 147,
+          "value": 0.7687074829931972,
+          "ci_low": 0.6942260361885696,
+          "ci_high": 0.8295021661110612
+        },
+        "precision": {
+          "k": 113,
+          "n": 178,
+          "value": 0.6348314606741573,
+          "ci_low": 0.5619432159580158,
+          "ci_high": 0.7020227852210323
+        },
+        "false_alarm": {
+          "k": 65,
+          "n": 1662,
+          "value": 0.03910950661853189,
+          "ci_low": 0.03080258237891246,
+          "ci_high": 0.04954215147813613
+        },
+        "unsure_rate": {
+          "k": 335,
+          "n": 1809,
+          "value": 0.18518518518518517,
+          "ci_low": 0.16795817386007245,
+          "ci_high": 0.20374644721658425
+        },
+        "grapheme_accuracy": {
+          "k": 0,
+          "n": 0,
+          "value": null,
+          "ci_low": null,
+          "ci_high": null
+        },
+        "words": 1809,
+        "sec_per_60s": 14.42
+      }
+    },
+    "childlike": {
+      "recordings": 100,
+      "label": "robustness: childlike (FLEURS test speakers, 100 recordings)",
+      "porabondhu": {
+        "recall": {
+          "k": 35,
+          "n": 262,
+          "value": 0.13358778625954199,
+          "ci_low": 0.0976444735655491,
+          "ci_high": 0.18012093260113055
+        },
+        "precision": {
+          "k": 35,
+          "n": 176,
+          "value": 0.19886363636363635,
+          "ci_low": 0.146605932914892,
+          "ci_high": 0.26398649953677655
+        },
+        "false_alarm": {
+          "k": 141,
+          "n": 1608,
+          "value": 0.08768656716417911,
+          "ci_low": 0.07482624969604934,
+          "ci_high": 0.10251226793496357
+        },
+        "unsure_rate": {
+          "k": 1019,
+          "n": 1870,
+          "value": 0.5449197860962567,
+          "ci_low": 0.522279929045009,
+          "ci_high": 0.5673754612505207
+        },
+        "grapheme_accuracy": {
+          "k": 27,
+          "n": 27,
+          "value": 1.0,
+          "ci_low": 0.8754409628553641,
+          "ci_high": 1.0
+        },
+        "words": 1870,
+        "sec_per_60s": 15.61
+      }
+    }
+  },
+  "calibration": {
+    "recordings": 120,
+    "previous_thresholds": {
+      "free_high": 0.5,
+      "gop_high": 0.5,
+      "gop_low": -3.0,
+      "temperature": 2.0,
+      "hesitation_sec": 3.0,
+      "not_reached_min_run": 3
+    },
+    "wide_grid_best": {
+      "thresholds": {
+        "free_high": 0.3,
+        "gop_high": 0.1,
+        "gop_low": -3.0,
+        "temperature": 2.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3
+      },
+      "precision": 0.8048,
+      "recall": 0.8481,
+      "f1": 0.8259,
+      "false_alarm": 0.0356,
+      "unsure_rate": 0.1606,
+      "words": 2142
+    },
+    "on_grid_edge": {
+      "temperature": false,
+      "free_high": false,
+      "gop_high": true,
+      "gop_low": false
+    },
+    "cross_validation": {
+      "folds": [
+        {
+          "fold": 0,
+          "thresholds": {
+            "free_high": 0.3,
+            "gop_high": 0.1,
+            "gop_low": -5.0,
+            "temperature": 1.5,
+            "hesitation_sec": 3.0,
+            "not_reached_min_run": 3
+          },
+          "precision": 0.81,
+          "recall": 0.7714,
+          "f1": 0.7902,
+          "false_alarm": 0.031,
+          "unsure_rate": 0.2117,
+          "words": 718
+        },
+        {
+          "fold": 1,
+          "thresholds": {
+            "free_high": 0.3,
+            "gop_high": 0.1,
+            "gop_low": -3.0,
+            "temperature": 2.0,
+            "hesitation_sec": 3.0,
+            "not_reached_min_run": 3
+          },
+          "precision": 0.8273,
+          "recall": 0.8835,
+          "f1": 0.8545,
+          "false_alarm": 0.0314,
+          "unsure_rate": 0.1271,
+          "words": 708
+        },
+        {
+          "fold": 2,
+          "thresholds": {
+            "free_high": 0.3,
+            "gop_high": 0.1,
+            "gop_low": -3.0,
+            "temperature": 2.0,
+            "hesitation_sec": 3.0,
+            "not_reached_min_run": 3
+          },
+          "precision": 0.7928,
+          "recall": 0.8148,
+          "f1": 0.8037,
+          "false_alarm": 0.0378,
+          "unsure_rate": 0.176,
+          "words": 716
+        }
+      ],
+      "precision": {
+        "mean": 0.81,
+        "sd": 0.0173
+      },
+      "recall": {
+        "mean": 0.8232,
+        "sd": 0.0565
+      },
+      "false_alarm": {
+        "mean": 0.0334,
+        "sd": 0.0038
+      },
+      "unsure_rate": {
+        "mean": 0.1716,
+        "sd": 0.0425
+      }
+    },
+    "tradeoff_front": [
+      {
+        "thresholds": {
+          "free_high": 0.2,
+          "gop_high": 0.1,
+          "gop_low": -3.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 2.0
+        },
+        "precision": 0.7861,
+        "recall": 0.8608,
+        "f1": 0.8218,
+        "false_alarm": 0.0405,
+        "unsure_rate": 0.1545,
+        "words": 2142
+      },
+      {
+        "thresholds": {
+          "free_high": 0.3,
+          "gop_high": 0.1,
+          "gop_low": -3.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 2.0
+        },
+        "precision": 0.8048,
+        "recall": 0.8481,
+        "f1": 0.8259,
+        "false_alarm": 0.0356,
+        "unsure_rate": 0.1606,
+        "words": 2142
+      },
+      {
+        "thresholds": {
+          "free_high": 0.4,
+          "gop_high": 0.1,
+          "gop_low": -3.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 2.0
+        },
+        "precision": 0.8306,
+        "recall": 0.807,
+        "f1": 0.8186,
+        "false_alarm": 0.0285,
+        "unsure_rate": 0.1727,
+        "words": 2142
+      },
+      {
+        "thresholds": {
+          "free_high": 0.5,
+          "gop_high": 0.1,
+          "gop_low": -3.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 2.0
+        },
+        "precision": 0.8608,
+        "recall": 0.7437,
+        "f1": 0.798,
+        "false_alarm": 0.0208,
+        "unsure_rate": 0.1886,
+        "words": 2142
+      },
+      {
+        "thresholds": {
+          "free_high": 0.3,
+          "gop_high": 0.1,
+          "gop_low": -4.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 2.0
+        },
+        "precision": 0.8839,
+        "recall": 0.7468,
+        "f1": 0.8096,
+        "false_alarm": 0.017,
+        "unsure_rate": 0.1914,
+        "words": 2142
+      },
+      {
+        "thresholds": {
+          "free_high": 0.6,
+          "gop_high": 0.1,
+          "gop_low": -3.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 2.0
+        },
+        "precision": 0.8862,
+        "recall": 0.6899,
+        "f1": 0.7758,
+        "false_alarm": 0.0153,
+        "unsure_rate": 0.2012,
+        "words": 2142
+      },
+      {
+        "thresholds": {
+          "free_high": 0.7,
+          "gop_high": 0.1,
+          "gop_low": -3.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 2.0
+        },
+        "precision": 0.8978,
+        "recall": 0.6392,
+        "f1": 0.7468,
+        "false_alarm": 0.0126,
+        "unsure_rate": 0.211,
+        "words": 2142
+      },
+      {
+        "thresholds": {
+          "free_high": 0.3,
+          "gop_high": 0.1,
+          "gop_low": -3.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 3.0
+        },
+        "precision": 0.9436,
+        "recall": 0.5823,
+        "f1": 0.7202,
+        "false_alarm": 0.006,
+        "unsure_rate": 0.2148,
+        "words": 2142
+      },
+      {
+        "thresholds": {
+          "free_high": 0.3,
+          "gop_high": 0.1,
+          "gop_low": -5.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 2.0
+        },
+        "precision": 0.945,
+        "recall": 0.5981,
+        "f1": 0.7326,
+        "false_alarm": 0.006,
+        "unsure_rate": 0.2227,
+        "words": 2142
+      },
+      {
+        "thresholds": {
+          "free_high": 0.5,
+          "gop_high": 0.5,
+          "gop_low": -3.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 3.0
+        },
+        "precision": 0.9843,
+        "recall": 0.3956,
+        "f1": 0.5643,
+        "false_alarm": 0.0011,
+        "unsure_rate": 0.2703,
+        "words": 2142
+      },
+      {
+        "thresholds": {
+          "free_high": 0.5,
+          "gop_high": 0.5,
+          "gop_low": -3.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3,
+          "temperature": 4.0
+        },
+        "precision": 1.0,
+        "recall": 0.0728,
+        "f1": 0.1357,
+        "false_alarm": 0.0,
+        "unsure_rate": 0.3277,
+        "words": 2142
+      }
+    ]
+  }
+}

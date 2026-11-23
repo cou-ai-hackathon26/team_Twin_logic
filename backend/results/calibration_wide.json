@@ -1,0 +1,285 @@
+{
+  "generated_at": "2026-11-22T15:47:34.840615+00:00",
+  "label": "FLEURS bn_in tuning speakers only (real adult speech, simulated errors)",
+  "recordings": 120,
+  "previous_thresholds": {
+    "free_high": 0.5,
+    "gop_high": 0.5,
+    "gop_low": -3.0,
+    "temperature": 2.0,
+    "hesitation_sec": 3.0,
+    "not_reached_min_run": 3
+  },
+  "wide_grid_best": {
+    "thresholds": {
+      "free_high": 0.3,
+      "gop_high": 0.1,
+      "gop_low": -3.0,
+      "temperature": 2.0,
+      "hesitation_sec": 3.0,
+      "not_reached_min_run": 3
+    },
+    "precision": 0.8048,
+    "recall": 0.8481,
+    "f1": 0.8259,
+    "false_alarm": 0.0356,
+    "unsure_rate": 0.1606,
+    "words": 2142
+  },
+  "on_grid_edge": {
+    "temperature": false,
+    "free_high": false,
+    "gop_high": true,
+    "gop_low": false
+  },
+  "cross_validation": {
+    "folds": [
+      {
+        "fold": 0,
+        "thresholds": {
+          "free_high": 0.3,
+          "gop_high": 0.1,
+          "gop_low": -5.0,
+          "temperature": 1.5,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3
+        },
+        "precision": 0.81,
+        "recall": 0.7714,
+        "f1": 0.7902,
+        "false_alarm": 0.031,
+        "unsure_rate": 0.2117,
+        "words": 718
+      },
+      {
+        "fold": 1,
+        "thresholds": {
+          "free_high": 0.3,
+          "gop_high": 0.1,
+          "gop_low": -3.0,
+          "temperature": 2.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3
+        },
+        "precision": 0.8273,
+        "recall": 0.8835,
+        "f1": 0.8545,
+        "false_alarm": 0.0314,
+        "unsure_rate": 0.1271,
+        "words": 708
+      },
+      {
+        "fold": 2,
+        "thresholds": {
+          "free_high": 0.3,
+          "gop_high": 0.1,
+          "gop_low": -3.0,
+          "temperature": 2.0,
+          "hesitation_sec": 3.0,
+          "not_reached_min_run": 3
+        },
+        "precision": 0.7928,
+        "recall": 0.8148,
+        "f1": 0.8037,
+        "false_alarm": 0.0378,
+        "unsure_rate": 0.176,
+        "words": 716
+      }
+    ],
+    "precision": {
+      "mean": 0.81,
+      "sd": 0.0173
+    },
+    "recall": {
+      "mean": 0.8232,
+      "sd": 0.0565
+    },
+    "false_alarm": {
+      "mean": 0.0334,
+      "sd": 0.0038
+    },
+    "unsure_rate": {
+      "mean": 0.1716,
+      "sd": 0.0425
+    }
+  },
+  "tradeoff_front": [
+    {
+      "thresholds": {
+        "free_high": 0.2,
+        "gop_high": 0.1,
+        "gop_low": -3.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 2.0
+      },
+      "precision": 0.7861,
+      "recall": 0.8608,
+      "f1": 0.8218,
+      "false_alarm": 0.0405,
+      "unsure_rate": 0.1545,
+      "words": 2142
+    },
+    {
+      "thresholds": {
+        "free_high": 0.3,
+        "gop_high": 0.1,
+        "gop_low": -3.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 2.0
+      },
+      "precision": 0.8048,
+      "recall": 0.8481,
+      "f1": 0.8259,
+      "false_alarm": 0.0356,
+      "unsure_rate": 0.1606,
+      "words": 2142
+    },
+    {
+      "thresholds": {
+        "free_high": 0.4,
+        "gop_high": 0.1,
+        "gop_low": -3.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 2.0
+      },
+      "precision": 0.8306,
+      "recall": 0.807,
+      "f1": 0.8186,
+      "false_alarm": 0.0285,
+      "unsure_rate": 0.1727,
+      "words": 2142
+    },
+    {
+      "thresholds": {
+        "free_high": 0.5,
+        "gop_high": 0.1,
+        "gop_low": -3.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 2.0
+      },
+      "precision": 0.8608,
+      "recall": 0.7437,
+      "f1": 0.798,
+      "false_alarm": 0.0208,
+      "unsure_rate": 0.1886,
+      "words": 2142
+    },
+    {
+      "thresholds": {
+        "free_high": 0.3,
+        "gop_high": 0.1,
+        "gop_low": -4.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 2.0
+      },
+      "precision": 0.8839,
+      "recall": 0.7468,
+      "f1": 0.8096,
+      "false_alarm": 0.017,
+      "unsure_rate": 0.1914,
+      "words": 2142
+    },
+    {
+      "thresholds": {
+        "free_high": 0.6,
+        "gop_high": 0.1,
+        "gop_low": -3.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 2.0
+      },
+      "precision": 0.8862,
+      "recall": 0.6899,
+      "f1": 0.7758,
+      "false_alarm": 0.0153,
+      "unsure_rate": 0.2012,
+      "words": 2142
+    },
+    {
+      "thresholds": {
+        "free_high": 0.7,
+        "gop_high": 0.1,
+        "gop_low": -3.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 2.0
+      },
+      "precision": 0.8978,
+      "recall": 0.6392,
+      "f1": 0.7468,
+      "false_alarm": 0.0126,
+      "unsure_rate": 0.211,
+      "words": 2142
+    },
+    {
+      "thresholds": {
+        "free_high": 0.3,
+        "gop_high": 0.1,
+        "gop_low": -3.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 3.0
+      },
+      "precision": 0.9436,
+      "recall": 0.5823,
+      "f1": 0.7202,
+      "false_alarm": 0.006,
+      "unsure_rate": 0.2148,
+      "words": 2142
+    },
+    {
+      "thresholds": {
+        "free_high": 0.3,
+        "gop_high": 0.1,
+        "gop_low": -5.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 2.0
+      },
+      "precision": 0.945,
+      "recall": 0.5981,
+      "f1": 0.7326,
+      "false_alarm": 0.006,
+      "unsure_rate": 0.2227,
+      "words": 2142
+    },
+    {
+      "thresholds": {
+        "free_high": 0.5,
+        "gop_high": 0.5,
+        "gop_low": -3.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 3.0
+      },
+      "precision": 0.9843,
+      "recall": 0.3956,
+      "f1": 0.5643,
+      "false_alarm": 0.0011,
+      "unsure_rate": 0.2703,
+      "words": 2142
+    },
+    {
+      "thresholds": {
+        "free_high": 0.5,
+        "gop_high": 0.5,
+        "gop_low": -3.0,
+        "hesitation_sec": 3.0,
+        "not_reached_min_run": 3,
+        "temperature": 4.0
+      },
+      "precision": 1.0,
+      "recall": 0.0728,
+      "f1": 0.1357,
+      "false_alarm": 0.0,
+      "unsure_rate": 0.3277,
+      "words": 2142
+    }
+  ],
+  "points_evaluated": 27
+}

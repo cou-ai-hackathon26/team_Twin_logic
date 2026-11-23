@@ -1,0 +1,540 @@
+{
+  "generated_at": "2026-11-22T16:25:47.478550+00:00",
+  "label": "Pilot only: first 10 FLEURS bn_in test recordings; real adult speech, simulated text-side reading errors; PoraBondhu only; descriptive, not child validation",
+  "split": "test",
+  "recordings": 10,
+  "speakers": [
+    "fleurs-test-male"
+  ],
+  "groups": [
+    "adult"
+  ],
+  "thresholds": {
+    "free_high": 0.3,
+    "gop_high": 0.1,
+    "gop_low": -3.0,
+    "temperature": 2.0,
+    "hesitation_sec": 3.0,
+    "not_reached_min_run": 3
+  },
+  "model": {
+    "ctc": "arijitx/wav2vec2-xls-r-300m-bengali",
+    "ctc_backend": "onnx-int8",
+    "whisper": null
+  },
+  "results": {
+    "porabondhu": {
+      "adult": {
+        "recordings": 10,
+        "words": 170,
+        "recall": {
+          "k": 17,
+          "n": 20,
+          "value": 0.85,
+          "ci_low": 0.6395767041130426,
+          "ci_high": 0.9476322080405041
+        },
+        "precision": {
+          "k": 17,
+          "n": 28,
+          "value": 0.6071428571428571,
+          "ci_low": 0.42408726034906297,
+          "ci_high": 0.7643454817241996
+        },
+        "false_alarm": {
+          "k": 11,
+          "n": 150,
+          "value": 0.07333333333333333,
+          "ci_low": 0.04143838680502927,
+          "ci_high": 0.12653698526598406
+        },
+        "unsure_rate": {
+          "k": 34,
+          "n": 170,
+          "value": 0.2,
+          "ci_low": 0.1467991020988553,
+          "ci_high": 0.26645986468469934
+        },
+        "grapheme_accuracy": {
+          "k": 9,
+          "n": 9,
+          "value": 1.0,
+          "ci_low": 0.7008472464490407,
+          "ci_high": 1.0
+        },
+        "uncertainty_coverage": {
+          "k": 32,
+          "n": 60,
+          "value": 0.5333333333333333,
+          "ci_low": 0.40893208671135106,
+          "ci_high": 0.65372298459012
+        },
+        "confusion": {
+          "tp": 17,
+          "fp": 11,
+          "fn": 3,
+          "tn": 139
+        },
+        "cer": {
+          "k": 137,
+          "n": 920,
+          "value": 0.14891304347826087,
+          "ci_low": null,
+          "ci_high": null
+        },
+        "wer": {
+          "k": 81,
+          "n": 162,
+          "value": 0.5,
+          "ci_low": null,
+          "ci_high": null
+        },
+        "sec_per_60s": 22.9,
+        "sec_per_60s_max": 26.55
+      },
+      "all": {
+        "recordings": 10,
+        "words": 170,
+        "recall": {
+          "k": 17,
+          "n": 20,
+          "value": 0.85,
+          "ci_low": 0.6395767041130426,
+          "ci_high": 0.9476322080405041
+        },
+        "precision": {
+          "k": 17,
+          "n": 28,
+          "value": 0.6071428571428571,
+          "ci_low": 0.42408726034906297,
+          "ci_high": 0.7643454817241996
+        },
+        "false_alarm": {
+          "k": 11,
+          "n": 150,
+          "value": 0.07333333333333333,
+          "ci_low": 0.04143838680502927,
+          "ci_high": 0.12653698526598406
+        },
+        "unsure_rate": {
+          "k": 34,
+          "n": 170,
+          "value": 0.2,
+          "ci_low": 0.1467991020988553,
+          "ci_high": 0.26645986468469934
+        },
+        "grapheme_accuracy": {
+          "k": 9,
+          "n": 9,
+          "value": 1.0,
+          "ci_low": 0.7008472464490407,
+          "ci_high": 1.0
+        },
+        "uncertainty_coverage": {
+          "k": 32,
+          "n": 60,
+          "value": 0.5333333333333333,
+          "ci_low": 0.40893208671135106,
+          "ci_high": 0.65372298459012
+        },
+        "confusion": {
+          "tp": 17,
+          "fp": 11,
+          "fn": 3,
+          "tn": 139
+        },
+        "cer": {
+          "k": 137,
+          "n": 920,
+          "value": 0.14891304347826087,
+          "ci_low": null,
+          "ci_high": null
+        },
+        "wer": {
+          "k": 81,
+          "n": 162,
+          "value": 0.5,
+          "ci_low": null,
+          "ci_high": null
+        },
+        "sec_per_60s": 22.9,
+        "sec_per_60s_max": 26.55
+      }
+    }
+  },
+  "kappa": {
+    "adult": null
+  },
+  "targets": {
+    "adult": [
+      {
+        "measure": "recall",
+        "target": ">= 0.8",
+        "value": 0.85,
+        "met": true
+      },
+      {
+        "measure": "precision",
+        "target": ">= 0.8",
+        "value": 0.6071428571428571,
+        "met": false
+      },
+      {
+        "measure": "false_alarm",
+        "target": "<= 0.05",
+        "value": 0.07333333333333333,
+        "met": false
+      },
+      {
+        "measure": "grapheme_accuracy",
+        "target": ">= 0.7",
+        "value": 1.0,
+        "met": true
+      },
+      {
+        "measure": "wcpm_mae",
+        "target": "<= 5.0",
+        "value": null,
+        "met": null
+      },
+      {
+        "measure": "wcpm_spearman",
+        "target": ">= 0.9",
+        "value": null,
+        "met": null
+      },
+      {
+        "measure": "uncertainty_coverage_noisy",
+        "target": ">= 0.5",
+        "value": null,
+        "met": null
+      },
+      {
+        "measure": "kappa",
+        "target": ">= 0.8",
+        "value": null,
+        "met": null
+      },
+      {
+        "measure": "sec_per_60s",
+        "target": "<= 15.0",
+        "value": 22.9,
+        "met": false
+      }
+    ]
+  },
+  "hypothesis": null,
+  "per_recording": [
+    {
+      "id": "fleurs_test_12060003042809642189",
+      "group": "adult",
+      "condition": "clean",
+      "speaker": "fleurs-test-male",
+      "systems": {
+        "porabondhu": {
+          "wcpm": 67.7,
+          "transcript": "হংকং এর সর্বদ দৃশ্ যন্য অদিশ্েকে বেরিয়ে পর এবং কৌলকন ওয়াটারফ্রন্টপদিএর দিকে যয",
+          "statuses": [
+            "correct",
+            "unsure",
+            "unsure",
+            "correct",
+            "skipped",
+            "skipped",
+            "unsure",
+            "correct",
+            "correct",
+            "correct",
+            "unsure",
+            "correct",
+            "unsure",
+            "correct",
+            "skipped",
+            "unsure"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fleurs_test_480825178926076881",
+      "group": "adult",
+      "condition": "clean",
+      "speaker": "fleurs-test-male",
+      "systems": {
+        "porabondhu": {
+          "wcpm": 85.0,
+          "transcript": "তিনি এইসব গুজকে রাজনৈতিকবককানি আর বোকামী হিসেবে উল্লেখ করেছেন",
+          "statuses": [
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "unsure",
+            "correct",
+            "correct",
+            "unsure",
+            "correct",
+            "correct"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fleurs_test_10112260419298134236",
+      "group": "adult",
+      "condition": "clean",
+      "speaker": "fleurs-test-male",
+      "systems": {
+        "porabondhu": {
+          "wcpm": 71.1,
+          "transcript": "জাপানের পারমানবিক সংস্থা সুতত্রে জানা কিয়েছে ্লানটিতে তে জশকিরিও শি জিআাম এবং আয়োডিন চিহ্নিত করা হয়েছে",
+          "statuses": [
+            "correct",
+            "correct",
+            "misread",
+            "unsure",
+            "correct",
+            "unsure",
+            "correct",
+            "misread",
+            "misread",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fleurs_test_8465562174124821871",
+      "group": "adult",
+      "condition": "clean",
+      "speaker": "fleurs-test-male",
+      "systems": {
+        "porabondhu": {
+          "wcpm": 80.8,
+          "transcript": "অনেক প্রোটো এবং িউট্রনের সাথে নিউকিলিয়াসকে জুডতে যে শক্তি প্রয়োজন হয় সেই নীতিতে ফিউশন বোমা কাফ করে",
+          "statuses": [
+            "correct",
+            "misread",
+            "correct",
+            "unsure",
+            "correct",
+            "misread",
+            "misread",
+            "skipped",
+            "correct",
+            "correct",
+            "skipped",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "unsure",
+            "correct"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fleurs_test_16404326595248629960",
+      "group": "adult",
+      "condition": "clean",
+      "speaker": "fleurs-test-male",
+      "systems": {
+        "porabondhu": {
+          "wcpm": 88.9,
+          "transcript": "এ ছাড়া উত্তরে আওয়ার লেডিঅব ফাতিমা শিরিন এর দুর্দান্ত অভায়রন্নটি দেখুন যা বিশ্বব্যাপী মারিয়ান অপচছায়ার একটি খ্যাত স্থান",
+          "statuses": [
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "unsure",
+            "correct",
+            "unsure",
+            "correct",
+            "correct",
+            "unsure",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "unsure",
+            "correct",
+            "misread",
+            "correct"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fleurs_test_15228360769238337664",
+      "group": "adult",
+      "condition": "clean",
+      "speaker": "fleurs-test-male",
+      "systems": {
+        "porabondhu": {
+          "wcpm": 77.5,
+          "transcript": "ঘটনার পরে িপসণকে কি হাসপাতালে স্থানতরিত করা হয়েছিল বে কিচুক্ষণ পরেসে গমারা গিয়েছিল",
+          "statuses": [
+            "skipped",
+            "misread",
+            "correct",
+            "unsure",
+            "unsure",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "unsure",
+            "unsure",
+            "correct",
+            "correct",
+            "correct",
+            "correct"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fleurs_test_1123600470979041259",
+      "group": "adult",
+      "condition": "clean",
+      "speaker": "fleurs-test-male",
+      "systems": {
+        "porabondhu": {
+          "wcpm": 85.6,
+          "transcript": "পরস্তিত লোকজনে সংখ্যা এত বেশি ছিল যে সেন্টার এে স্টোয়ারের আয়োজিত শষ কৃতিটের অনুষ্ঠানঅন সকলে একস টে প্রবেশ কর দেখতে পায়নি",
+          "statuses": [
+            "unsure",
+            "correct",
+            "misread",
+            "correct",
+            "misread",
+            "correct",
+            "correct",
+            "correct",
+            "unsure",
+            "misread",
+            "correct",
+            "unsure",
+            "correct",
+            "correct",
+            "unsure",
+            "correct",
+            "correct",
+            "correct",
+            "unsure"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fleurs_test_15869686875614499249",
+      "group": "adult",
+      "condition": "clean",
+      "speaker": "fleurs-test-male",
+      "systems": {
+        "porabondhu": {
+          "wcpm": 64.1,
+          "transcript": "এগুলো মাঝে মাঝে ঘন সন্লিবিষঠ পিবার প্রপযোগী সইক যেখানে উপবর্তি যিষ্ঠ ভালো পরিসরে দোকান আছে সাতাকাটা নিরাপদ",
+          "statuses": [
+            "correct",
+            "correct",
+            "unsure",
+            "correct",
+            "misread",
+            "unsure",
+            "correct",
+            "unsure",
+            "misread",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fleurs_test_3845485644472192349",
+      "group": "adult",
+      "condition": "clean",
+      "speaker": "fleurs-test-male",
+      "systems": {
+        "porabondhu": {
+          "wcpm": 70.2,
+          "transcript": "অধিকাংশ মানুষের গাড়ি ালিকানার ফলে রাস্তায় দুর্ঘটনার সম্ভাবনা বেড়ে যায় যার কারণে আআহত ব্যক্তিদে ্রুসুসা ন চিতিৎসা ব্যবস্থায় নতুন তোসালে ুদ্ভাবন দেখা যায়",
+          "statuses": [
+            "skipped",
+            "correct",
+            "misread",
+            "misread",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "misread",
+            "unsure",
+            "misread",
+            "unsure",
+            "misread",
+            "correct",
+            "unsure",
+            "unsure",
+            "misread",
+            "correct"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fleurs_test_4767292901121127858",
+      "group": "adult",
+      "condition": "clean",
+      "speaker": "fleurs-test-male",
+      "systems": {
+        "porabondhu": {
+          "wcpm": 116.2,
+          "transcript": "বস্তুত এর অস্তিত্ব থাকলেও তা খুঁজে পাওয়া একেবারে সহজ নয় কবার গুহার ভিতরে এটা সম্পূর্ণ বিচ্ছিন্নতা",
+          "statuses": [
+            "misread",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "unsure",
+            "correct",
+            "correct",
+            "unsure",
+            "correct",
+            "correct",
+            "correct",
+            "correct",
+            "misread",
+            "correct"
+          ]
+        }
+      }
+    }
+  ],
+  "wall_time_sec": 46.3
+}

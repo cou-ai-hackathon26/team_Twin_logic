@@ -490,4 +490,15 @@ def benchmark_report() -> dict:
         return {"available": False}
     rep = [json.loads(p.read_text(encoding="utf-8")) for p in found]
     real = [r for r in rep if "SYNTHETIC" not in str(r.get("label", "")).upper()]
-    return {"available": True, **(real or rep)[0]}
+    if not real:
+        return {
+            "available": False,
+            "reason": "Only synthetic smoke-test reports are available; no benchmark result is published yet.",
+        }
+    out = {"available": True, **real[0]}
+    out.pop("per_recording", None)  # large and not shown; the full file stays in results/
+    # robustness, paired comparisons and tuning summary from scripts/publish_results.py
+    extra = RESULTS_DIR / "robustness.json"
+    if extra.exists():
+        out["evidence"] = json.loads(extra.read_text(encoding="utf-8"))
+    return out
