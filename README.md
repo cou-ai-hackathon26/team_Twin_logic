@@ -30,6 +30,7 @@ never sent to a third-party AI service.
 
 | Role | Username | Password |
 |---|---|---|
+| Admin (creates teacher accounts; Teacher tab) | `admin` | `admin123` |
 | Teacher | `teacher` | `teacher123` |
 | Student (class 3, roll 01) | `c3r01` | `student123` |
 
@@ -85,6 +86,56 @@ login: `python -m scripts.create_teacher <username>` (asks for an 8+ character p
 (who can see recordings, consent and withdrawal, deletion, storage) and, before recording any child, the safeguards in
 [docs/CLASSROOM_AND_PILOT.md](docs/CLASSROOM_AND_PILOT.md#7-safeguards-required-before-any-real-child-pilot).
 
+## Screenshots (the real app)
+
+Captured on 23 Nov 2026 from this repository running locally with the demo data; readings marked
+**DEMO · simulated** are generated practice history, everything else is real model output. Full
+step-by-step guide: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
+
+<table>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t14-review.jpg" alt="Teacher review: every word marked; click a word to see heard vs expected unit by unit, the diagnosis and the evidence; one tap changes a mark" width="100%"><br><sub>Teacher review: every word marked; click a word to see heard vs expected unit by unit, the diagnosis and the evidence; one tap changes a mark</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t04-class-pattern-map.jpg" alt="Class pattern map: which written units the class misreads, and "Assign to this group"" width="100%"><br><sub>Class pattern map: which written units the class misreads, and "Assign to this group"</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t12-progress-listening.jpg" alt="Real marking stages while the model works (no fake spinner)" width="100%"><br><sub>Real marking stages while the model works (no fake spinner)</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s04-waiting-for-teacher.jpg" alt="Child sees no mark until the teacher has checked the reading" width="100%"><br><sub>Child sees no mark until the teacher has checked the reading</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t17-benchmark.jpg" alt="Benchmark page: 100 held-out recordings, three systems, confidence intervals, missed targets" width="100%"><br><sub>Benchmark page: 100 held-out recordings, three systems, confidence intervals, missed targets</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t18-settings-learning.jpg" alt="Learning from teacher reviews, privacy rules, password, demo reset" width="100%"><br><sub>Learning from teacher reviews, privacy rules, password, demo reset</sub></td></tr>
+</table>
+
+<details>
+<summary><b>Teacher site, all 18 steps</b></summary>
+
+<table>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t01-login.jpg" alt="1. Login (public-demo warning)" width="100%"><br><sub>1. Login (public-demo warning)</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t02-dashboard.jpg" alt="2. Dashboard (simulated data labelled DEMO)" width="100%"><br><sub>2. Dashboard (simulated data labelled DEMO)</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t03-class.jpg" alt="3. Class: marks, speed, weak patterns, Export / Assign / Report" width="100%"><br><sub>3. Class: marks, speed, weak patterns, Export / Assign / Report</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t04-class-pattern-map.jpg" alt="4. Class pattern map" width="100%"><br><sub>4. Class pattern map</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t05-student.jpg" alt="5. Student: progress and what to teach next" width="100%"><br><sub>5. Student: progress and what to teach next</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t06-student-patterns.jpg" alt="6. Practice given, student login, grapheme patterns, readings" width="100%"><br><sub>6. Practice given, student login, grapheme patterns, readings</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t07-assign-practice.jpg" alt="7. Assign practice for a weak pattern" width="100%"><br><sub>7. Assign practice for a weak pattern</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t08-assigned.jpg" alt="8. Practice sent" width="100%"><br><sub>8. Practice sent</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t09-new-assessment.jpg" alt="9. New assessment: child and passage" width="100%"><br><sub>9. New assessment: child and passage</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t10-reading-screen.jpg" alt="10. Reading screen (faces the child)" width="100%"><br><sub>10. Reading screen (faces the child)</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t11-progress-loading.jpg" alt="11. Marking: starting the speech model" width="100%"><br><sub>11. Marking: starting the speech model</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t12-progress-listening.jpg" alt="12. Marking: listening to every sound" width="100%"><br><sub>12. Marking: listening to every sound</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t13-review-queue.jpg" alt="13. Review queue" width="100%"><br><sub>13. Review queue</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t14-review.jpg" alt="14. Review a reading" width="100%"><br><sub>14. Review a reading</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t15-finalise.jpg" alt="15. Finalise (audio deleted unless kept)" width="100%"><br><sub>15. Finalise (audio deleted unless kept)</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t16-passages.jpg" alt="16. Passage bank with unit chips" width="100%"><br><sub>16. Passage bank with unit chips</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t17-benchmark.jpg" alt="17. Benchmark" width="100%"><br><sub>17. Benchmark</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t18-settings-learning.jpg" alt="18. Settings: learning, privacy, password" width="100%"><br><sub>18. Settings: learning, privacy, password</sub></td></tr>
+</table>
+
+</details>
+
+<details>
+<summary><b>Student site, all 8 steps</b></summary>
+
+<table>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/s01-student-login.jpg" alt="1. Student login" width="100%"><br><sub>1. Student login</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s02-student-home.jpg" alt="2. Home: marks and "From your teacher"" width="100%"><br><sub>2. Home: marks and "From your teacher"</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/s03-student-reading.jpg" alt="3. Read a passage" width="100%"><br><sub>3. Read a passage</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s04-waiting-for-teacher.jpg" alt="4. Waiting for the teacher (no mark yet)" width="100%"><br><sub>4. Waiting for the teacher (no mark yet)</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/s05-checked-result.jpg" alt="5. After the teacher checked it" width="100%"><br><sub>5. After the teacher checked it</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s06-my-readings.jpg" alt="6. My readings" width="100%"><br><sub>6. My readings</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/s07-practice.jpg" alt="7. Word practice with Say it" width="100%"><br><sub>7. Word practice with Say it</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s08-progress.jpg" alt="8. My progress" width="100%"><br><sub>8. My progress</sub></td></tr>
+</table>
+
+</details>
+
+<details>
+<summary><b>Admin: creating teacher accounts</b></summary>
+
+<table>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/a01-admin-teachers.jpg" alt="Admin → Teachers: create teacher accounts, reset passwords, remove; teachers create student logins on each student's page" width="100%"><br><sub>Admin → Teachers: create teacher accounts, reset passwords, remove; teachers create student logins on each student's page</sub></td></tr>
+</table>
+
+</details>
+
 ## Problem
 
 According to the World Bank, in 2022 **51% of children in Bangladesh could not read and
@@ -125,6 +176,9 @@ know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
 * Live grapheme engine page (normaliser, segmenter, unit diff)
 * English passages (marked by Whisper) next to Bangla
 * Evaluation scripts: calibration on tuning speakers, benchmark with 95% CIs
+* **Three roles:** an admin creates teacher accounts (**Teachers** page), each teacher creates the
+  logins of their own students (student page → **Create login**), students see only their own work.
+  See [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) for every screen.
 * **Learns from teacher reviews** (no model retraining, nothing leaves the device): a pronunciation
   teachers accept 3 times for a word becomes an accepted variant, and after 10 reviewed readings the
   marking thresholds are re-tuned to agree with the teachers' final marks (false alarms kept ≤5%,
