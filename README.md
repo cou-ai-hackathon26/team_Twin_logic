@@ -138,18 +138,21 @@ step-by-step guide: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
 
 ## Problem
 
-According to the World Bank, in 2022 **51% of children in Bangladesh could not read and
-understand a simple text by age 10** (learning poverty; *Human Capital Complementary
-Indicators: Bangladesh* country brief, World Bank, 2025,
-[PDF](https://thedocs.worldbank.org/en/doc/24459fe03f47e132c41e1e9823b1c765-0140012025/original/Bangladesh.pdf)).
-The National Student Assessment 2022 (Directorate of Primary Education with UNICEF; tested
-Grades 3 and 5 in Bangla and mathematics) found that only about half of the students showed
-grade-level proficiency in Bangla, as reported by its technical partner ACER
-([ACER presentation, UNESCO NEQMAP 2024](https://neqmap.bangkok.unesco.org/wp-content/uploads/2024/01/Session-3-Priyanka-Sharma.pdf);
-[DPE report](https://dpe.portal.gov.bd/sites/default/files/files/dpe.portal.gov.bd/publications/27a08801_1d5d_4e08_8fdb_25a4a693a2f3/NSA-2022%20Final%20Report.pdf),
-which we could not open from our network, so the exact grade-wise figures are not quoted). A teacher with 50 to 60 students cannot listen to each child read, weak
-readers stay hidden, and a teacher who knows a child reads poorly still does not
-know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
+**In one sentence:** Bangladeshi primary teachers know that about half of their pupils cannot read
+Bangla at grade level, but they have no quick way to hear each child read and find out *which*
+letters and conjuncts that child is stuck on, so the help they give is not targeted.
+
+| # | Evidence (sources opened and checked) | What it means |
+|---|---|---|
+| 1 | **51%** of 10-year-olds could not read and understand a simple text in 2022 (World Bank, *Human Capital Complementary Indicators: Bangladesh*, 2025, [PDF](https://thedocs.worldbank.org/en/doc/24459fe03f47e132c41e1e9823b1c765-0140012025/original/Bangladesh.pdf)) | The problem is large and national |
+| 2 | National Student Assessment 2022: **54,232** pupils in Grades 3 and 5; **about 50%** at grade level in Bangla (DPE/UNICEF, presented by ACER, [slides](https://neqmap.bangkok.unesco.org/wp-content/uploads/2024/01/Session-3-Priyanka-Sharma.pdf)) | Half of each class is behind |
+| 3 | That assessment is **pen-and-paper and system-level**, run every few years (same source) | It counts *how many* struggle; it never listens to a child read and never tells a teacher *why* |
+| 4 | Fluency benchmark **45 words per minute by end of Grade 2**; Bangla vowel signs and conjunct letters make it harder (Room to Read, 2017, [page](https://www.roomtoread.org/the-latest/benchmarking-reading-fluency-in-bangladesh/)) | Reading must be checked by listening; কার and যুক্তাক্ষর are the hard units |
+| 5 | **1 teacher per 28 pupils** in government primary schools, 2023 average (*The Daily Star*, 2025, [article](https://www.thedailystar.net/opinion/views/news/bangladesh-needs-better-education-infrastructure-prevent-primary-dropouts-3977821)) | At ~3 min per child (our estimate), one listening round takes ~84 min, 2+ periods, more in crowded classes |
+
+**Not yet confirmed:** no teacher has been interviewed about this tool. The evidence shows the problem
+exists; whether teachers want *this* solution is still open. Full evidence chain, the time
+calculation and a 10-minute teacher interview script: [docs/PROBLEM_EVIDENCE.md](docs/PROBLEM_EVIDENCE.md).
 
 ## Solution
 
@@ -486,7 +489,7 @@ What exists today is a working, tested prototype; these claims are **not** yet s
 |---|---|
 | Accurate on children's reading | Consent-based child recordings, two independent annotators, results reported separately from adults. A resampled child-like voice proxy costs only ~3 points of recall, but a proxy cannot show how real children read |
 | Teachers can use it unaided | The [usability test](docs/USABILITY_TEST.md) with at least 5 teachers, task success and SUS reported |
-| Teachers want it / it saves time | At least 2 real [teacher interviews](docs/CLASSROOM_AND_PILOT.md#6-teacher-interviews-not-done-yet), quoted with permission |
+| Teachers want it / it saves time | At least 2 real teacher interviews ([script](docs/PROBLEM_EVIDENCE.md#5-what-is-still-missing-confirmation-from-teachers)), quoted with permission |
 | Works in schools | A [pilot](docs/CLASSROOM_AND_PILOT.md#4-pilot-plan-8-weeks-proposed) (proposed only) meeting every safeguard |
 | Runs on school laptops | Timing on actual school hardware. So far measured on our 4-core laptop (~18-20 s per 60 s reading) and a 2-core server (8.2-8.4 s per 16.2 s of audio, i.e. ~31 s per 60 s; works with networking switched off) |
 
