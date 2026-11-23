@@ -21,7 +21,7 @@ from .db import get_db
 from .models import AuthSession, Student, User
 
 COOKIE = "pb_session"
-TEACHER, STUDENT = "teacher", "student"
+TEACHER, STUDENT, ADMIN = "teacher", "student", "admin"
 ROLES = (TEACHER, STUDENT)
 _ITER = 200_000
 
@@ -95,9 +95,17 @@ def current_user(request: Request, db: Session = Depends(get_db)) -> User:
 
 
 def require_teacher(user: User = Depends(current_user), db: Session = Depends(get_db)) -> User:
-    if user.role != TEACHER:
+    """Teachers and admins. A teacher sees shared classes and their own; an admin sees every class."""
+    if user.role not in (TEACHER, ADMIN):
         raise HTTPException(403, "Teacher account required")
-    db.info["teacher_id"] = user.id  # read by can_see(): a teacher sees shared classes and their own
+    db.info["teacher_id"] = None if user.role == ADMIN else user.id  # read by can_see()
+    return user
+
+
+def require_admin(user: User = Depends(current_user), db: Session = Depends(get_db)) -> User:
+    if user.role != ADMIN:
+        raise HTTPException(403, "Admin account required")
+    db.info["teacher_id"] = None
     return user
 
 

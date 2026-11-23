@@ -26,7 +26,7 @@ from ..assessment import types as T
 from ..assessment.english import assess_english, english_words
 from ..assessment.marking import assess, passage_words
 from ..assessment.metrics import compute_metrics
-from ..auth import STUDENT, TEACHER, hash_password, verify_password
+from ..auth import ADMIN, STUDENT, TEACHER, hash_password, verify_password
 from ..bangla.normalize import normalize_word
 from ..bangla.segment import segment_normalized
 from ..db import SessionLocal
@@ -35,6 +35,7 @@ from ..models import SIMULATED_MODEL_ID, AppMeta, Classroom, Passage, Reading, S
 DEMO_VERSION = 4  # v4: grades 1-3 practise the NCTB-aligned passages T01-T12 first (v3: richer history)
 META_KEY = "demo_seed_version"
 TEACHER_LOGIN = ("teacher", "teacher123")
+ADMIN_LOGIN = ("admin", "admin123")  # demo only: creates and removes teacher accounts
 STUDENT_PASSWORD = "student123"
 STUDENTS_PER_CLASS = 10
 SCHOOL = "PoraBondhu Demo School"
@@ -234,9 +235,22 @@ def _seed_results(db: Session, c: Classroom, refresh: bool = False) -> int:
     return added
 
 
+def ensure_demo_admin(db: Session) -> bool:
+    """The demo admin login (added after the first demo seeds, so it is checked on every start)."""
+    if db.scalar(select(User.id).where(User.username == ADMIN_LOGIN[0])) is not None:
+        return False
+    if db.scalar(select(User.id).where(User.username == TEACHER_LOGIN[0])) is None:
+        return False  # not a demo database
+    db.add(User(username=ADMIN_LOGIN[0], password_hash=hash_password(ADMIN_LOGIN[1]), role=ADMIN,
+                display_name="Demo Admin"))
+    db.commit()
+    return True
+
+
 def seed_demo() -> str | None:
     db = SessionLocal()
     try:
+        ensure_demo_admin(db)
         meta = db.get(AppMeta, META_KEY)
         version = int(meta.value) if meta else 0
         if version >= DEMO_VERSION:
@@ -262,6 +276,7 @@ def seed_demo() -> str | None:
         else:
             meta.value = str(DEMO_VERSION)
         db.commit()
+        ensure_demo_admin(db)
         return (f"v{DEMO_VERSION}: teacher={TEACHER_LOGIN[0]}, students={student_username(1, 1)}..."
                 f"{student_username(5, STUDENTS_PER_CLASS)}, {readings} simulated readings")
     finally:
@@ -272,7 +287,7 @@ def is_demo_login(username: str | None) -> bool:
     """The published demo logins (teacher, c1r01 … c5r10) that the README tells visitors to use."""
     if not username:
         return False
-    if username == TEACHER_LOGIN[0]:
+    if username in (TEACHER_LOGIN[0], ADMIN_LOGIN[0]):
         return True
     return any(username == student_username(g, r) for g in range(1, 6) for r in range(1, STUDENTS_PER_CLASS + 1))
 
@@ -288,6 +303,13 @@ def restore_demo(db: Session) -> dict:
         db.add(User(username=TEACHER_LOGIN[0], password_hash=hash_password(TEACHER_LOGIN[1]), role=TEACHER,
                     display_name="Demo Teacher"))
         restored += 1
+    db.flush()
+    if ensure_demo_admin(db):
+        restored += 1
+    # teacher accounts visitors created through the admin page are removed (their classes stay, shared)
+    for u in db.scalars(select(User).where(User.role == TEACHER, User.username != TEACHER_LOGIN[0])):
+        db.delete(u)
+        restored += 1
     student_hash = hash_password(STUDENT_PASSWORD)
     for grade in range(1, 6):
         c = _ensure_class(db, grade, student_hash)
@@ -296,7 +318,7 @@ def restore_demo(db: Session) -> dict:
     for u in db.scalars(select(User)):
         if not is_demo_login(u.username):
             continue
-        want = TEACHER_LOGIN[1] if u.username == TEACHER_LOGIN[0] else STUDENT_PASSWORD
+        want = {TEACHER_LOGIN[0]: TEACHER_LOGIN[1], ADMIN_LOGIN[0]: ADMIN_LOGIN[1]}.get(u.username, STUDENT_PASSWORD)
         if not verify_password(want, u.password_hash) or u.failed_logins or u.locked_until:
             u.password_hash = hash_password(want) if not verify_password(want, u.password_hash) else u.password_hash
             u.failed_logins, u.locked_until = 0, None
