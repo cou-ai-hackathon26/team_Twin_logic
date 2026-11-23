@@ -57,7 +57,7 @@ server); the progress bar shows the real stages, so do not cut the wait out of a
 | 4 | **Review** | Click a red word: heard vs expected unit by unit, play just that word. Change one mark with a tap, then **Finalise review** (audio is deleted unless "Keep the audio" is ticked) |
 | 5 | Student page → **Assign practice** on a weak pattern | Words and a passage containing that unit are picked for the child |
 | 6 | Log out, log in as `c2r01` / `student123` | The checked reading now shows its mark; an unchecked one says "your teacher will check". **From your teacher** shows the assigned words with a **Say it** check |
-| 7 | Teacher → **Benchmark** | The published benchmark (adult speech with simulated errors, see [Evaluation](#evaluation)), including the targets we miss, and what it does not prove |
+| 7 | Teacher → **Benchmark** | The 100-recording held-out comparison (adult FLEURS speech, simulated errors): PoraBondhu vs plain CTC vs Whisper, paired differences, robustness checks including the child-like voice failure, and the missed targets |
 | 8 | Teacher → **Settings** → **Reset demo recordings** | Clean up for the next visitor |
 
 **Recording checklist for a demo video (3 minutes max):** use the HTTPS link in Chrome or
@@ -143,7 +143,7 @@ know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
 | Model reading (TTS) | Microsoft Edge neural voices via edge-tts (passage text only) |
 | Team-built AI parts | Bangla normaliser and grapheme segmenter, weighted word/unit alignment, CTC forced alignment and expected-text score, two-signal marking, weak-pattern tracking |
 | Passages | 42 Bangla and 25 English graded passages, Grades 1-5. **T01-T12** (`backend/app/seed/textbook_passages.json`) are aligned to the NCTB textbooks *আমার বাংলা বই* (Grades 1-3, 2025 reprint): each practises the কার, ফলা, রেফ or যুক্তাক্ষর of one lesson and cites its page ([evidence table](docs/CURRICULUM_ALIGNMENT.md), checked by `scripts/curriculum_evidence.py`). All passage text is written by the team (AI-assisted); no textbook text is copied |
-| Evaluation data | [Google FLEURS](https://huggingface.co/datasets/google/fleurs) Bengali (`bn_in`, CC BY 4.0): real adult read speech; reading errors simulated by changing the expected text (`scripts/make_public_set.py`). Tuning on FLEURS dev speakers, testing on FLEURS test speakers. **No child speech yet** |
+| Evaluation data | [Google FLEURS](https://huggingface.co/datasets/google/fleurs) Bengali (`bn_in`, CC BY 4.0): real adult read speech; reading errors simulated by changing the expected text (`scripts/make_public_set.py`). Tuning on 120 FLEURS dev recordings, testing on 100 FLEURS test recordings (different sentences; speaker overlap cannot be verified). **No child speech yet** |
 | Hosting | The repository's `Dockerfile` (ONNX int8 model, no PyTorch) on a 2-core / 4 GB Ubuntu VPS, behind Caddy with a Let's Encrypt certificate. Backup: the same code on a laptop behind an ngrok tunnel (`deploy/run-public.ps1`) |
 
 ## AI tools used
@@ -299,8 +299,51 @@ against the success criteria fixed in the proposal. See
 `scripts/make_synthetic_set.py` builds a TTS-generated set **only to check that
 the scripts run**. Its numbers are not results and must not be reported.
 
-**Results:** _not measured yet. Fill in after running the benchmark on the
-human-annotated recordings._
+### Results (published in [`backend/results/EVALUATION.md`](backend/results/EVALUATION.md), shown on the Benchmark page)
+
+**Data:** Google FLEURS Bengali (`bn_in`, CC BY 4.0): native **adults** reading sentences correctly.
+Reading errors are **simulated** by changing the expected text the system is given. Thresholds were
+tuned on 120 FLEURS *dev* recordings; results are on the first **100 FLEURS *test*** recordings
+(1,870 words, 262 simulated errors). FLEURS has no speaker IDs, so speaker separation between dev
+and test cannot be verified (the splits use different sentences). Labels are generated, so there is
+no inter-annotator agreement. **No child speech and no authentic misreadings are evaluated.**
+
+| System (same audio) | Recall | Precision | False alarms | Unsure |
+|---|---|---|---|---|
+| **PoraBondhu** | 82.4% (77-87) | **76.1%** (71-81) | **4.2%** (3.3-5.3) | 17.7% |
+| Plain CTC + word compare (same speech model, no PoraBondhu layer) | 100% | 27.4% (25-30) | 43.1% (41-46) | 0% |
+| Whisper small + word compare | 100% | 14.6% (13-16) | 95.1% (94-96) | 0% |
+
+95% Wilson intervals in brackets. Against plain CTC on the same recordings (paired bootstrap):
+precision **+48.6 points** (+44.3 to +52.7), false alarms **-38.9 points** (-42.2 to -35.6), recall
+-17.6 points (-22.6 to -12.9), and 17.7% of words are passed to the teacher as "unsure". Whisper
+small produced largely unusable Bengali text on this data (character error rate about 80%), so it is
+**not a strong baseline**; a larger or Bangla-tuned Whisper was not tested (CPU time).
+Our pre-registered hypothesis ("+10 points recall over Whisper") is therefore **not supported** and
+not meaningful here. Targets: recall ≥80% met, false alarms ≤5% met, precision ≥80% **missed** (76%),
+≤15 s per 60 s reading **missed** (16.2 s on the 4-core laptop).
+
+**Robustness (PoraBondhu only, 100 test recordings each):**
+
+| Check | Recall | Precision | False alarms | Unsure |
+|---|---|---|---|---|
+| Error types the detector was not designed around (random consonant swaps, real-word substitutions) | 90.2% | 74.3% | 4.2% | 17.6% |
+| Real skips (word audio cut out of the recording) | 76.9% | 63.5% | 3.9% | 18.5% |
+| Child-like voice by resampling (pitch and formants raised 10-20%; a proxy, not children) | 79.4% | 74.6% | 4.4% | 21.7% |
+
+So the method is not only finding its own perturbation types, and it handles real skips less well
+than simulated ones. On the child-like proxy it loses little (paired: recall -3.0 points, -6.3 to
+0.0; false alarms +0.2; unsure +4.0 points). A first child-like proxy built with phase-vocoder
+pitch shifting looked catastrophic (recall 13%), but a control showed that shifting pitch up and
+back down again already drops recall to 23%, so that result measured **processing artifacts, not
+voices**; it is kept, labelled as confounded, in [`EVALUATION.md`](backend/results/EVALUATION.md).
+A test-time voice-normalisation idea did not help and is not used. Real children's speech (different
+pronunciation, hesitations, classroom noise) remains untested.
+
+**Tuning:** 3-fold cross-validation on the dev recordings gave precision 81% ± 2, recall 82% ± 6,
+false alarms 3.3% ± 0.4. One threshold (`gop_high` = 0.1) is at the edge of the searched range.
+
+The earlier [10-recording pilot](backend/results/benchmark_pilot_10.md) (PoraBondhu only) is kept for reference.
 
 Measured on the development laptop (Intel i5-10310U, 4 cores, no GPU):
 ONNX int8 CTC processes ~14 s of audio in ~4.5 s, i.e. roughly 18-20 s per
@@ -382,7 +425,7 @@ What exists today is a working, tested prototype; these claims are **not** yet s
 
 | Claim | Evidence needed |
 |---|---|
-| Accurate on children's reading | Consent-based child recordings, two independent annotators, results reported separately from adults |
+| Accurate on children's reading | Consent-based child recordings, two independent annotators, results reported separately from adults. A resampled child-like voice proxy costs only ~3 points of recall, but a proxy cannot show how real children read |
 | Teachers can use it unaided | The [usability test](docs/USABILITY_TEST.md) with at least 5 teachers, task success and SUS reported |
 | Teachers want it / it saves time | At least 2 real [teacher interviews](docs/CLASSROOM_AND_PILOT.md#6-teacher-interviews-not-done-yet), quoted with permission |
 | Works in schools | A [pilot](docs/CLASSROOM_AND_PILOT.md#4-pilot-plan-8-weeks-proposed) (proposed only) meeting every safeguard |
@@ -391,7 +434,7 @@ What exists today is a working, tested prototype; these claims are **not** yet s
 ## Limitations
 
 * The CTC model can still miss or invent errors; uncertain cases are shown as unsure.
-* All evaluation so far uses adult speech (FLEURS, simulated errors). **No child has been recorded**, so accuracy on children is unknown.
+* All evaluation so far uses adult speech (FLEURS, simulated errors). **No child has been recorded**, so accuracy on children is unknown; a resampled child-like voice proxy lowered recall by about 3 points.
 * Regional accents may appear as errors until added as accepted variants.
 * Whisper `small` often writes Bangla in Devanagari; the baseline maps it back
   to Bengali script by Unicode block offset before comparing.

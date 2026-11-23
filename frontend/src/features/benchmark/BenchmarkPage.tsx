@@ -1,3 +1,4 @@
+import { EvidenceSection } from './EvidenceSection'
 import clsx from 'clsx'
 import { CheckCircle2, FlaskConical, XCircle } from 'lucide-react'
 import { useBenchmark } from '@/api/hooks'
@@ -32,12 +33,17 @@ export function BenchmarkPage() {
     <>
       <PageHeader
         title="Benchmark"
-        subtitle="Three systems on the same recordings, with 95% confidence intervals. Targets we miss are shown too."
+        subtitle={!data?.available
+          ? 'No benchmark result is published yet.'
+          : Object.keys(data.results ?? {}).length < 3
+            ? 'Pilot result for the system(s) shown. Check the label and sample-size limits; this is not child validation.'
+            : 'Three systems on the same recordings, with 95% confidence intervals. Targets we miss are shown too.'}
       />
       <ErrorBox error={error} />
       {!data?.available ? (
         <Card>
-          <EmptyState icon={<FlaskConical className="size-12" />} title="No benchmark has been run yet">
+          <EmptyState icon={<FlaskConical className="size-12" />} title={data?.reason ? 'No publishable benchmark result yet' : 'No benchmark has been run yet'}>
+            {data?.reason && <p className="mb-3 text-sm text-slate-600">{data.reason}</p>}
             Collect and annotate recordings (see <code>docs/DATA_COLLECTION.md</code>), tune thresholds on the tuning speakers, then run:
             <pre className="mt-3 overflow-x-auto rounded-lg bg-slate-900 p-3 text-left text-xs text-slate-100">
               {`python -m scripts.calibrate --recordings eval/recordings.csv --annotations eval/annotations.csv
@@ -114,6 +120,8 @@ python -m scripts.benchmark --recordings eval/recordings.csv --annotations eval/
               </div>
             </Card>
           ))}
+
+          {data.evidence && <EvidenceSection e={data.evidence} />}
 
           {Object.entries(data.targets ?? {}).map(([g, rows]) => (
             <Card key={g}>

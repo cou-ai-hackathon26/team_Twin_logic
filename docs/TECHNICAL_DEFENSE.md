@@ -53,14 +53,18 @@ and "unsure", accepted regional variants, and above all **the teacher has the fi
 changes any mark, and marks shown to the child are only encouragement.
 
 **How good is it really?**
-Say exactly what the benchmark shows (README, Evaluation section), including the misses. The FLEURS set
-is **real adult speech with simulated reading errors** (we changed the expected passage text, the
-speakers read correctly). It is **not child validation**: no child made those errors. The synthetic TTS
-set only checks that the scripts run. Child accuracy is unknown until we record consenting children.
+On 100 held-out FLEURS test recordings (real adults, simulated errors): recall 82%, precision 76%,
+false alarms 4.2%, 18% unsure. The same speech model with plain word comparison: precision 27%, false
+alarms 43%. So our layer cuts false alarms by about 39 points and costs about 18 points of recall.
+Misses: precision target (80%) and speed target (15 s per 60 s). It is **not child validation**. On a
+child-like proxy (same recordings resampled so pitch and formants rise 10-20%) recall drops only about
+3 points. Our first proxy looked catastrophic (13%) until a control showed that the pitch-shifting tool
+itself caused it; we report both and say which one is valid.
 
 **Why not just use Whisper or ChatGPT?**
-Whisper is a strong baseline (we compare against it on the same audio) but its language model tends to
-write the word that *should* be there. It also does not say which written unit was wrong, and a cloud
+We compared Whisper small on the same audio: on this Bengali data it produced mostly unusable text
+(about 80% character errors), so it is not a fair strong baseline, and we say so. In general, Whisper's
+language model tends to write the word that *should* be there. It also does not say which written unit was wrong, and a cloud
 LLM would send children's voices off the device. Our system runs offline on a school laptop.
 
 **Did you train a model?**
@@ -72,6 +76,27 @@ fine-tuning script exists (`scripts/adapt_child_voice.py`) but we only claim it 
 **What is simulated in the demo?**
 Dashboard history labelled **DEMO · simulated** was generated from scripted errors run through the real
 marking engine, with no audio. Every reading recorded during the demo is marked live by the models.
+
+## 2b. The five hardest judge questions (model answers; rehearse them in your own words)
+
+1. **Why is blank left out of the competitor in the expected-text score?** In CTC most frames are
+   "blank", so comparing against blank would mostly measure timing, not which letter was said. We take
+   the frame where the expected character is most likely and compare it with the best *other
+   character*; a temperature (2.0, tuned) softens the very peaky CTC posteriors so the score is not
+   saturated at 0 or minus infinity.
+2. **Your thresholds were at the edge of the grid; why trust them?** We re-ran a wider search with
+   3-fold cross-validation on the dev recordings: precision 81% ± 2, recall 82% ± 6, false alarms 3.3%
+   ± 0.4, and on held-out test recordings 76% / 82% / 4.2%. One threshold is still at the edge. On a
+   resampled child-like proxy they still give 79% recall and 4.4% false alarms; real children are untested.
+3. **Aren't you just finding your own perturbations?** We tested error types the detector was not
+   built around (random consonant swaps, whole-word substitutions): recall 90%, precision 74%, false
+   alarms 4.2%, about the same as the main set.
+4. **Inserted words are not real skips.** We also cut real word audio out of recordings: recall 77%,
+   precision 64%. Real skips are harder; we report that.
+5. **18% unsure means one word in five goes to the teacher. Usable?** The teacher only listens to the
+   amber words, never all of them, and "unsure" is never counted against the child. The trade-off is
+   tunable (see `calibration_wide.json`); fewer unsure words cost precision. Whether teachers accept
+   this has not been tested with teachers yet.
 
 ## 3. Live demo script (3 minutes)
 

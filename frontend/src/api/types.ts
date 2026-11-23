@@ -350,6 +350,7 @@ export interface BenchmarkGroupResult {
 
 export interface BenchmarkReport {
   available: boolean
+  reason?: string
   generated_at?: string
   label?: string
   split?: string
@@ -361,6 +362,28 @@ export interface BenchmarkReport {
   kappa?: Record<string, number | null>
   targets?: Record<string, { measure: string; target: string; value: number | null; met: boolean | null }[]>
   hypothesis?: { recall_gain_pp: number; precision_not_worse: boolean; supported: boolean } | null
+  evidence?: BenchmarkEvidence
+}
+
+export interface PairedDiff {
+  diff: number
+  ci_low: number
+  ci_high: number
+  excludes_zero: boolean
+}
+
+/** Published by scripts/publish_results.py: paired comparisons, robustness sets, tuning summary. */
+export interface BenchmarkEvidence {
+  generated_at: string
+  notes?: string[]
+  comparisons: Record<string, { recordings: number } & Record<string, PairedDiff | number>>
+  robustness: Record<string, { recordings: number; label: string; porabondhu: Record<string, Proportion | number | null> }>
+  calibration: {
+    recordings: number
+    on_grid_edge: Record<string, boolean>
+    wide_grid_best: { thresholds: Record<string, number>; precision: number; recall: number; false_alarm: number; unsure_rate: number }
+    cross_validation: Record<'precision' | 'recall' | 'false_alarm' | 'unsure_rate', { mean: number; sd: number }>
+  } | null
 }
 
 export interface MyPassage extends Passage {
