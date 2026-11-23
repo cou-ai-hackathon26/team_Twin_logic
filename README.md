@@ -451,7 +451,8 @@ The earlier [10-recording pilot](backend/results/benchmark_pilot_10.md) (PoraBon
 Measured on the development laptop (Intel i5-10310U, 4 cores / 8 threads, no GPU) with
 [`scripts/speed_test.py`](backend/scripts/speed_test.py) on one 60 s reading
 ([`results/speed_test.json`](backend/results/speed_test.json)): **15.5 s** median with
-`PB_TORCH_THREADS=4` (16.8-18.4 s with the default thread count). The speech model alone takes ~15.2 s,
+`PB_TORCH_THREADS=4` when the passage has been read before (alignment cache warm; about 16.8 s the first
+time, 18.4 s with the default thread count). The speech model alone takes ~15.2 s,
 so the ≤15 s target is still **missed by about half a second** on this laptop; the rest of the pipeline
 (alignment, diagnosis, classifier) takes under 2 s. The PyTorch fp32 path is ~2x slower.
 

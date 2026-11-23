@@ -64,5 +64,5 @@ adult speech, simulated errors, no child speech.
 ## Speed (23 Nov 2026)
 
 `scripts/speed_test.py`, one 60 s reading, 4-core / 8-thread laptop: 15.5 s median with
-`PB_TORCH_THREADS=4` (default threads 18.4 s). The speech model alone ~15.2 s. Target ≤15 s: missed by
+`PB_TORCH_THREADS=4` on repeated readings of the same passage (first reading ~16.8 s; default threads 18.4 s). The speech model alone ~15.2 s. Target ≤15 s: missed by
 ~0.5 s.
