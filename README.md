@@ -18,7 +18,7 @@ never sent to a third-party AI service.
 | **Members** | Md Yak Safu · Munny Rahaman Dristy. Md Yak Safu designed, built and committed the project; Munny Rahaman Dristy was unable to take part in the build |
 | **Domain** | Education (primary), Accessibility (secondary) |
 | **Live demo** | **https://porabondhu.165-99-219-251.sslip.io** (HTTPS only; the app port is reachable only through the HTTPS proxy) |
-| **Demo video** | Not recorded yet (optional under rule 12 when the live link works). Follow the [5-minute demo script](#demo-in-5-minutes) and its recording checklist |
+| **Demo video** | **https://youtu.be/z_jiGV3ZkbU** (2:00, Bangla narration with a cartoon guide; a narrated walkthrough of real screenshots of the app, not a live screen recording). Live steps: [5-minute demo script](#demo-in-5-minutes) |
 | **Repository** | https://github.com/mohammadyaksafu/porabondhu-ai |
 | **Docs** | [Teacher guide](docs/TEACHER_GUIDE.md) · [Children's data and security](docs/DATA_PROTECTION.md) · [Teacher usability test (not run yet)](docs/USABILITY_TEST.md) · [Curriculum alignment](docs/CURRICULUM_ALIGNMENT.md) · [Classroom workflow, pilot plan, safeguards and interview questions](docs/CLASSROOM_AND_PILOT.md) · [Technical defence and demo script](docs/TECHNICAL_DEFENSE.md) · [Data collection](docs/DATA_COLLECTION.md) |
 
@@ -61,7 +61,7 @@ server); the progress bar shows the real stages, so do not cut the wait out of a
 | 7 | Teacher → **Benchmark** | The 100-recording held-out comparison (adult FLEURS speech, simulated errors): PoraBondhu vs plain CTC vs Whisper, paired differences, robustness checks including the child-like voice failure, and the missed targets |
 | 8 | Teacher → **Settings** → **Reset demo recordings** | Clean up for the next visitor |
 
-**Recording checklist for a demo video (3 minutes max):** use the HTTPS link in Chrome or
+**Recording checklist for a live screen-recorded video (3 minutes max), if you make one:** use the HTTPS link in Chrome or
 Edge on a laptop; allow the microphone; use a headset in a quiet room; read in your own
 voice (no children); show steps 1, 3, 4, 6 and 7; keep the DEMO badges visible so simulated
 data is never presented as real; do not cut the waiting time to make marking look faster;
