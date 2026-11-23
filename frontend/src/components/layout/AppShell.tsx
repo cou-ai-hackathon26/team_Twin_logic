@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { setUiLang, tr, useUiLang } from '@/lib/i18n'
-import { Bell, BookOpenText, ExternalLink, FlaskConical, HardDrive, Inbox, LayoutDashboard, LogOut, Mic, Search, Settings, Sparkles } from 'lucide-react'
+import { Bell, BookOpenText, ExternalLink, FlaskConical, HardDrive, Inbox, LayoutDashboard, LogOut, Mic, Search, Settings, Sparkles, UsersRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation, useNavigate } from 'react-router-dom'
 import { useClassrooms, useLogout, useMe, useReviewQueue, useSystem } from '@/api/hooks'
@@ -10,7 +10,7 @@ import { CommandPalette } from './CommandPalette'
 const BN_DIGITS = '০১২৩৪৫৬৭৮৯'
 const bnNum = (n: number) => String(n).replace(/\d/g, (d) => BN_DIGITS[Number(d)])
 
-type NavItem = { to: string; label: string; short: string; icon: typeof Mic; end?: boolean; badge?: 'review' }
+type NavItem = { to: string; label: string; short: string; icon: typeof Mic; end?: boolean; badge?: 'review'; adminOnly?: boolean }
 const GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: 'Teaching',
@@ -28,13 +28,20 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       { to: '/benchmark', label: 'Benchmark', short: 'Bench', icon: FlaskConical },
     ],
   },
-  { title: 'Account', items: [{ to: '/settings', label: 'Settings', short: 'Settings', icon: Settings }] },
+  {
+    title: 'Account',
+    items: [
+      { to: '/admin/teachers', label: 'Teachers', short: 'Teachers', icon: UsersRound, adminOnly: true },
+      { to: '/settings', label: 'Settings', short: 'Settings', icon: Settings },
+    ],
+  },
 ]
 const ALL = GROUPS.flatMap((g) => g.items)
 const MOBILE = ALL.filter((i) => ['/dashboard', '/assess', '/review', '/passages', '/settings'].includes(i.to))
 
 const TITLES: [RegExp, string, string][] = [
   [/^\/dashboard/, 'Dashboard', 'ড্যাশবোর্ড'],
+  [/^\/admin\/teachers/, 'Teachers', 'শিক্ষকবৃন্দ'],
   [/^\/assess/, 'New assessment', 'নতুন মূল্যায়ন'],
   [/^\/review/, 'Review queue', 'যাচাইয়ের তালিকা'],
   [/^\/readings\//, 'Reading review', 'পড়া যাচাই'],
@@ -90,7 +97,7 @@ function UserBox() {
       <div className="grid size-9 place-items-center rounded-full bg-marigold text-xs font-bold text-ink uppercase">{me?.username.slice(0, 2)}</div>
       <div className="min-w-0 flex-1 leading-tight">
         <div className="truncate text-sm font-semibold text-white">{me?.display_name}</div>
-        <div className="font-bn text-xs text-teal-200/60">শিক্ষক · Teacher</div>
+        <div className="font-bn text-xs text-teal-200/60">{me?.role === 'admin' ? 'প্রশাসক · Admin' : 'শিক্ষক · Teacher'}</div>
       </div>
       <button onClick={out} className="rounded-lg p-2 text-teal-200/70 hover:bg-white/10 hover:text-white" aria-label="Log out" title="Log out">
         <LogOut className="size-4" />
@@ -126,6 +133,8 @@ function ClassLinks() {
 
 export function AppShell() {
   const uiLang = useUiLang()
+  const { data: me } = useMe()
+  const isAdmin = me?.role === 'admin'
   const loc = useLocation()
   const out = useSignOut()
   const queue = useReviewQueue()
@@ -168,7 +177,7 @@ export function AppShell() {
             <div key={g.title}>
               <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-teal-200/40">{t(g.title)}</div>
               <div className="flex flex-col gap-0.5">
-                {g.items.map(({ to, label, icon: Icon, end, badge }) => (
+                {g.items.filter((i) => !i.adminOnly || isAdmin).map(({ to, label, icon: Icon, end, badge }) => (
                   <NavLink
                     key={to}
                     to={to}

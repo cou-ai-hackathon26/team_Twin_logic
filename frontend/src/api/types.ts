@@ -1,5 +1,5 @@
 export type Language = 'bn' | 'en'
-export type Role = 'teacher' | 'student'
+export type Role = 'admin' | 'teacher' | 'student'
 
 export interface Me {
   id: number

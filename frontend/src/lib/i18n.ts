@@ -33,6 +33,7 @@ const BN: Record<string, string> = {
   'Grapheme engine': 'বর্ণ বিশ্লেষণ',
   Benchmark: 'মূল্যায়ন ফলাফল',
   Settings: 'সেটিংস',
+  Teachers: 'শিক্ষকবৃন্দ',
   Home: 'হোম',
   Assess: 'মূল্যায়ন',
   Review: 'যাচাই',

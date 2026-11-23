@@ -66,6 +66,7 @@ export const router = createBrowserRouter([
       { path: '/engine', element: page(() => import('@/features/engine/EnginePage'), 'EnginePage') },
       { path: '/benchmark', element: page(() => import('@/features/benchmark/BenchmarkPage'), 'BenchmarkPage') },
       { path: '/settings', element: page(() => import('@/features/settings/SettingsPage'), 'SettingsPage') },
+      { path: '/admin/teachers', element: page(() => import('@/features/admin/TeachersPage'), 'TeachersPage') },
       { path: '*', element: page(() => import('@/features/NotFound'), 'NotFound') },
     ],
   },

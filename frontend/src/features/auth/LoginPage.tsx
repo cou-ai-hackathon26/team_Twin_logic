@@ -4,13 +4,13 @@ import { ArrowLeft, GraduationCap, Hand, KeyRound, LogIn, Mic, ScanSearch, Schoo
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useLogin, useMe } from '@/api/hooks'
-import type { Role } from '@/api/types'
 import { Button, ErrorBox, Input, Label, PageLoader } from '@/components/ui/primitives'
 import { Logo } from '@/components/brand'
 import { homeFor } from './home'
 
-const TABS: { role: Role; label: string; bn: string; icon: typeof School; hint: string }[] = [
-  { role: 'teacher', label: 'Teacher', bn: 'শিক্ষক', icon: School, hint: 'Demo: teacher / teacher123' },
+type LoginTab = 'teacher' | 'student' // admins log in on the Teacher tab
+const TABS: { role: LoginTab; label: string; bn: string; icon: typeof School; hint: string }[] = [
+  { role: 'teacher', label: 'Teacher', bn: 'শিক্ষক', icon: School, hint: 'Demo: teacher / teacher123 · admin / admin123 (manages teachers)' },
   { role: 'student', label: 'Student', bn: 'শিক্ষার্থী', icon: GraduationCap, hint: 'Demo: c3r01 / student123 (class 3, roll 01)' },
 ]
 
@@ -18,10 +18,10 @@ export function LoginPage() {
   const me = useMe()
   const login = useLogin()
   const nav = useNavigate()
-  const navState = useLocation().state as { from?: string; role?: Role } | null
+  const navState = useLocation().state as { from?: string; role?: LoginTab } | null
   const from = navState?.from
   const initialRole = navState?.role
-  const [role, setRole] = useState<Role>(initialRole ?? 'teacher')
+  const [role, setRole] = useState<LoginTab>(initialRole ?? 'teacher')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
@@ -32,7 +32,7 @@ export function LoginPage() {
     e.preventDefault()
     login.mutate(
       { username: username.trim(), password, role },
-      { onSuccess: (u) => nav(from && u.role === 'teacher' && !from.startsWith('/me') ? from : homeFor(u.role), { replace: true }) },
+      { onSuccess: (u) => nav(from && u.role !== 'student' && !from.startsWith('/me') ? from : homeFor(u.role), { replace: true }) },
     )
   }
   const tab = TABS.find((t) => t.role === role)!
@@ -68,7 +68,7 @@ export function LoginPage() {
             })}
           </ul>
         </div>
-        <p className="relative mt-16 text-xs text-teal-200/50">Runs on this computer. Audio never leaves the school.</p>
+        <p className="relative mt-16 text-xs text-teal-200/50">Speech models run on the server or school laptop itself; no audio goes to any outside AI service.</p>
       </div>
 
       {/* form */}
