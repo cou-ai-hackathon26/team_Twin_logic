@@ -76,3 +76,31 @@ export const useWordCheck = () =>
 /** Server flags; demo_mode = public test logins, so the UI warns against recording real children. */
 export const useHealth = () =>
   useQuery({ queryKey: ['health'], queryFn: () => api.get<{ ok: boolean; demo_mode?: boolean }>('/health'), staleTime: 10 * 60_000 })
+
+// ------------------------------------------------------- learning from reviews
+export interface LearningStatus {
+  reviewed_readings: number
+  decided_words: number
+  needs: { readings: number; words: number }
+  agreement_now: { precision: number; recall: number; false_alarm: number; unsure_rate: number; words: number } | null
+  thresholds: Record<string, number>
+  thresholds_source: string
+  last_learned: { tuned_at?: string; reviewed_readings?: number; before?: { f1: number }; after?: { f1: number } } | null
+  learned_variants: { word: string; variant: string; note: string }[]
+  can_undo: boolean
+}
+export const useLearning = () => useQuery({ queryKey: ['learning'], queryFn: () => api.get<LearningStatus>('/learning') })
+export function useLearnNow() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<{ variants_added: unknown[]; thresholds: { changed: boolean; reason?: string } }>('/learning/run'),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['learning'] }),
+  })
+}
+export function useUndoLearning() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<{ undone: boolean }>('/learning/undo'),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['learning'] }),
+  })
+}

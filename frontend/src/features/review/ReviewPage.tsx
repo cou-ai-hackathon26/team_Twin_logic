@@ -301,7 +301,7 @@ export function ReviewPage() {
                 <div className="text-sm">
                   <div className="font-medium text-slate-900">Review finalised</div>
                   <div className="text-slate-500">
-                    {r.reviewed_at && dateTime(r.reviewed_at)} · audio {r.has_audio ? 'kept' : 'deleted'}. You can still change marks.
+                    {r.reviewed_at && dateTime(r.reviewed_at)} · audio {r.has_audio ? 'kept' : 'deleted'}. You can still change marks. {!r.simulated && 'Your corrections now help PoraBondhu learn the pronunciations at your school (Settings → Learning).'}
                   </div>
                   {nextInQueue ? (
                     <Link to={`/readings/${nextInQueue.id}`} className="mt-3 inline-flex">

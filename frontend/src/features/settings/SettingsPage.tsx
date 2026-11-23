@@ -5,6 +5,7 @@ import { useAddVariant, useDeleteVariant, useSystem, useVariants, useWarmup } fr
 import type { ModelStatus } from '@/api/types'
 import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, PageHeader, PageLoader } from '@/components/ui/primitives'
 import { PasswordCard, PrivacyCard } from './AccountCards'
+import { LearningCard } from './LearningCard'
 
 function StateBadge({ s }: { s: ModelStatus }) {
   const cls = {
@@ -32,6 +33,7 @@ export function SettingsPage() {
     <>
       <PageHeader title="Settings" subtitle="Speech models run on this server's CPU. No audio is sent to any outside AI service." />
       <div className="grid gap-6 xl:grid-cols-2">
+        <LearningCard />
         <PrivacyCard settings={data.settings} />
         <PasswordCard demo={data.settings.demo_mode} />
         <Card>

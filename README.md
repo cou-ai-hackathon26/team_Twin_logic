@@ -125,6 +125,10 @@ know *why*: the difficulty is usually specific conjuncts, vowel signs or sounds.
 * Live grapheme engine page (normaliser, segmenter, unit diff)
 * English passages (marked by Whisper) next to Bangla
 * Evaluation scripts: calibration on tuning speakers, benchmark with 95% CIs
+* **Learns from teacher reviews** (no model retraining, nothing leaves the device): a pronunciation
+  teachers accept 3 times for a word becomes an accepted variant, and after 10 reviewed readings the
+  marking thresholds are re-tuned to agree with the teachers' final marks (false alarms kept ≤5%,
+  one-click undo; Settings → Learning from your reviews)
 * **Assign practice** to one child, a weak-pattern group (from the class pattern map) or the
   whole class; the child sees it under "From your teacher" and it is marked done when read
 * **Word check** for students: say one practice word and the same speech model checks it at once
@@ -239,6 +243,7 @@ word-level feedback. What PoraBondhu adds, as far as we know, is the combination
 | Spelling vs reading | Spelling differences count as errors | Letters that sound the same (স/শ/ষ, ি/ী …) are not reading errors |
 | From diagnosis to teaching | Report | Repeated unit errors become weak patterns → class pattern map → **practice assigned to exactly the children who need it**, with passages tied to the **NCTB lesson and page** that teaches that unit |
 | Child safety | Score shown at once | Child sees the mark only after the teacher checks it |
+| Improvement over time | Fixed model, or retraining on collected audio | **Learns from each teacher review**: replays the stored evidence of every decision to re-tune its thresholds and adopts regional pronunciations teachers accept; transparent and reversible, no audio kept |
 | Cost and privacy | Cloud service | Offline on a school laptop CPU, no API cost, no audio leaves the device |
 
 How well this works on children is **not yet known** (see [Evidence still needed](#evidence-still-needed)).
