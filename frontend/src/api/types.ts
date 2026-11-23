@@ -363,6 +363,30 @@ export interface BenchmarkReport {
   targets?: Record<string, { measure: string; target: string; value: number | null; met: boolean | null }[]>
   hypothesis?: { recall_gain_pp: number; precision_not_worse: boolean; supported: boolean } | null
   evidence?: BenchmarkEvidence
+  word_classifier?: WordClassifierReport
+}
+
+export interface ClsStats {
+  precision: number
+  recall: number
+  f1: number
+  false_alarm: number
+  unsure_rate: number
+  tp: number
+  fp: number
+  fn: number
+}
+export interface WordClassifierReport {
+  generated_at: string
+  train: { recordings: number; candidate_words: number; positives: number }
+  test: { recordings: number; candidate_words: number; note: string }
+  decision: { lo: number; hi: number }
+  cv_tune: ClsStats
+  rules_test: ClsStats
+  learned_test: ClsStats
+  difference_learned_minus_rules_test: Record<string, { diff: number; ci95: [number, number] }>
+  use_in_app: boolean
+  strongest_features: { feature: string; weight: number }[]
 }
 
 export interface PairedDiff {

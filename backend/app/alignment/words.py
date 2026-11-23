@@ -38,14 +38,27 @@ def align_units(exp: list[Unit], rec: list[Unit]) -> tuple[list[Op], float]:
     return align(exp, rec, cached_unit_cost, 1.0, 1.0)
 
 
+_word_distance_cache: dict[tuple[tuple[str, ...], tuple[str, ...]], float] = {}
+
+
 def word_distance(exp: list[Unit], rec: list[Unit]) -> float:
-    """Normalised unit-level distance in [0, 1]."""
+    """Normalised unit-level distance in [0, 1].
+
+    Depends only on the unit texts (unit costs are cached by text too), so results are memoised:
+    pairs repeat across readings of the same passage, so a warm server skips them (same output)."""
     if not exp and not rec:
         return 0.0
-    if [u.text for u in exp] == [u.text for u in rec]:
+    key = (tuple(u.text for u in exp), tuple(u.text for u in rec))
+    if key[0] == key[1]:
         return 0.0
-    _, cost = align_units(exp, rec)
-    return min(1.0, cost / max(len(exp), len(rec), 1))
+    v = _word_distance_cache.get(key)
+    if v is None:
+        _, cost = align_units(exp, rec)
+        v = min(1.0, cost / max(len(exp), len(rec), 1))
+        if len(_word_distance_cache) > 200_000:
+            _word_distance_cache.clear()
+        _word_distance_cache[key] = v
+    return v
 
 
 @dataclass

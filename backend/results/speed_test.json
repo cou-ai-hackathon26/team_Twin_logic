@@ -1,0 +1,32 @@
+{
+  "generated": "2026-11-23T23:19:13",
+  "audio_sec": 60.0,
+  "machine": "author's laptop, 8 logical cores, Windows 10, nothing else heavy running",
+  "backend": "onnx-int8",
+  "results": [
+    {
+      "threads": 4,
+      "chunk_sec": 15.0,
+      "median_s_per_60s": 15.52,
+      "runs": [
+        15.66,
+        15.21,
+        15.52,
+        15.51,
+        15.68
+      ]
+    }
+  ],
+  "best": {
+    "threads": 4,
+    "chunk_sec": 15.0,
+    "median_s_per_60s": 15.52,
+    "runs": [
+      15.66,
+      15.21,
+      15.52,
+      15.51,
+      15.68
+    ]
+  }
+}

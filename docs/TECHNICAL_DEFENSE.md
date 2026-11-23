@@ -98,6 +98,38 @@ marking engine, with no audio. Every reading recorded during the demo is marked 
    tunable (see `calibration_wide.json`); fewer unsure words cost precision. Whether teachers accept
    this has not been tested with teachers yet.
 
+## 2b+. The trained classifier
+
+* **Did you train anything?** Yes: a logistic-regression word-error classifier on top of the speech
+  model (18 evidence features per flagged word), trained on the 120 FLEURS tuning recordings only,
+  cut-off by 5-fold cross-validation, then run once on the 100 held-out test recordings. Precision
+  76.1% → 80.8% (+4.7 points, CI +0.9 to +8.2), false alarms 4.2% → 3.2%, recall unchanged within
+  noise. The speech model itself is not fine-tuned (no consented child data, and CPU only).
+* **Why logistic regression and not a bigger model?** 896 training words: a bigger model would
+  overfit, and logistic regression keeps every weight inspectable (the top ones are the free-decoding
+  confidence and the expected-text scores of the differing units).
+* **Unsure went to 0%. Is that worse?** The cut-off was fixed by cross-validation before testing; the
+  best rule on tuning data put every flagged word on one side. The teacher still checks every reading,
+  and teacher reviews re-tune the cut-off locally. If schools want more "check this" words, the cut-off
+  can be split into two (the code supports a lower and an upper cut-off).
+
+## 2c. Scaling, schools and the district view
+
+6. **How many children can it handle?** Measured, not guessed (`docs/SCALING.md`): 10, 25 and 50
+   real recordings sent at the same moment to a laptop; all marked, none failed; 50 at once finished in
+   157 s with 2 workers, about 200 one-minute readings per hour using under 1.6 GB. A 2-core server is
+   about 2× real time (~115 per hour). When the queue is full the server answers "busy, try again"
+   (503) instead of crashing.
+7. **Why are Prometheus and Grafana not on the live demo?** The demo server has 2 cores and ~4 GB; the
+   speech model needs most of it. Monitoring was run and screenshotted locally during the load test;
+   on the demo `/metrics` is switched off (404).
+8. **Can a district officer see a child?** No. The district role only gets counts per school from
+   teacher-checked readings; any school, unit or week with fewer than 5 children is hidden, and every
+   other page answers 403 (tested in `test_district.py`). The demo schools are fictional and labelled
+   simulated.
+9. **Is the district view a ranking of schools?** No, and the page says so: it shows which written
+   units need practice and links the passages that practise them, to plan teacher support.
+
 ## 3. Live demo script (3 minutes)
 
 1. Log in as teacher. Point out the DEMO banner and badges on the dashboard: "this history is simulated".

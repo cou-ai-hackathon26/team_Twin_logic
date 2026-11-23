@@ -43,3 +43,26 @@ Child-like sets are signal-processing proxies, **not** child speech.
 * Wide search best: {'free_high': 0.3, 'gop_high': 0.1, 'gop_low': -3.0, 'temperature': 2.0, 'hesitation_sec': 3.0, 'not_reached_min_run': 3} (precision 0.805, recall 0.848, false alarms 0.036, unsure 0.161).
 * Parameters at the edge of the searched grid: ['gop_high'].
 * 3-fold cross-validation (tune on 2/3, test on 1/3): precision 0.810 ± 0.017, recall 0.823 ± 0.057, false alarms 0.033 ± 0.004, unsure 0.172 ± 0.043.
+
+## Trained word classifier (added 23 Nov 2026; used by the app)
+
+Logistic regression on 18 evidence features per flagged word (`app/assessment/learned.py`), trained on
+the 120 FLEURS tuning recordings only (896 flagged words, 315 real errors); cut-off chosen by 5-fold
+cross-validation on tuning data (false alarms ≤5%, then best F1, then fewest unsure). Run once on the
+same first 100 test recordings as the main table (`scripts/word_classifier.py`,
+`results/word_classifier.json`).
+
+| | Recall | Precision | False alarms | Unsure |
+|---|---|---|---|---|
+| Rules (thresholds above) | 82.4% (216/262) | 76.1% (216/284) | 4.2% (68/1608) | 17.7% |
+| Trained classifier | 81.7% (214/262) | 80.8% (214/265) | 3.2% (51/1608) | 0.0% |
+| Paired difference (bootstrap, 95% CI, pp) | -0.8 (-4.3 to +2.6) | +4.7 (+0.9 to +8.2) * | -1.1 (-1.8 to -0.2) * | -17.7 * |
+
+Cross-validated on tuning data: precision 84.4%, recall 83.9%, false alarms 2.7%. Same limits as above:
+adult speech, simulated errors, no child speech.
+
+## Speed (23 Nov 2026)
+
+`scripts/speed_test.py`, one 60 s reading, 4-core / 8-thread laptop: 15.5 s median with
+`PB_TORCH_THREADS=4` (default threads 18.4 s). The speech model alone ~15.2 s. Target ≤15 s: missed by
+~0.5 s.

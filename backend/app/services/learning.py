@@ -6,8 +6,9 @@ are learned from them, both transparent and reversible:
 1. **Accepted pronunciations.** When teachers mark the same heard form of a word as correct in at
    least ``VARIANT_MIN_READINGS`` different readings (e.g. a regional pronunciation), that form is
    added as an accepted variant and is no longer flagged.
-2. **Decision thresholds.** Each word's decision depends on three thresholds (free_high, gop_high,
-   gop_low). The evidence behind every decision is stored, so the decisions can be *replayed* with
+2. **Decision thresholds.** Each word's decision depends on thresholds: the cut-off of the trained
+   word classifier (app/assessment/learned.py) when it is in use, otherwise the three rule thresholds
+   (free_high, gop_high, gop_low). The evidence behind every decision is stored, so the decisions can be *replayed* with
    other thresholds. After enough reviews we search for thresholds that agree better with the
    teachers' final marks while keeping false alarms (against the teacher) at or below 5%. A change is
    adopted only if it improves agreement; the previous thresholds are kept for one-click undo.
@@ -28,6 +29,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ..assessment import learned
 from ..assessment import types as T
 from ..config import get_settings, load_thresholds, save_thresholds
 from ..models import SIMULATED_MODEL_ID, AcceptedVariant, Reading, WordMark
@@ -43,8 +45,22 @@ GOP_LOW = (-6.0, -5.0, -4.0, -3.0, -2.0, -1.0)
 _lock = threading.Lock()
 
 
+CUTS = tuple(x / 100 for x in range(10, 91, 4))
+
+
+def _mark_dict(m: WordMark) -> dict:
+    return {"raw_status": m.raw_status, "err_free": m.err_free, "gop": m.gop, "units": m.units or [],
+            "flags": m.flags or [], "start": m.start, "end": m.end, "free_conf": m.free_conf, "heard": m.heard}
+
+
 def replay(m: WordMark, th: T.Thresholds) -> str:
-    """The decision the marking rules would make for this word with thresholds ``th``."""
+    """The decision the marking would make for this word with thresholds ``th``."""
+    model = learned.load_model()
+    if model is not None:
+        if m.status == T.NOT_REACHED or m.raw_status == T.CORRECT:
+            return m.status
+        lo, hi = learned.cutoffs(model, th)
+        return learned.decide(model, _mark_dict(m), lo, hi)
     if m.raw_status == T.MISREAD:
         free = m.err_free if m.err_free is not None else m.free_conf
         if m.gop is not None and m.gop >= th.gop_high:
@@ -91,6 +107,13 @@ def _key(s: dict) -> tuple:
 def search(marks: list[WordMark], current: T.Thresholds) -> tuple[T.Thresholds, dict]:
     """Thresholds that agree best with the teachers' final marks (false alarms at most 5%)."""
     best, best_s = current, score(marks, current)
+    if learned.load_model() is not None:  # trained classifier in use: learn its cut-off instead
+        for cut in CUTS:
+            th = T.Thresholds(**{**current.to_dict(), "word_model_cut": cut})
+            s = score(marks, th)
+            if _key(s) > _key(best_s):
+                best, best_s = th, s
+        return best, best_s
     for fh, gh, gl in itertools.product(FREE_HIGH, GOP_HIGH, GOP_LOW):
         if gl >= gh:
             continue

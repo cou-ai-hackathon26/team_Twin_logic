@@ -15,14 +15,16 @@ def _mark(raw, gop, err_free, teacher, status=None):
     return m
 
 
-def test_replay_follows_the_marking_rules():
+def test_replay_follows_the_marking_rules(monkeypatch):
+    monkeypatch.setattr(learning.learned, "load_model", lambda: None)  # rules only
     th = T.Thresholds(free_high=0.5, gop_high=1.0, gop_low=-3.0)
     assert learning.replay(_mark(T.MISREAD, 2.0, 0.9, None), th) == T.CORRECT
     assert learning.replay(_mark(T.MISREAD, -4.0, 0.9, None), th) == T.MISREAD
     assert learning.replay(_mark(T.MISREAD, -1.0, 0.9, None), th) == T.UNSURE
 
 
-def test_search_moves_thresholds_towards_the_teachers():
+def test_search_moves_thresholds_towards_the_teachers(monkeypatch):
+    monkeypatch.setattr(learning.learned, "load_model", lambda: None)  # rules only
     # teachers call words with gop around -1.5 misread, but the current gop_low (-3) leaves them unsure
     marks = [_mark(T.MISREAD, -1.5, 0.9, T.MISREAD) for _ in range(30)]
     marks += [_mark(T.MISREAD, 2.0, 0.9, T.CORRECT) for _ in range(200)]
@@ -68,3 +70,20 @@ def test_teacher_corrections_teach_an_accepted_pronunciation(client, monkeypatch
     c.post("/api/demo/reset")
     after = c.get("/api/learning").json()
     assert after["learned_variants"] == [] and not after["can_undo"]
+
+
+def test_with_trained_classifier_teachers_tune_its_cut_off(monkeypatch):
+    """When the trained classifier is in use, learning moves its cut-off towards the teachers."""
+    n = len(learning.learned.FEATURES)
+    i = learning.learned.FEATURES.index("err_free")
+    model = {"mean": [0.0] * n, "std": [1.0] * n, "weights": [0.0] * n, "bias": 0.0, "lo": 0.8, "hi": 0.8}
+    model["weights"][i] = 10.0  # probability grows with err_free
+    monkeypatch.setattr(learning.learned, "load_model", lambda: model)
+    # teachers call words with err_free 0.1 (p ~ 0.73) misread; the trained cut 0.8 misses them
+    marks = [_mark(T.MISREAD, -1.0, 0.1, T.MISREAD) for _ in range(30)]
+    marks += [_mark(T.MISREAD, -1.0, -0.5, T.CORRECT) for _ in range(200)]  # p ~ 0.007
+    cur = T.Thresholds()
+    assert learning.score(marks, cur)["recall"] == 0.0
+    best, s = learning.search(marks, cur)
+    assert best.word_model_cut is not None and best.word_model_cut <= 0.7
+    assert s["recall"] == 1.0 and s["false_alarm"] == 0.0

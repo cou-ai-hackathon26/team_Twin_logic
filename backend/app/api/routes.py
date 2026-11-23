@@ -516,4 +516,10 @@ def benchmark_report() -> dict:
     extra = RESULTS_DIR / "robustness.json"
     if extra.exists():
         out["evidence"] = json.loads(extra.read_text(encoding="utf-8"))
+    wc = RESULTS_DIR / "word_classifier.json"
+    if wc.exists():  # trained word classifier: trained on tuning data, tested once on the same test set
+        w = json.loads(wc.read_text(encoding="utf-8"))
+        out["word_classifier"] = {k: w.get(k) for k in (
+            "generated_at", "train", "test", "decision", "cv_tune", "rules_test", "learned_test",
+            "difference_learned_minus_rules_test", "use_in_app", "strongest_features")}
     return out

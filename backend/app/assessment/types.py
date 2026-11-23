@@ -34,6 +34,9 @@ class Thresholds:
     temperature: float = 1.0  # logit temperature for calibration
     hesitation_sec: float = 3.0
     not_reached_min_run: int = 3
+    # cut-off for the trained word classifier learned from teacher reviews (None = the cut-offs chosen
+    # by cross-validation when the classifier was trained; see app/assessment/learned.py)
+    word_model_cut: float | None = None
 
     def to_dict(self) -> dict:
         return asdict(self)

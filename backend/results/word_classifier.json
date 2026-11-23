@@ -1,0 +1,235 @@
+{
+  "generated_at": "2026-11-23T17:00:23+00:00",
+  "what": "Logistic-regression word error classifier on top of the CTC model; trained on FLEURS tuning split only",
+  "train": {
+    "recordings": 120,
+    "candidate_words": 896,
+    "positives": 315
+  },
+  "test": {
+    "recordings": 100,
+    "candidate_words": 857,
+    "note": "same first 100 test recordings as the published benchmark; used once"
+  },
+  "features": [
+    "is_skip",
+    "err_free",
+    "err_free_missing",
+    "word_gop",
+    "word_gop_missing",
+    "min_unit_gop",
+    "mean_unit_gop",
+    "frac_units_wrong",
+    "n_units",
+    "n_units_wrong",
+    "spelling_only",
+    "free_conf",
+    "has_heard",
+    "duration",
+    "repeated_or_partial",
+    "extra_word",
+    "unit_del_frac",
+    "unit_ins_count"
+  ],
+  "model": {
+    "mean": [
+      0.0859375,
+      0.5848598325225923,
+      0.0859375,
+      -2.1433740738649316,
+      0.002232142857142857,
+      -2.1239358648519944,
+      -1.4948167576828322,
+      0.575431370464852,
+      3.385044642857143,
+      1.7790178571428572,
+      0.0,
+      0.479785963593583,
+      0.9140625,
+      0.5136160714285716,
+      0.002232142857142857,
+      0.004464285714285714,
+      0.19593785430839,
+      0.17633928571428573
+    ],
+    "std": [
+      0.28027173716643905,
+      0.22325435807669752,
+      0.28027173716643905,
+      2.9408710467638164,
+      0.04719280124970113,
+      2.8955655601960575,
+      2.6469152819325332,
+      0.33918807560236647,
+      1.3546215538989776,
+      1.0723001487310233,
+      1e-09,
+      0.2706934241665434,
+      0.28027173716643905,
+      0.34946943931061686,
+      0.04719280124970125,
+      0.06666600333512547,
+      0.33630238104019655,
+      0.5262510538250679
+    ],
+    "weights": [
+      0.07323666990039444,
+      0.9823792929185488,
+      0.07323666990039444,
+      -0.5945901089966744,
+      0.311625137834246,
+      -0.7255227743151627,
+      -0.825036713553038,
+      0.22205910293055556,
+      -0.15350260191970422,
+      0.4385234423356475,
+      0.0,
+      -0.35863448760439104,
+      -0.07323666990039444,
+      -0.12463928815179504,
+      -0.10857689530430129,
+      -0.3957192747598968,
+      -0.6615804258148142,
+      -0.6352520810280494
+    ],
+    "bias": -1.1550581569457448
+  },
+  "decision": {
+    "lo": 0.46,
+    "hi": 0.46,
+    "rule": "p >= hi -> error; p <= lo -> correct; else unsure",
+    "chosen_by": "5-fold CV on tuning data: false alarms <= 5%, best F1, fewest unsure"
+  },
+  "cv_tune": {
+    "precision": 0.8439,
+    "recall": 0.8386,
+    "f1": 0.8413,
+    "false_alarm": 0.0268,
+    "unsure_rate": 0.0,
+    "tp": 265,
+    "fp": 49,
+    "fn": 51,
+    "words": 2142,
+    "errors": 316,
+    "correct_words": 1826
+  },
+  "rules_tune": {
+    "precision": 0.8048,
+    "recall": 0.8481,
+    "f1": 0.8259,
+    "false_alarm": 0.0356,
+    "unsure_rate": 0.1606,
+    "tp": 268,
+    "fp": 65,
+    "fn": 48,
+    "words": 2142,
+    "errors": 316,
+    "correct_words": 1826
+  },
+  "rules_test": {
+    "precision": 0.7606,
+    "recall": 0.8244,
+    "f1": 0.7912,
+    "false_alarm": 0.0423,
+    "unsure_rate": 0.177,
+    "tp": 216,
+    "fp": 68,
+    "fn": 46,
+    "words": 1870,
+    "errors": 262,
+    "correct_words": 1608
+  },
+  "learned_test": {
+    "precision": 0.8075,
+    "recall": 0.8168,
+    "f1": 0.8121,
+    "false_alarm": 0.0317,
+    "unsure_rate": 0.0,
+    "tp": 214,
+    "fp": 51,
+    "fn": 48,
+    "words": 1870,
+    "errors": 262,
+    "correct_words": 1608
+  },
+  "difference_learned_minus_rules_test": {
+    "precision": {
+      "diff": 0.047,
+      "ci95": [
+        0.0094,
+        0.0819
+      ]
+    },
+    "recall": {
+      "diff": -0.0076,
+      "ci95": [
+        -0.0425,
+        0.0255
+      ]
+    },
+    "false_alarm": {
+      "diff": -0.0106,
+      "ci95": [
+        -0.0184,
+        -0.0024
+      ]
+    },
+    "unsure_rate": {
+      "diff": -0.177,
+      "ci95": [
+        -0.1994,
+        -0.1559
+      ]
+    },
+    "f1": {
+      "diff": 0.0209,
+      "ci95": [
+        -0.0056,
+        0.0458
+      ]
+    }
+  },
+  "use_in_app": true,
+  "strongest_features": [
+    {
+      "feature": "err_free",
+      "weight": 0.982
+    },
+    {
+      "feature": "mean_unit_gop",
+      "weight": -0.825
+    },
+    {
+      "feature": "min_unit_gop",
+      "weight": -0.726
+    },
+    {
+      "feature": "unit_del_frac",
+      "weight": -0.662
+    },
+    {
+      "feature": "unit_ins_count",
+      "weight": -0.635
+    },
+    {
+      "feature": "word_gop",
+      "weight": -0.595
+    },
+    {
+      "feature": "n_units_wrong",
+      "weight": 0.439
+    },
+    {
+      "feature": "extra_word",
+      "weight": -0.396
+    }
+  ],
+  "thresholds_of_rule_system": {
+    "free_high": 0.3,
+    "gop_high": 0.1,
+    "gop_low": -3.0,
+    "temperature": 2.0,
+    "hesitation_sec": 3.0,
+    "not_reached_min_run": 3
+  }
+}

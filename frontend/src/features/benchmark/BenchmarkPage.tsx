@@ -1,4 +1,5 @@
 import { EvidenceSection } from './EvidenceSection'
+import { WordClassifierCard } from './WordClassifierCard'
 import clsx from 'clsx'
 import { CheckCircle2, FlaskConical, XCircle } from 'lucide-react'
 import { useBenchmark } from '@/api/hooks'
@@ -120,6 +121,8 @@ python -m scripts.benchmark --recordings eval/recordings.csv --annotations eval/
               </div>
             </Card>
           ))}
+
+          {data.word_classifier && <WordClassifierCard w={data.word_classifier} />}
 
           {data.evidence && <EvidenceSection e={data.evidence} />}
 

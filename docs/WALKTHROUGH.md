@@ -127,6 +127,12 @@ and the targets we miss.
 
 ![Benchmark](walkthrough/t17-benchmark.jpg)
 
+Below it, **Trained word classifier vs hand-set rules**: the logistic-regression classifier (trained on tuning
+recordings only) against the rules on the same held-out recordings: precision 76.1% → 80.8%, false alarms
+4.2% → 3.2%, with bootstrap intervals.
+
+![Trained classifier](walkthrough/t19-trained-classifier.jpg)
+
 ### 16. Settings: learning from your reviews, privacy, password
 How many reviews were counted, how often PoraBondhu agrees with you, which pronunciations it learned,
 **Learn now** / **Undo**. Below: privacy and safety rules, password change, and (demo only) **Reset demo

@@ -312,8 +312,8 @@ word-level feedback. What PoraBondhu adds, as far as we know, is the combination
 | | Typical approach | PoraBondhu |
 |---|---|---|
 | Unit of feedback | Word right or wrong, words per minute | The **Bangla written unit** behind the error (যুক্তাক্ষর, ফলা, রেফ, কার, চন্দ্রবিন্দু), from our own grapheme segmenter and unit diff |
-| Recognition | ASR with a language model, which tends to "correct" the child | Character-level CTC with **no language model**, plus a second, independent expected-text score; an error needs both to agree |
-| Uncertainty | Forced decision | **Abstention**: "unsure" goes to the teacher and never counts as an error |
+| Recognition | ASR with a language model, which tends to "correct" the child | Character-level CTC with **no language model**, plus a second, independent expected-text score; a **trained word classifier** combines both with 16 other cues per word (precision 80.8% on held-out recordings) |
+| Uncertainty | Forced decision | **Abstention** built in: "unsure" goes to the teacher and never counts as an error. With the trained classifier the cross-validated cut-off currently sends no word to unsure (the teacher still checks every reading); the rules mode marks 18% unsure |
 | Spelling vs reading | Spelling differences count as errors | Letters that sound the same (স/শ/ষ, ি/ী …) are not reading errors |
 | From diagnosis to teaching | Report | Repeated unit errors become weak patterns → class pattern map → **practice assigned to exactly the children who need it**, with passages tied to the **NCTB lesson and page** that teaches that unit |
 | Child safety | Score shown at once | Child sees the mark only after the teacher checks it |
@@ -399,8 +399,32 @@ precision **+48.6 points** (+44.3 to +52.7), false alarms **-38.9 points** (-42.
 small produced largely unusable Bengali text on this data (character error rate about 80%), so it is
 **not a strong baseline**; a larger or Bangla-tuned Whisper was not tested (CPU time).
 Our pre-registered hypothesis ("+10 points recall over Whisper") is therefore **not supported** and
-not meaningful here. Targets: recall ≥80% met, false alarms ≤5% met, precision ≥80% **missed** (76%),
-≤15 s per 60 s reading **missed** (16.2 s on the 4-core laptop).
+not meaningful here. Targets with the hand-set rules: recall ≥80% met, false alarms ≤5% met,
+precision ≥80% **missed** (76%), ≤15 s per 60 s reading **missed** (16.2 s on the 4-core laptop).
+
+**Trained word classifier (now used by the app).** The rules above compare two numbers with hand-set
+thresholds. We then **trained a small model**: logistic regression on 18 pieces of evidence the speech
+model already gives for each flagged word (free-decoding confidence, unit-level expected-text scores,
+how many units differ, deletions, insertions, repeats, duration…), trained on the 120 **tuning**
+recordings only (896 flagged words), with its cut-off chosen by 5-fold cross-validation under the same
+rule (false alarms ≤5%, then best F1). It was then run **once** on the same 100 held-out test
+recordings ([`scripts/word_classifier.py`](backend/scripts/word_classifier.py),
+[`results/word_classifier.json`](backend/results/word_classifier.json)):
+
+| Same 100 test recordings | Recall | Precision | False alarms | Unsure |
+|---|---|---|---|---|
+| Hand-set rules | 82.4% | 76.1% | 4.2% | 17.7% |
+| **Trained classifier** | 81.7% | **80.8%** | **3.2%** | 0% |
+| Difference (paired bootstrap, 95% CI) | -0.8 (-4.3 to +2.6) | **+4.7 (+0.9 to +8.2)** | **-1.1 (-1.8 to -0.2)** | -17.7 |
+
+So the **precision target (≥80%) is now met** on held-out data, with fewer false alarms and no
+significant loss of recall. The cross-validated cut-off put every flagged word on one side, so the
+classifier sends no word to "unsure"; the teacher still reviews every reading. Teacher reviews then tune
+this cut-off locally (Settings → Learning from your reviews). The strongest evidence is the
+free-decoding confidence of the differing units and their expected-text scores. Still adult speech with
+simulated errors.
+
+![Trained classifier vs rules on the Benchmark page](docs/walkthrough/t19-trained-classifier.jpg)
 
 **Robustness (PoraBondhu only, 100 test recordings each):**
 
@@ -424,10 +448,12 @@ false alarms 3.3% ± 0.4. One threshold (`gop_high` = 0.1) is at the edge of the
 
 The earlier [10-recording pilot](backend/results/benchmark_pilot_10.md) (PoraBondhu only) is kept for reference.
 
-Measured on the development laptop (Intel i5-10310U, 4 cores, no GPU):
-ONNX int8 CTC processes ~14 s of audio in ~4.5 s, i.e. roughly 18-20 s per
-60 s reading (target ≤ 15 s; use `PB_TORCH_THREADS` and close other apps).
-The PyTorch fp32 path is ~2x slower.
+Measured on the development laptop (Intel i5-10310U, 4 cores / 8 threads, no GPU) with
+[`scripts/speed_test.py`](backend/scripts/speed_test.py) on one 60 s reading
+([`results/speed_test.json`](backend/results/speed_test.json)): **15.5 s** median with
+`PB_TORCH_THREADS=4` (16.8-18.4 s with the default thread count). The speech model alone takes ~15.2 s,
+so the ≤15 s target is still **missed by about half a second** on this laptop; the rest of the pipeline
+(alignment, diagnosis, classifier) takes under 2 s. The PyTorch fp32 path is ~2x slower.
 
 ## Scaling and monitoring (local only, not deployed)
 
