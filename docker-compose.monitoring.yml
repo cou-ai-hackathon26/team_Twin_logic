@@ -1,8 +1,8 @@
 # LOCAL ONLY: Prometheus + Grafana for load tests and demos on your own machine.
 # Not part of the hosted demo (the 2-core / 4 GB VPS has no room for it). See docs/SCALING.md.
 #
-#   1. run PoraBondhu locally with metrics on, e.g. on port 8200:
-#        set PB_METRICS_ENABLED=true && python -m uvicorn app.main:app --port 8200
+#   1. run PoraBondhu locally with metrics on, on port 8000 (the scrape target in monitoring/prometheus.yml):
+#        set PB_METRICS_ENABLED=true && python -m uvicorn app.main:app --port 8000
 #   2. docker compose -f docker-compose.monitoring.yml up -d
 #   3. Grafana: http://localhost:3000 (anonymous viewer; dashboard "PoraBondhu marking")
 #      Prometheus: http://localhost:9090

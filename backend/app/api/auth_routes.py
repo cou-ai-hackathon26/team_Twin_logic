@@ -121,16 +121,12 @@ def _own_passage(db: Session, user: User, pid: int) -> Passage:
     return p
 
 
-CHILD_HIDDEN = ("score", "accuracy", "wcpm", "errors", "unsure")
-
-
 def child_summary(r: Reading) -> dict:
-    """A reading as the child may see it: no marks, and no word results before teacher review."""
+    """A reading as the child sees it. Before teacher review the child sees the AI's provisional
+    result (flagged ai_provisional); the reading still waits in the teacher's review queue."""
     d = analytics.reading_summary(r)
     d["pending_review"] = r.status == "done" and not r.reviewed
-    if d["pending_review"]:
-        for k in (*CHILD_HIDDEN, "correct", "total_words"):
-            d[k] = None
+    d["ai_provisional"] = d["pending_review"]
     return d
 
 
@@ -245,8 +241,5 @@ def my_reading(rid: int, user: User = Depends(require_student), db: Session = De
     if d.get("error"):
         d["error"] = "Something went wrong while checking this reading. Please ask your teacher."
     d["pending_review"] = r.status == "done" and not r.reviewed
-    if d["pending_review"]:  # AI suggestions stay with the teacher until reviewed
-        d["metrics"] = None
-        d["score"] = None
-        d["marks"] = []
+    d["ai_provisional"] = d["pending_review"]  # AI result shown now; teacher review can still change it
     return d

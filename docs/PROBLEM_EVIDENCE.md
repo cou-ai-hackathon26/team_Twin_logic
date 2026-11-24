@@ -52,7 +52,7 @@ words it flags. **How much time this actually saves in a real class is not measu
 | E4: fluency needs listening; কার and যুক্তাক্ষর are the hard part | WCPM per reading; Bangla grapheme segmenter; class pattern map by unit |
 | E5: too many children per teacher | The child reads alone on a laptop or phone; the teacher reviews only flagged words |
 | E6: weakest areas, poor connectivity | Runs offline on a CPU, no API cost, data stays on the device |
-| Teachers must stay in charge | Unsure marks are never counted; the teacher has the final word; the child sees no mark before review |
+| Teachers must stay in charge | Unsure marks are never counted; the teacher has the final word; the child sees the AI result at once, labelled provisional, and every reading still goes to the teacher for review |
 
 ## 5. What is still missing: confirmation from teachers
 

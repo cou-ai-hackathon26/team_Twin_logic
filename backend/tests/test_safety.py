@@ -147,7 +147,7 @@ def test_cross_site_writes_blocked(client):  # noqa: F811
     assert client.post("/api/auth/logout", headers={"Origin": "http://testserver"}).status_code == 204
 
 
-def test_unreviewed_reading_hidden_from_child_everywhere(monkeypatch):
+def test_unreviewed_reading_shown_to_child_as_ai_provisional(monkeypatch):
     s = _student_login("c4r05")
     pid = next(p["id"] for p in s.get("/api/my/passages").json() if p["language"] == "bn")
     monkeypatch.setattr(svc, "get_ctc", lambda: FakeRecognizer(["ভুল"]))
@@ -158,9 +158,12 @@ def test_unreviewed_reading_hidden_from_child_everywhere(monkeypatch):
         if d["status"] not in ("queued", "processing"):
             break
         time.sleep(0.1)
-    assert d["pending_review"] and d["score"] is None and d["metrics"] is None and d["marks"] == []
+    # the child sees the AI result at once, flagged provisional; teacher-only tools stay hidden
+    assert d["pending_review"] and d["ai_provisional"] and d["score"] is not None and d["marks"]
+    assert d["comparison"] is None and d["transcript"] is None and d["thresholds"] is None
     h = next(x for x in s.get("/api/my/overview").json()["history"] if x["id"] == rid)
-    assert h["score"] is None and h["errors"] is None and h["correct"] is None
+    assert h["ai_provisional"] and h["score"] is not None
+    # unchecked readings still do not feed the practice list or the checked totals
     assert all(w["reading_id"] != rid for w in s.get("/api/my/practice").json())
     s.__exit__(None, None, None)
 

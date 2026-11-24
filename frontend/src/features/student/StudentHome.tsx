@@ -120,21 +120,21 @@ export function StudentHome() {
       <Card>
         <CardHeader title="My readings" subtitle="Newest first" />
         {!o.history.length ? (
-          <EmptyState title="No readings yet">Your readings appear here. Your teacher will check each one.</EmptyState>
+          <EmptyState title="No readings yet">Your readings appear here. The AI marks each one at once, then your teacher checks it.</EmptyState>
         ) : (
           <ul className="divide-y divide-slate-100">
             {o.history.map((r) => (
               <li key={r.id}>
                 <Link to={`/me/readings/${r.id}`} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3 hover:bg-slate-50">
-                  {!r.pending_review && r.status === 'done' && <MarkBadge score={r.score} />}
+                  {r.status === 'done' && <MarkBadge score={r.score} />}
                   <span className={clsx('min-w-0 flex-1 truncate', langFont(r.language))}>{r.passage_title}</span>
                   <LanguageBadge language={r.language} />
-                  {r.status === 'done' && !r.pending_review && r.correct !== null && (
+                  {r.status === 'done' && r.correct !== null && (
                     <span className="text-sm tabular-nums text-teal-700">{r.correct} words read right</span>
                   )}
                   {r.pending_review && (
                     <span className="flex items-center gap-1 text-sm text-slate-500">
-                      <Clock className="size-3.5" /> Teacher will check
+                      <Clock className="size-3.5" /> AI result · teacher will check
                     </span>
                   )}
                   <span className="text-sm text-slate-500">{dateTime(r.created_at)}</span>

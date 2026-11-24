@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { ArrowLeft, Ear, Hourglass, ListChecks, Loader2, Mic, RotateCcw, Volume2 } from 'lucide-react'
+import { ArrowLeft, Bot, Ear, Hourglass, ListChecks, Loader2, Mic, RotateCcw, Volume2 } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMe, useMyPassage, useReading, useUploadMyReading } from '@/api/hooks'
 import { ListenAlong, MyVoicePlayer, useMyVoice, useSayWord } from '@/components/audio'
@@ -46,7 +46,6 @@ export function StudentReadingPage() {
 export function StudentResultPage() {
   const id = Number(useParams().id)
   const { data: r, isLoading, error } = useReading(id, true)
-  const passage = useMyPassage(r?.pending_review ? r.passage_id : 0)
   const myAudio = `/api/my/readings/${id}/audio`
   const { say, busy } = useSayWord(r?.language ?? 'bn')
   const { playClip } = useMyVoice(myAudio)
@@ -92,43 +91,6 @@ export function StudentResultPage() {
       </>
     )
 
-  if (r.pending_review)
-    return (
-      <>
-        <PageHeader back={back} title={title} subtitle={dateTime(r.created_at)} />
-        <Card className="mb-6 overflow-hidden">
-          <div className="flex flex-col items-center gap-3 bg-marigold-50 px-6 py-10 text-center">
-            <div className="grid size-16 place-items-center rounded-full bg-white shadow ring-1 ring-amber-200">
-              <Hourglass className="size-8 text-amber-600" />
-            </div>
-            <p className="font-bn text-2xl font-semibold text-ink">খুব সুন্দর পড়েছ! শিক্ষক এখন তোমার পড়া শুনবেন।</p>
-            <p className="max-w-md text-slate-600">
-              Great reading! Your teacher will listen and check it. Then you will see your mark and the words to practise here.
-            </p>
-            <Link to={`/me/read/${r.passage_id}`}>
-              <Button variant="secondary">
-                <Mic className="size-4" /> Read it again
-              </Button>
-            </Link>
-          </div>
-        </Card>
-        {passage.data && (
-          <Card>
-            <CardHeader
-              title={
-                <span className="flex items-center gap-2">
-                  <Volume2 className="size-4 text-teal-700" /> Listen while you wait
-                </span>
-              }
-            />
-            <div className="px-5 py-6">
-              <ListenAlong compact text={passage.data.text} language={lang} textClassName={clsx('text-2xl leading-[2.2] text-slate-900', langFont(lang))} />
-            </div>
-          </Card>
-        )}
-      </>
-    )
-
   const m = r.metrics
   const marks = r.marks ?? []
   const practise = marks.filter((w) => w.final_status === 'misread' || w.final_status === 'skipped')
@@ -139,7 +101,7 @@ export function StudentResultPage() {
       <PageHeader
         back={back}
         title={title}
-        subtitle={`${dateTime(r.created_at)} · checked by your teacher`}
+        subtitle={`${dateTime(r.created_at)} · ${r.pending_review ? 'AI result · waiting for your teacher to check' : 'checked by your teacher'}`}
         actions={
           <Link to={`/me/read/${r.passage_id}`}>
             <Button variant="secondary">
@@ -148,9 +110,25 @@ export function StudentResultPage() {
           </Link>
         }
       />
+      {r.pending_review && (
+        <Card className="mb-6 overflow-hidden">
+          <div className="flex items-start gap-4 bg-marigold-50 px-5 py-4">
+            <div className="grid size-12 shrink-0 place-items-center rounded-full bg-white shadow ring-1 ring-amber-200">
+              <Bot className="size-6 text-amber-600" />
+            </div>
+            <div>
+              <p className="font-bn text-lg font-semibold text-ink">এটি AI-এর ফলাফল। শিক্ষক এখন তোমার পড়া শুনে যাচাই করবেন।</p>
+              <p className="mt-0.5 text-sm text-slate-600">
+                This is the AI's result. It has also gone to your teacher for review, so your mark may change after your teacher checks it.
+              </p>
+            </div>
+            <Hourglass className="ml-auto hidden size-5 shrink-0 text-amber-600 sm:block" />
+          </div>
+        </Card>
+      )}
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card className="flex flex-col items-center justify-center gap-1 p-4">
-          <span className="text-xs font-medium tracking-wide text-slate-500 uppercase">Mark</span>
+          <span className="text-xs font-medium tracking-wide text-slate-500 uppercase">{r.pending_review ? 'AI mark' : 'Mark'}</span>
           <MarkBadge score={r.score} size="lg" />
         </Card>
         <Stat label="Words correct" value={m ? `${m.correct}/${m.total_words}` : '—'} />

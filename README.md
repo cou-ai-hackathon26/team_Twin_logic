@@ -58,7 +58,7 @@ server); the progress bar shows the real stages, so do not cut the wait out of a
 | 3 | **Assess a child** → Roll 01 → passage **T06** (ফলা lesson, NCTB Class 2 p. ২৩-২৪) | Read it aloud in **your own voice**, making two slips (স্মরণ → সরণ, দ্বিতীয় → দিতীয়). Watch the progress bar show the real pipeline stages |
 | 4 | **Review** | Click a red word: heard vs expected unit by unit, play just that word. Change one mark with a tap, then **Finalise review** (audio is deleted unless "Keep the audio" is ticked) |
 | 5 | Student page → **Assign practice** on a weak pattern | Words and a passage containing that unit are picked for the child |
-| 6 | Log out, log in as `c2r01` / `student123` | The checked reading now shows its mark; an unchecked one says "your teacher will check". **From your teacher** shows the assigned words with a **Say it** check |
+| 6 | Log out, log in as `c2r01` / `student123` | A checked reading shows the teacher's mark; an unchecked one shows the AI result labelled "AI result · teacher will check". **From your teacher** shows the assigned words with a **Say it** check |
 | 7 | Teacher → **Benchmark** | The 100-recording held-out comparison (adult FLEURS speech, simulated errors): PoraBondhu vs plain CTC vs Whisper, paired differences, robustness checks including the child-like voice failure, and the missed targets |
 | 8 | Teacher → **Settings** → **Reset demo recordings** | Clean up for the next visitor |
 
@@ -95,7 +95,7 @@ step-by-step guide: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
 
 <table>
 <tr><td width="50%" valign="top"><img src="docs/walkthrough/t14-review.jpg" alt="Teacher review: every word marked; click a word to see heard vs expected unit by unit, the diagnosis and the evidence; one tap changes a mark" width="100%"><br><sub>Teacher review: every word marked; click a word to see heard vs expected unit by unit, the diagnosis and the evidence; one tap changes a mark</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t04-class-pattern-map.jpg" alt="Class pattern map: which written units the class misreads, and "Assign to this group"" width="100%"><br><sub>Class pattern map: which written units the class misreads, and "Assign to this group"</sub></td></tr>
-<tr><td width="50%" valign="top"><img src="docs/walkthrough/t12-progress-listening.jpg" alt="Real marking stages while the model works (no fake spinner)" width="100%"><br><sub>Real marking stages while the model works (no fake spinner)</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s04-waiting-for-teacher.jpg" alt="Child sees no mark until the teacher has checked the reading" width="100%"><br><sub>Child sees no mark until the teacher has checked the reading</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/t12-progress-listening.jpg" alt="Real marking stages while the model works (no fake spinner)" width="100%"><br><sub>Real marking stages while the model works (no fake spinner)</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s04-waiting-for-teacher.jpg" alt="Earlier version: child waits for the teacher (now the AI result is shown at once)" width="100%"><br><sub>Earlier version: child waits for the teacher (now the AI result is shown at once)</sub></td></tr>
 <tr><td width="50%" valign="top"><img src="docs/walkthrough/t17-benchmark.jpg" alt="Benchmark page: 100 held-out recordings, three systems, confidence intervals, missed targets" width="100%"><br><sub>Benchmark page: 100 held-out recordings, three systems, confidence intervals, missed targets</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/t18-settings-learning.jpg" alt="Learning from teacher reviews, privacy rules, password, demo reset" width="100%"><br><sub>Learning from teacher reviews, privacy rules, password, demo reset</sub></td></tr>
 </table>
 
@@ -121,7 +121,7 @@ step-by-step guide: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
 
 <table>
 <tr><td width="50%" valign="top"><img src="docs/walkthrough/s01-student-login.jpg" alt="1. Student login" width="100%"><br><sub>1. Student login</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s02-student-home.jpg" alt="2. Home: marks and "From your teacher"" width="100%"><br><sub>2. Home: marks and "From your teacher"</sub></td></tr>
-<tr><td width="50%" valign="top"><img src="docs/walkthrough/s03-student-reading.jpg" alt="3. Read a passage" width="100%"><br><sub>3. Read a passage</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s04-waiting-for-teacher.jpg" alt="4. Waiting for the teacher (no mark yet)" width="100%"><br><sub>4. Waiting for the teacher (no mark yet)</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/walkthrough/s03-student-reading.jpg" alt="3. Read a passage" width="100%"><br><sub>3. Read a passage</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s04-waiting-for-teacher.jpg" alt="4. Earlier version: waiting for the teacher" width="100%"><br><sub>4. Earlier version: waiting for the teacher (now the AI result is shown at once)</sub></td></tr>
 <tr><td width="50%" valign="top"><img src="docs/walkthrough/s05-checked-result.jpg" alt="5. After the teacher checked it" width="100%"><br><sub>5. After the teacher checked it</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s06-my-readings.jpg" alt="6. My readings" width="100%"><br><sub>6. My readings</sub></td></tr>
 <tr><td width="50%" valign="top"><img src="docs/walkthrough/s07-practice.jpg" alt="7. Word practice with Say it" width="100%"><br><sub>7. Word practice with Say it</sub></td><td width="50%" valign="top"><img src="docs/walkthrough/s08-progress.jpg" alt="8. My progress" width="100%"><br><sub>8. My progress</sub></td></tr>
 </table>
@@ -531,9 +531,12 @@ frontend/          React 19 + TypeScript + Tailwind 4 + TanStack Query + Rechart
   "Listen first" model reading. The demo uses public test logins, so do not record
   real children on it.
 * Audio is kept only until the teacher finalises the review, unless they keep it.
-* The child sees a mark out of 10 and the words to practise **only after the teacher has
-  checked the reading** (enforced by the API, not only the screen). Before that the child
-  sees "your teacher will check your reading". Stars reward effort (readings finished,
+* The child sees the AI's mark out of 10 and the words to practise **as soon as the reading is
+  marked**, clearly labelled as the AI result that the teacher will check. The reading still goes
+  to the teacher's review list, and the teacher's corrections replace the AI result once the review
+  is finalised. The best score, average mark and practice list count only teacher-checked readings
+  (enforced by the API), and teacher tools (comparison, transcript, thresholds) stay hidden from
+  the child. Stars reward effort (readings finished,
   words practised), never rankings against other children.
 * Recordings are deleted when the teacher finalises a review, and automatically after
   `PB_AUDIO_RETENTION_DAYS` (default 14, failed readings included); recordings the teacher

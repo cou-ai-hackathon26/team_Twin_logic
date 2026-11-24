@@ -34,7 +34,9 @@ working: the next child can read while the previous reading is being marked.
 1. **New assessment** → choose the child and a passage. Passages `T01`-`T12` follow the NCTB lessons
    (see [CURRICULUM_ALIGNMENT.md](CURRICULUM_ALIGNMENT.md)); pick the one for the lesson you are on.
 2. Press the big microphone button, let the child read, press stop. The progress bar shows each step.
-3. The child sees "your teacher will check your reading", not a mark.
+3. The child sees the AI result straight away (mark, coloured words, words to practise), labelled
+   "AI result · teacher will check". The reading also lands in your review list; after you finalise it,
+   the child sees your checked mark instead.
 
 ## Reviewing (the important part)
 

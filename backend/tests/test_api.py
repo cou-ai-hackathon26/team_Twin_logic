@@ -175,9 +175,10 @@ def test_login_required_and_roles(anon, monkeypatch):
         if d["status"] not in ("queued", "processing"):
             break
         time.sleep(0.1)
-    # before the teacher checks it, the child sees no mark and no word results
-    assert d["status"] == "done" and d["pending_review"] and d["score"] is None and d["marks"] == []
-    assert c.get("/api/my/overview").json()["history"][0]["score"] is None
+    # before the teacher checks it, the child sees the AI's provisional result, still waiting for review
+    assert d["status"] == "done" and d["pending_review"] and d["ai_provisional"] and d["score"] is not None and d["marks"]
+    h0 = c.get("/api/my/overview").json()["history"][0]
+    assert h0["ai_provisional"] and h0["score"] is not None
     with TestClient(app) as t:
         t.post("/api/auth/login", json={"username": "teacher", "password": "teacher123"})
         assert t.post(f"/api/readings/{rid}/finalize", json={"keep_audio": False}).status_code == 200

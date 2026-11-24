@@ -161,9 +161,11 @@ The same child-friendly reading screen: press the button, read aloud, press stop
 
 ![Student reading](walkthrough/s03-student-reading.jpg)
 
-### 4. Waiting for the teacher
-Before the teacher checks the reading the child sees **no mark**: "খুব সুন্দর পড়েছ! শিক্ষক এখন তোমার
-পড়া শুনবেন।" and can listen to the passage meanwhile.
+### 4. AI result, waiting for the teacher
+As soon as the reading is marked the child sees the **AI result** (mark, coloured words, words to
+practise) under a note: "এটি AI-এর ফলাফল। শিক্ষক এখন তোমার পড়া শুনে যাচাই করবেন।" The reading also
+goes to the teacher's review list, and the mark may change after the teacher checks it.
+*(The screenshot below is from the earlier version, which showed no mark until review.)*
 
 ![Waiting for teacher](walkthrough/s04-waiting-for-teacher.jpg)
 
@@ -174,7 +176,7 @@ correct pronunciation (and the child's own voice if the teacher kept the audio).
 ![Checked result](walkthrough/s05-checked-result.jpg)
 
 ### 6. My readings
-Every reading, newest first: checked ones with their mark, unchecked ones "Teacher will check".
+Every reading, newest first: checked ones with the teacher's mark, unchecked ones with the AI mark and "AI result · teacher will check".
 
 ![My readings](walkthrough/s06-my-readings.jpg)
 

@@ -4,5 +4,5 @@ scrape_configs:
   - job_name: porabondhu
     metrics_path: /metrics
     static_configs:
-      # PoraBondhu running on the host (load-test port 8200; change to 8000 for the dev server)
-      - targets: ["host.docker.internal:8200"]
+      # PoraBondhu running on the host on port 8000 (use 8200 for a separate load-test server)
+      - targets: ["host.docker.internal:8000"]
