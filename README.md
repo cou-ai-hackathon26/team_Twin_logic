@@ -20,7 +20,7 @@ never sent to a third-party AI service.
 | **Live demo** | **https://porabondhu.165-99-219-251.sslip.io** (HTTPS only; the app port is reachable only through the HTTPS proxy) |
 | **Demo video** | **https://youtu.be/z_jiGV3ZkbU** (2:00, Bangla narration with a cartoon guide; a narrated walkthrough of real screenshots of the app, not a live screen recording). Live steps: [5-minute demo script](#demo-in-5-minutes) |
 | **Repository** | https://github.com/mohammadyaksafu/porabondhu-ai |
-| **Docs** | [Teacher guide](docs/TEACHER_GUIDE.md) · [Children's data and security](docs/DATA_PROTECTION.md) · [Teacher usability test (not run yet)](docs/USABILITY_TEST.md) · [Curriculum alignment](docs/CURRICULUM_ALIGNMENT.md) · [Classroom workflow, pilot plan, safeguards and interview questions](docs/CLASSROOM_AND_PILOT.md) · [Technical defence and demo script](docs/TECHNICAL_DEFENSE.md) · [Data collection](docs/DATA_COLLECTION.md) |
+| **Docs** | **[Data, model and architecture (why no child data, what we trained)](docs/DATA_AND_MODEL.md)** · [Teacher guide](docs/TEACHER_GUIDE.md) · [Children's data and security](docs/DATA_PROTECTION.md) · [Teacher usability test (not run yet)](docs/USABILITY_TEST.md) · [Curriculum alignment](docs/CURRICULUM_ALIGNMENT.md) · [Classroom workflow, pilot plan, safeguards and interview questions](docs/CLASSROOM_AND_PILOT.md) · [Technical defence and demo script](docs/TECHNICAL_DEFENSE.md) · [Data collection](docs/DATA_COLLECTION.md) |
 
 ### Test logins for the live demo
 
@@ -341,6 +341,9 @@ word-level feedback. What PoraBondhu adds, as far as we know, is the combination
 How well this works on children is **not yet known** (see [Evidence still needed](#evidence-still-needed)).
 
 ## How the AI works
+
+Full detail, including **why there is no child data, what we trained and tuned (and what we did not),
+and the model architecture**: [docs/DATA_AND_MODEL.md](docs/DATA_AND_MODEL.md).
 
 ```
 audio ─► quality check ─► wav2vec2 CTC (Bangla, CPU, ONNX int8)

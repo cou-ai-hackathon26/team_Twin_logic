@@ -67,7 +67,7 @@ We compared Whisper small on the same audio: on this Bengali data it produced mo
 language model tends to write the word that *should* be there. It also does not say which written unit was wrong, and a cloud
 LLM would send children's voices off the device. Our system runs offline on a school laptop.
 
-**Did you train a model?**
+**Did you train a model?** (full answer with the architecture: [DATA_AND_MODEL.md](DATA_AND_MODEL.md))
 The speech model is a public checkpoint (arijitx/wav2vec2-xls-r-300m-bengali, Apache-2.0) that we
 exported to ONNX int8 for CPU speed. What we built and tuned: the grapheme engine, the alignment, the
 two-signal decision and its thresholds (calibrated on held-out tuning speakers). A child-voice
