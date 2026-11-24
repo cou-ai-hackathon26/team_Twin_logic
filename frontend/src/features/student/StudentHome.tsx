@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMyOverview, useMyPassages } from '@/api/hooks'
 import { FromTeacher } from './FromTeacher'
+import { buddyLine, ReadingBuddy } from '@/components/ReadingBuddy'
 import type { Language } from '@/api/types'
 import { LanguageBadge, MarkBadge, ReadingStatusBadge, SimulatedBadge } from '@/components/domain'
 import { Button, Card, CardHeader, EmptyState, ErrorBox, PageLoader } from '@/components/ui/primitives'
@@ -29,9 +30,7 @@ export function StudentHome() {
       <div className="relative mb-8 overflow-hidden rounded-3xl bg-marigold-50 p-6 ring-1 ring-amber-200 sm:p-8">
         <div aria-hidden="true" className="pointer-events-none absolute -right-4 -bottom-16 select-none font-bn-display text-[13rem] leading-none text-amber-500/10">অআ</div>
         <div className="relative flex flex-wrap items-center gap-6">
-          <div className="grid size-20 shrink-0 animate-float place-items-center rounded-3xl bg-white text-4xl shadow-lg ring-1 ring-amber-200" aria-hidden="true">
-            📖
-          </div>
+          <ReadingBuddy size={104} {...buddyLine(o.tests_done ? o.history.find((h) => h.score !== null)?.score : null)} className="order-last sm:order-none" />
           <div className="min-w-0 flex-1">
             <div className="font-bn text-amber-800">শুভেচ্ছা!</div>
             <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Hello, {o.nickname || o.code}!</h1>

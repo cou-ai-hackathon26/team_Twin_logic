@@ -8,6 +8,7 @@ import { Button, Card, CardHeader, EmptyState, ErrorBox, PageHeader, PageLoader,
 import { ProcessingProgress } from '@/features/assess/ProcessingProgress'
 import { dateTime, langFont, STATUS_META } from '@/lib/format'
 import { ReadingSession } from '../assess/ReadingSession'
+import { buddyLine, ReadingBuddy } from '@/components/ReadingBuddy'
 import { Legend, MarkedPassage } from '../review/MarkedPassage'
 
 /** A student takes a reading test on their own. */
@@ -110,6 +111,7 @@ export function StudentResultPage() {
           </Link>
         }
       />
+      <ReadingBuddy size={88} {...buddyLine(r.score)} className="mb-4" />
       {r.pending_review && (
         <Card className="mb-6 overflow-hidden">
           <div className="flex items-start gap-4 bg-marigold-50 px-5 py-4">
