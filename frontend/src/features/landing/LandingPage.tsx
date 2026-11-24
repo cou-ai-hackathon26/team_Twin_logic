@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { ReadingBuddy } from '@/components/ReadingBuddy'
 import {
   ArrowRight,
   AudioLines,
@@ -449,6 +450,7 @@ export function LandingPage() {
             </ul>
           </div>
           <div className="animate-fade-up [animation-delay:0.15s]">
+            <ReadingBuddy size={112} mood="cheer" say="এসো, একসাথে পড়ি! তুমি পারবে!" className="mb-5 justify-center" />
             <HeroDemo />
           </div>
         </div>
