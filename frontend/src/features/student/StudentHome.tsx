@@ -62,7 +62,7 @@ export function StudentHome() {
       <Card className="mb-6">
         <CardHeader
           title="Read aloud"
-          subtitle="Read a passage aloud. You get a mark out of 10 after your teacher checks it."
+          subtitle="Read a passage aloud. The AI shows your mark out of 10 at once, then your teacher checks it."
           actions={
             <div className="inline-flex rounded-lg bg-slate-100 p-1 text-sm" role="tablist">
               {LANG_TABS.map((t) => (

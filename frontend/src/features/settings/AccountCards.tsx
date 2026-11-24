@@ -83,7 +83,7 @@ export function PrivacyCard({ settings }: { settings: SystemInfo['settings'] }) 
           {days > 0 ? `, and automatically ${days} days after recording` : ''} unless you tick “keep audio”.
           {days === 0 && <span className="text-slate-500"> Automatic deletion is off; set PB_AUDIO_RETENTION_DAYS (we recommend 14).</span>}
         </li>
-        <li>• Children see their mark and practice words only after you have checked the reading.</li>
+        <li>• Children see the AI result at once, labelled "AI result · teacher will check"; your checked mark replaces it.</li>
         <li>
           • A login is locked for {settings.lockout_minutes ?? 10} minutes after {settings.max_failed_logins ?? 5} wrong passwords in a row.
         </li>
