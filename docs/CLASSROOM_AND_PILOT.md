@@ -12,10 +12,10 @@ Times are our estimates; only the marking time was measured (on our development 
 | Set up once | Teacher | 10 min | Create the class, add roll numbers (no names), print the login slips if children will read on their own |
 | Hear each child | Child reads, teacher or a helper starts the recording | 1-2 min per child | One graded passage (for example T05-T08 for Grade 2, matched to the textbook lesson the class is on). 10-12 children a day covers the class in a week |
 | Wait for marks | Laptop | ~20-30 s per reading on a 4-core laptop CPU, runs in the background | The next child can start reading while the previous one is marked |
-| Review | Teacher | 1-2 min per reading | Open the review queue (sorted "needs most help first"), listen to any red or amber word, correct with one tap. "Unsure" words are never counted as errors |
+| Review | Teacher | 1-2 min per reading | Open the review queue (sorted "needs most help first"), use **Quick check** to hear each flagged word (or **Compare** it with the correct pronunciation), correct with one tap. "Unsure" words are never counted as errors |
 | Plan the lesson | Teacher | 5 min per week | Class pattern map: which units (e.g. র-ফলা, ি/ী, যুক্তাক্ষর) most children misread. **Assign to this group** sends words and a passage with that unit to exactly those children |
 | Practice | Child, on a shared device | 5 min | "From your teacher": hear each word, say it, get an instant check; reading the assigned passage marks it done |
-| Talk to parents | Teacher | optional | Print the one-page student report (Report button), marks only after the teacher has reviewed them |
+| Talk to parents | Teacher | optional | Print the one-page student report (Report button); use readings the teacher has checked |
 
 Total extra teacher time: about 2-3 minutes per child per assessment round, against listening to
 every child read individually and noting errors by hand.
@@ -100,8 +100,9 @@ None of these is in place yet; all are required before recording a single child.
   set (we suggest 14); audio kept longer only for annotation, with explicit consent for that use.
 * **Storage:** the laptop disk encrypted (e.g. BitLocker) or the audio folder on an encrypted volume;
   backups encrypted; a named team member responsible for the data and for deleting it after the pilot.
-* **Child wellbeing:** children see their mark only after the teacher checks it (built in); no
-  rankings; a child who is upset by reading aloud stops without penalty.
+* **Child wellbeing:** children see the AI result at once, clearly labelled "AI result · teacher will
+  check", and the teacher's checked mark replaces it; possible regional pronunciations are never counted
+  as errors; no rankings; a child who is upset by reading aloud stops without penalty.
 * **Reporting:** results reported for children separately from adults, with sample size and limits;
   no claim beyond what the pilot measured.
 
@@ -111,8 +112,8 @@ None of these is in place yet; all are required before recording a single child.
 |---|---|---|
 | Accuracy on children's voices is unmeasured | All numbers so far are adult speech; teachers will stop using it after a few false accusations | Consent-based pilot with two independent annotators (section 4), report child results separately |
 | Marking speed on old school laptops | ~18-20 s per 60 s of reading on our 4-core laptop; slower on 2-core machines | Measure on the actual school laptop first; chunked processing while the child reads is the planned fix |
-| Classroom noise and microphones | Noise makes words "unsure" or rejected | Use a USB headset; the quality check already rejects unusable audio |
+| Classroom noise and microphones | Noise makes words "unsure" or rejected | Use a USB headset; the quality check rejects unusable audio and the per-word noise guard sends noisy words to the teacher (〰) |
 | Regional pronunciation | Standard-Bangla model may mark accepted local forms as errors | Teachers add accepted variants in Settings; collect them during the pilot |
-| Teacher time and trust | Reviewing still costs 1-2 min per reading (estimate) | Ask teachers in the interviews; track how often they change AI marks during the pilot |
+| Teacher time and trust | Reviewing still costs 1-2 min per reading (estimate) | Quick check plays only the flagged words; the review page shows the teacher-AI agreement per reading, to be tracked during the pilot |
 | Devices and setup | Needs a laptop with ~3 GB free and a one-time model download | A prepared USB installer or a pre-loaded laptop per school |
 | Hosting real data | A public server is not acceptable for children's voices | Offline school laptop by default; any hosted version only after the safeguards in section 7 |

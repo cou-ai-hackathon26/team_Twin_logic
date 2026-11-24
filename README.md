@@ -182,7 +182,7 @@ calculation and a 10-minute teacher interview script: [docs/PROBLEM_EVIDENCE.md]
 * Teacher and student logins; classes and students by roll code (no names stored)
 * In-browser recording (16 kHz WAV) with an audio quality check
 * Marked passage with a per-word inspector: heard vs expected unit by unit,
-  Bangla diagnosis, both confidence signals, and playback of just that word
+  Bangla diagnosis, both confidence signals, and replay of the child's own voice (next point)
 * **Replay for teacher correction:** for every word, **Word**, **In context** (with its neighbours) and
   **Compare** (the child's word, then the correct pronunciation); 1×/0.75×/0.5× speed; the word under
   the playhead lights up in the passage; **Quick check** steps through only the flagged words and plays
@@ -198,8 +198,8 @@ calculation and a 10-minute teacher interview script: [docs/PROBLEM_EVIDENCE.md]
   paired): on words read in a simulated regional accent, false alarms fall from 86.1% (186/216) to
   28.7% (62/216); false alarms on other correct words fall slightly (3.8% → 3.2% clean, 4.6% → 4.1% in
   5 dB classroom babble). **Cost:** recall falls from 87.9% to 70.7% on clean audio, mostly because
-  simulated aspiration slips that look like an accent (23 words) are sent to the teacher as unsure
-  instead of being counted as errors. Adult speech, simulated errors and simulated accent, not children
+  simulated aspiration slips that look like an accent are sent to the teacher as unsure instead of
+  being counted as errors. Adult speech, simulated errors and simulated accent, not children
   or real dialect recordings; full table on the Benchmark page.
 * Student progress (WCPM and accuracy over time), weak patterns, practice suggestions
 * Class pattern map: which units most children misread
@@ -334,7 +334,7 @@ word-level feedback. What PoraBondhu adds, as far as we know, is the combination
 | Uncertainty | Forced decision | **Abstention** built in: "unsure" goes to the teacher and never counts as an error. With the trained classifier the cross-validated cut-off currently sends no word to unsure (the teacher still checks every reading); the rules mode marks 18% unsure |
 | Spelling vs reading | Spelling differences count as errors | Letters that sound the same (স/শ/ষ, ি/ী …) are not reading errors |
 | From diagnosis to teaching | Report | Repeated unit errors become weak patterns → class pattern map → **practice assigned to exactly the children who need it**, with passages tied to the **NCTB lesson and page** that teaches that unit |
-| Child safety | Score shown at once | Child sees the mark only after the teacher checks it |
+| Child safety | Score shown at once, final | The child sees the AI result at once, labelled "AI result · teacher will check"; the teacher's checked mark replaces it, and best/average marks and practice lists use checked readings only |
 | Improvement over time | Fixed model, or retraining on collected audio | **Learns from each teacher review**: replays the stored evidence of every decision to re-tune its thresholds and adopts regional pronunciations teachers accept; transparent and reversible, no audio kept |
 | Cost and privacy | Cloud service | Offline on a school laptop CPU, no API cost, no audio leaves the device |
 
@@ -464,6 +464,32 @@ pronunciation, hesitations, classroom noise) remains untested.
 **Tuning:** 3-fold cross-validation on the dev recordings gave precision 81% ± 2, recall 82% ± 6,
 false alarms 3.3% ± 0.4. One threshold (`gop_high` = 0.1) is at the edge of the searched range.
 
+**Trust guards and replay (added 24 Nov, after the judges' feedback).** The judges asked for (1) replay
+of the child's recording for teacher correction and (2) a diagnosis that stays trustworthy with noise,
+regional accents and odd words. Replay is in the Review page (Word, In context, Compare, slower speed,
+Quick check). The trust guards (`backend/app/assessment/robust.py`) were measured with
+[`scripts/eval_noise_accent.py`](backend/scripts/eval_noise_accent.py) on the first 60 FLEURS test
+recordings, decoding each recording once and applying the guards to a copy of the same marks
+([`results/noise_accent.json`](backend/results/noise_accent.json)):
+
+| Condition (60 FLEURS test recordings) | False alarms, guards off → on | Recall, guards off → on | Unsure, off → on |
+|---|---|---|---|
+| No added noise | 3.8% → 3.2% (37 → 31 of 971) | 87.9% → 70.7% (138 → 111 of 157) | 0% → 2.9% |
+| Classroom babble, 20 dB | 3.3% → 2.7% | 85.4% → 71.3% | 0% → 2.5% |
+| Classroom babble, 10 dB | 3.9% → 3.4% | 75.2% → 64.3% | 0% → 2.0% |
+| Classroom babble, 5 dB | 4.6% → 4.1% | 59.2% → 46.5% | 0% → 2.2% |
+| Fan / rain hiss, 10 dB | 5.1% → 4.6% | 57.3% → 54.8% | 0% → 0.8% |
+| Simulated regional accent (216 words read the regional way) | **86.1% → 28.7%** (186 → 62) | n/a | |
+
+**What this shows:** words read in a simulated regional accent are mostly no longer called errors, and
+false alarms on other correct words drop a little in every noise condition. **The cost is recall:** on
+clean audio 27 of 157 simulated errors stop being counted automatically; most of the 23 words the accent
+guard changed were simulated aspiration-type slips, which look exactly like an accent. They are not hidden: they go to the teacher as unsure ♪ and are replayed
+in Quick check. The headline tables above were measured **before** the guards existed; on the same 60
+recordings the app with guards gives recall 70.7% and false alarms 3.2%. Adult speech, simulated errors
+and a simulated accent (passage spelling changed so the speaker's real pronunciation is the regional
+form); no real dialect recordings or classroom audio yet.
+
 The earlier [10-recording pilot](backend/results/benchmark_pilot_10.md) (PoraBondhu only) is kept for reference.
 
 Measured on the development laptop (Intel i5-10310U, 4 cores / 8 threads, no GPU) with
@@ -592,7 +618,7 @@ What exists today is a working, tested prototype; these claims are **not** yet s
 
 * The CTC model can still miss or invent errors; uncertain cases are shown as unsure.
 * All evaluation so far uses adult speech (FLEURS, simulated errors). **No child has been recorded**, so accuracy on children is unknown; a resampled child-like voice proxy lowered recall by about 3 points.
-* Regional accents may appear as errors until added as accepted variants.
+* Possible regional pronunciations are sent to the teacher as unsure (♪) instead of errors, and the teacher can accept them as variants. The same rule also stops some real aspiration slips from being counted automatically (recall 87.9% → 70.7% in the trust test). The accent test is simulated, not real dialect speech.
 * Whisper `small` often writes Bangla in Devanagari; the baseline maps it back
   to Bengali script by Unicode block offset before comparing.
 

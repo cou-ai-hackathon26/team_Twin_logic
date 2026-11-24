@@ -28,8 +28,10 @@ outside AI or analytics service; the only outside call is Microsoft Edge TTS, wh
   only**. No child, roll number, nickname, class list, recording or single reading is ever sent to this
   role; any school, unit or week with **fewer than 5 children is hidden**, so one child cannot be
   singled out. The server refuses every other page for this role (tested).
-* A **child login** sees only that child's own readings and assignments, and sees marks and errors only
-  after the teacher has reviewed the reading (enforced by the server).
+* A **child login** sees only that child's own readings and assignments. Before the teacher's review it
+  sees the AI's provisional result, labelled "AI result · teacher will check"; teacher-only details
+  (system comparison, transcript, thresholds, review statistics) are never sent to it, and best/average
+  marks and the practice list use teacher-checked readings only (enforced by the server).
 * Whoever has **administrator access to the computer or server** can read the files directly. Use an
   encrypted disk (e.g. BitLocker on Windows) and keep the laptop locked.
 * On the **public demo** the logins are shared, so anyone can see what is recorded there. It must never

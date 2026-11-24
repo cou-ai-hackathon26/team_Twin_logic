@@ -27,7 +27,7 @@ at any time. We will not use your name unless you agree."
 | 1 | Log in as the teacher and switch the menus to Bangla | Logged in, বাং toggle used | Time, hesitations |
 | 2 | Create a class "Test 3" (Grade 3) and add 5 students | 5 roll numbers visible | Did they find **Add students**? |
 | 3 | Assess Roll 01 of Class 2 with passage T06, reading it yourself with two mistakes | Reading uploaded, progress bar seen | Was the wait acceptable? |
-| 4 | Review that reading: find a wrong word, listen to it, correct one mark, finalise | Finalised with ≥1 teacher change | Did they understand **unsure**? |
+| 4 | Review that reading: find a wrong word, listen to it (Word / In context / Compare, or Quick check), correct one mark, finalise | Finalised with ≥1 teacher change | Did they understand **unsure** and the ♪ 〰 ⚑ marks? Did they use Compare? |
 | 5 | On the Class 2 page, find which unit most children misread and assign practice to that group | Assignment created for the group | Did the pattern map make sense? |
 | 6 | Log in as one of those children (`c2rNN` / `student123`, NN = roll number) and find what the teacher assigned; also open the reading from task 3 as `c2r01` | "From your teacher" found; the reading shows its mark only because it was finalised | |
 | 7 | Back as teacher: export Class 2 and open it in Excel | CSV opens with Bangla readable | |
@@ -44,7 +44,7 @@ at any time. We will not use your name unless you agree."
 
 1. Which task was hardest, and why?
 2. Did you trust the marks? When would you change a mark?
-3. Was the meaning of "unsure" (অনিশ্চিত) clear?
+3. Was the meaning of "unsure" (অনিশ্চিত) clear? Did **Compare** (the child, then the correct word) or **Quick check** make deciding easier?
 4. How long could you spend per child per week on this? Is the review step worth it?
 5. Which result would you actually use in class: per-child weak patterns, class pattern map, assigned
    practice, export, or the printed report?

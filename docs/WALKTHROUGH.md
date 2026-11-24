@@ -104,14 +104,20 @@ Every reading waiting for the teacher, "needs most help first", with filters by 
 ### 12. Review a reading
 Mark, words correct per minute, accuracy, errors, **unsure** (never counted as errors). In the passage:
 red = misread, struck through = skipped, dotted amber = unsure. Click a word: heard vs expected **unit
-by unit**, the diagnosis in Bangla, the evidence, and **Listen** to just that word. Change a mark with
-one tap (keys 1-4).
+by unit**, the diagnosis in Bangla, the evidence (including how far the word stands above background
+noise), and three replay buttons: **Word** (space), **In context** (C, with the words before and after)
+and **Compare** (V, the child's word, then the correct pronunciation). 1× / 0.75× / 0.5× speed; the word
+under the playhead lights up while the recording plays. **Quick check** steps through only the flagged
+words and plays each one. Change a mark with one tap (keys 1-4), or **Accept as accent** /
+**AI unreliable here: always ask me**. The bar above the passage shows how often you agreed with the AI
+and the trust-guard marks: ♪ possible regional accent, 〰 noisy, ⚑ odd word (all left to you as unsure).
+*(The screenshot below is from before the replay buttons were added.)*
 
 ![Review](walkthrough/t14-review.jpg)
 
 ### 13. Finalise
-**Finalise review**: the audio is deleted unless "Keep the audio" is ticked. Only now does the child see
-the mark, and the corrections teach PoraBondhu (step 16).
+**Finalise review**: the audio is deleted unless "Keep the audio" is ticked. The child's AI result is now
+replaced by your checked mark, and the corrections teach PoraBondhu (step 16).
 
 ![Finalise](walkthrough/t15-finalise.jpg)
 
@@ -123,7 +129,8 @@ Graded Bangla and English passages; chips show which units each passage practise
 ### 15. Benchmark
 The held-out evaluation (100 FLEURS test recordings, adult speech, simulated errors): PoraBondhu vs
 plain CTC vs Whisper with confidence intervals, the hypothesis we did **not** confirm, robustness checks,
-and the targets we miss.
+and the targets we miss. A **Trust test** card shows background noise (classroom babble, hiss) and a
+simulated regional accent with the trust guards off vs on, including what they cost in recall.
 
 ![Benchmark](walkthrough/t17-benchmark.jpg)
 

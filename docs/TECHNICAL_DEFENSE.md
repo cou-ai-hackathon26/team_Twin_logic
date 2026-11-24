@@ -130,14 +130,56 @@ marking engine, with no audio. Every reading recorded during the demo is marked 
 9. **Is the district view a ranking of schools?** No, and the page says so: it shows which written
    units need practice and links the passages that practise them, to plan teacher support.
 
+## 2d. Replay for teacher correction and trust guards (the judges' feedback, 24 Nov)
+
+The judges asked: (1) let the teacher hear the child's own recording next to the marked passage and
+correct a mark by replaying it; (2) keep the diagnosis trustworthy with noise, a regional accent or an odd word.
+
+1. **How does the teacher check a mark?** Click the word: **Word** plays just that word (with 0.35 s
+   either side), **In context** plays it with the word before and after, **Compare** plays the child's
+   word and then the correct pronunciation. 0.75× and 0.5× help with small slips (a missing ফলা). The
+   word under the playhead lights up while the recording plays. **Quick check** jumps through only the
+   flagged words and plays each one; the teacher presses 1-4 and the next word plays.
+2. **Where do the word times come from?** From the forced alignment of the passage text against the
+   speech model's frames (the same step that gives the expected-text score), so every passage word has a
+   start and end even if the child skipped it.
+3. **How do you show the teacher is in control?** The bar above the passage shows how many words the
+   teacher changed and the agreement rate for that reading. Every change is stored next to the AI's
+   decision and teaches the learning step (variants, thresholds).
+4. **Regional accent?** If the heard word differs from the passage word *only* by a regional sound swap
+   (dropped aspiration ভ→ব, র/ড়, স for চ), it is flagged ♪ and sent to **unsure**: never counted as an
+   error, and the teacher decides. We do not mark it correct automatically, because in standard Bangla an
+   aspiration slip can be a real reading error. **Accept as accent** marks it correct and adds the
+   pronunciation as an accepted variant for future readings.
+5. **Noise?** Per word we measure how far it stands above the local noise (dB) and how flat its spectrum
+   is (hiss, fans, rain are flat; speech is peaky). A misread over flat noise, or a quiet misread in a
+   recording that is noisy overall, becomes unsure 〰. A soft word in a quiet room is not called noise,
+   and a silent skipped word is not mistaken for noise (only sounding frames count).
+6. **Odd words?** Three-letter conjuncts, very long, rare or foreign words need very strong recogniser
+   confidence (≥0.85) to stay misread; words the teacher marked "AI unreliable here" and words teachers
+   corrected in 3+ reviewed readings always go to the teacher ⚑.
+7. **Did it help? Show me numbers.** Trust test on 60 FLEURS test recordings, guards off → on, paired:
+   accent words wrongly flagged 86.1% → 28.7%; false alarms on other correct words 3.8% → 3.2% clean and
+   4.6% → 4.1% in 5 dB babble. **Cost:** recall 87.9% → 70.7% on clean audio, because simulated
+   aspiration slips look exactly like an accent and are sent to the teacher instead of being counted.
+   We report that cost rather than hide it.
+8. **Isn't the accent test circular?** It is simulated: we change the passage spelling so the adult
+   speaker's real pronunciation is the regional form. It tests the decision logic, not real dialect
+   acoustics. Real dialect and classroom recordings are the next step.
+9. **Why not turn the accent guard off then?** The teacher confirms either way; the guard trades
+   automatic recall for far fewer wrong "error" marks on children who read correctly in their own accent,
+   which is what damages trust and motivation. Schools can remove an accepted variant in Settings.
+
 ## 3. Live demo script (3 minutes)
 
 1. Log in as teacher. Point out the DEMO banner and badges on the dashboard: "this history is simulated".
 2. New assessment → choose a child and T06 (Grade 2, ফলা lesson, textbook page shown in the evidence
    table) → read it aloud, making two deliberate mistakes (e.g. স্মরণ → সরণ, দ্বিতীয় → দিতীয়).
 3. Show the progress bar (real pipeline stages) while it marks.
-4. Review: click the misread word, show heard vs expected unit by unit, play just that word. Correct one
-   mark with a tap ("the teacher has the final word"). Finalise; audio is deleted.
+4. Review: click the misread word, show heard vs expected unit by unit, press **Compare** (the child,
+   then the correct word) and **In context**; try 0.75×. Turn on **Quick check** to step through only the
+   flagged words. Correct one mark with a tap ("the teacher has the final word"), point at the agreement
+   bar and any ♪ 〰 ⚑ marks. Finalise; audio is deleted.
 5. Student page → weak patterns and practice words → Report button.
 6. Benchmark page: the honest numbers and what they do not prove.
 
