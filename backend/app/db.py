@@ -56,7 +56,7 @@ def _add_missing_columns() -> None:
               "users": {"failed_logins": "INTEGER NOT NULL DEFAULT 0", "locked_until": "TIMESTAMP",
                         "school_id": "INTEGER"},
               "classrooms": {"teacher_id": "INTEGER", "school_id": "INTEGER"},
-              "word_marks": {"err_free": "FLOAT"}}
+              "word_marks": {"err_free": "FLOAT", "snr_db": "FLOAT"}}
     insp = inspect(engine)
     with engine.begin() as conn:
         for table, cols in wanted.items():

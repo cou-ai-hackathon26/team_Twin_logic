@@ -236,7 +236,7 @@ def my_reading_audio(rid: int, user: User = Depends(require_student), db: Sessio
 def my_reading(rid: int, user: User = Depends(require_student), db: Session = Depends(get_db)) -> dict:
     r = _own_reading(db, user, rid)
     d = reading_out(r)
-    for k in ("comparison", "comparison_status", "thresholds", "transcript"):  # teacher tools only
+    for k in ("comparison", "comparison_status", "thresholds", "transcript", "review_stats"):  # teacher tools only
         d[k] = None
     if d.get("error"):
         d["error"] = "Something went wrong while checking this reading. Please ask your teacher."

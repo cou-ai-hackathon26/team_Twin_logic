@@ -1,9 +1,10 @@
-import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Mic, RefreshCw, Trash2, Volume2 } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, ListChecks, Mic, RefreshCw, ShieldCheck, Trash2, Volume2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { audioUrl } from '@/api/client'
-import { useDeleteReading, useFinalize, useReading, useReprocess, useReviewQueue, useSetMark } from '@/api/hooks'
-import type { WordStatus } from '@/api/types'
+import { useAcceptAccent, useAddTrickyWord, useDeleteReading, useFinalize, useReading, useReprocess, useReviewQueue, useSetMark } from '@/api/hooks'
+import { useSayWord } from '@/components/audio'
+import type { WordMark, WordStatus } from '@/api/types'
 import { LanguageBadge, MarkBadge, ReadingStatusBadge } from '@/components/domain'
 import { Button, Card, CardHeader, EmptyState, ErrorBox, Modal, PageHeader, PageLoader, Stat } from '@/components/ui/primitives'
 import { ProcessingProgress } from '@/features/assess/ProcessingProgress'
@@ -13,6 +14,11 @@ import { Legend, MarkedPassage } from './MarkedPassage'
 import { WordInspector } from './WordInspector'
 
 const KEY_STATUS: Record<string, WordStatus> = { '1': 'correct', '2': 'misread', '3': 'skipped', '4': 'unsure' }
+const RATES = [1, 0.75, 0.5]
+const GUARD_FLAGS = ['accent', 'noisy', 'odd_word']
+/** Words worth a listen: the AI flagged them, or a trust guard changed its decision. */
+const needsCheck = (m: WordMark) =>
+  m.status === 'misread' || m.status === 'skipped' || m.status === 'unsure' || m.flags.some((f) => GUARD_FLAGS.includes(f))
 
 export function ReviewPage() {
   const id = Number(useParams().id)
@@ -29,9 +35,19 @@ export function ReviewPage() {
   const [confirmDel, setConfirmDel] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const stopAt = useRef<number | null>(null)
+  const onStop = useRef<(() => void) | null>(null)
+  const [rate, setRate] = useState(1)
+  const [playing, setPlaying] = useState<number | null>(null)
+  const [quick, setQuick] = useState(false)
+  const [comparing, setComparing] = useState(false)
+  const [tricky, setTricky] = useState<Set<string>>(new Set())
+  const acceptAccent = useAcceptAccent(id)
+  const addTricky = useAddTrickyWord()
+  const { say } = useSayWord(r?.language ?? 'bn')
 
   const marks = useMemo(() => r?.marks ?? [], [r?.marks])
   const sel = marks.find((m) => m.index === selected) ?? null
+  const checkList = useMemo(() => marks.filter(needsCheck), [marks])
 
   // Select the first word that needs attention once results arrive.
   useEffect(() => {
@@ -41,18 +57,68 @@ export function ReviewPage() {
     }
   }, [marks, selected])
 
-  const playSegment = useCallback((start: number | null, end: number | null) => {
-    const a = audioRef.current
-    if (!a || start === null) return
-    a.currentTime = Math.max(0, start - 0.35)
-    stopAt.current = end !== null ? end + 0.35 : null
-    void a.play()
-  }, [])
-
-  const onSet = useCallback(
-    (status: WordStatus | null) => sel && setMark.mutate({ index: sel.index, status }),
-    [sel, setMark],
+  /** Play part of the child's recording; resolves when that part has finished. */
+  const playSegment = useCallback(
+    (start: number | null, end: number | null, pad = 0.35) =>
+      new Promise<void>((resolve) => {
+        const a = audioRef.current
+        if (!a || start === null) return resolve()
+        onStop.current?.()
+        onStop.current = resolve
+        a.playbackRate = rate
+        a.currentTime = Math.max(0, start - pad)
+        stopAt.current = end !== null ? end + pad : null
+        void a.play().catch(() => resolve())
+      }),
+    [rate],
   )
+  const playWord = useCallback((m: WordMark | null) => (m ? playSegment(m.start, m.end) : Promise.resolve()), [playSegment])
+  /** The word with its neighbours, so a cut-off or blended word can be judged in context. */
+  const playContext = useCallback(
+    (m: WordMark | null) => {
+      if (!m) return Promise.resolve()
+      const timed = marks.filter((x) => x.start !== null && x.end !== null)
+      const k = timed.findIndex((x) => x.index === m.index)
+      const prev = k > 0 ? timed[k - 1] : m
+      const next = k >= 0 && k < timed.length - 1 ? timed[k + 1] : m
+      return playSegment(prev.start, next.end, 0.15)
+    },
+    [marks, playSegment],
+  )
+  /** The child's word, then the correct pronunciation, back to back. */
+  const compare = useCallback(
+    async (m: WordMark | null) => {
+      if (!m) return
+      setComparing(true)
+      try {
+        await playSegment(m.start, m.end)
+        await new Promise((res) => setTimeout(res, 300))
+        await say(m.display)
+      } finally {
+        setComparing(false)
+      }
+    },
+    [playSegment, say],
+  )
+
+  const nextToCheck = useCallback((from: number) => checkList.find((m) => m.index > from) ?? null, [checkList])
+  const onSet = useCallback(
+    (status: WordStatus | null) => {
+      if (!sel) return
+      setMark.mutate({ index: sel.index, status })
+      if (quick && status !== null) {
+        const nxt = nextToCheck(sel.index)
+        if (nxt) setSelected(nxt.index)
+      }
+    },
+    [sel, setMark, quick, nextToCheck],
+  )
+
+  // Quick check: every word you land on plays by itself.
+  useEffect(() => {
+    if (quick && sel && r?.has_audio) void playWord(sel)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quick, selected])
 
   // Keyboard: ←/→ move, 1-4 set status, space plays the word.
   useEffect(() => {
@@ -67,12 +133,19 @@ export function ReviewPage() {
         onSet(KEY_STATUS[e.key])
       } else if (e.key === ' ' && sel && r?.has_audio) {
         e.preventDefault()
-        playSegment(sel.start, sel.end)
+        void playWord(sel)
+      } else if ((e.key === 'c' || e.key === 'C') && sel && r?.has_audio) {
+        void playContext(sel)
+      } else if ((e.key === 'v' || e.key === 'V') && sel && r?.has_audio) {
+        void compare(sel)
+      } else if (e.key === 'n' || e.key === 'N') {
+        const nxt = nextToCheck(selected ?? -1) ?? checkList[0]
+        if (nxt) setSelected(nxt.index)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [marks, selected, sel, onSet, playSegment, r?.has_audio])
+  }, [marks, selected, sel, onSet, playWord, playContext, compare, nextToCheck, checkList, r?.has_audio])
 
   if (isLoading) return <PageLoader />
   if (error || !r) return <ErrorBox error={error ?? 'Reading not found'} />
@@ -184,10 +257,23 @@ export function ReviewPage() {
           src={audioUrl(r.id)}
           preload="auto"
           onTimeUpdate={(e) => {
-            if (stopAt.current !== null && e.currentTarget.currentTime >= stopAt.current) {
+            const t = e.currentTarget.currentTime
+            const cur = marks.find((m) => m.start !== null && m.end !== null && t >= m.start - 0.05 && t <= m.end + 0.05)
+            setPlaying(cur ? cur.index : null)
+            if (stopAt.current !== null && t >= stopAt.current) {
               e.currentTarget.pause()
               stopAt.current = null
             }
+          }}
+          onPause={() => {
+            setPlaying(null)
+            onStop.current?.()
+            onStop.current = null
+          }}
+          onEnded={() => {
+            setPlaying(null)
+            onStop.current?.()
+            onStop.current = null
           }}
         />
       )}
@@ -205,6 +291,22 @@ export function ReviewPage() {
         <Stat label="Reading time" value={secs(m?.reading_time_sec)} hint={`${m?.hesitations ?? 0} hesitations · ${m?.repetitions ?? 0} repeats`} />
       </div>
 
+      {r.review_stats && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-teal-200 bg-teal-50/60 px-4 py-2.5 text-sm text-teal-900">
+          <span className="flex items-center gap-1.5 font-medium">
+            <ShieldCheck className="size-4" /> Teacher agrees with AI on {Math.round(r.review_stats.agreement * 100)}% of words
+          </span>
+          <span>
+            {r.review_stats.changed} of {r.review_stats.words} changed by you · {r.review_stats.to_check} flagged to check
+          </span>
+          {r.review_stats.guards.accent + r.review_stats.guards.noisy + r.review_stats.guards.odd_word > 0 && (
+            <span className="text-teal-800">
+              Trust guards: {r.review_stats.guards.accent} accent ♪ · {r.review_stats.guards.noisy} noisy 〰 · {r.review_stats.guards.odd_word} odd word ⚑
+            </span>
+          )}
+        </div>
+      )}
+
       {r.quality?.warnings?.includes('noisy') && (
         <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
           <AlertTriangle className="size-4" /> Background noise was high ({r.quality.snr_db} dB). Check unsure words by listening.
@@ -216,17 +318,71 @@ export function ReviewPage() {
           <Card>
             <CardHeader
               title="Marked passage"
-              subtitle="Click a word to inspect it. Keys: ← → move · 1-4 set · space listen"
+              subtitle="Click a word to inspect it. Keys: ← → move · 1-4 set · space word · C context · V compare · N next to check"
               actions={
                 r.has_audio && (
-                  <Button variant="secondary" size="sm" onClick={() => audioRef.current && (audioRef.current.currentTime = 0, stopAt.current = null, void audioRef.current.play())}>
-                    <Volume2 className="size-4" /> Play all
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs" role="group" aria-label="Playback speed">
+                      {RATES.map((x) => (
+                        <button
+                          key={x}
+                          type="button"
+                          onClick={() => {
+                            setRate(x)
+                            if (audioRef.current) audioRef.current.playbackRate = x
+                          }}
+                          className={`rounded-md px-2 py-1 font-medium ${rate === x ? 'bg-white shadow-sm' : 'text-slate-600'}`}
+                          title={x === 1 ? 'Normal speed' : 'Slower, to hear small slips'}
+                        >
+                          {x}×
+                        </button>
+                      ))}
+                    </div>
+                    <Button
+                      variant={quick ? 'primary' : 'secondary'}
+                      size="sm"
+                      onClick={() => {
+                        const on = !quick
+                        setQuick(on)
+                        if (on && checkList.length && !(sel && needsCheck(sel))) setSelected(checkList[0].index)
+                      }}
+                      title="Jump through only the flagged words; each one plays by itself"
+                    >
+                      <ListChecks className="size-4" /> Quick check{checkList.length ? ` (${checkList.length})` : ''}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        const a = audioRef.current
+                        if (!a) return
+                        onStop.current?.()
+                        onStop.current = null
+                        stopAt.current = null
+                        a.playbackRate = rate
+                        a.currentTime = 0
+                        void a.play()
+                      }}
+                    >
+                      <Volume2 className="size-4" /> Play all
+                    </Button>
+                  </div>
                 )
               }
             />
+            {quick && (
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-100 bg-teal-50 px-5 py-2 text-sm text-teal-900">
+                <span>
+                  Quick check: word {Math.max(1, checkList.findIndex((m) => m.index === selected) + 1)} of {checkList.length}. Listen, then press 1-4;
+                  the next flagged word plays by itself.
+                </span>
+                <button type="button" className="font-medium underline" onClick={() => setQuick(false)}>
+                  Stop
+                </button>
+              </div>
+            )}
             <div className="px-5 py-6">
-              <MarkedPassage marks={marks} selected={selected} onSelect={setSelected} language={r.language} />
+              <MarkedPassage marks={marks} selected={selected} onSelect={setSelected} language={r.language} playing={playing} />
             </div>
             <div className="border-t border-slate-100 px-5 py-3">
               <Legend />
@@ -286,12 +442,19 @@ export function ReviewPage() {
                 onSet={onSet}
                 saving={setMark.isPending}
                 canPlay={r.has_audio}
-                onPlay={() => playSegment(sel.start, sel.end)}
+                onPlay={() => void playWord(sel)}
+                onContext={() => void playContext(sel)}
+                onCompare={() => void compare(sel)}
+                comparing={comparing}
+                onAcceptAccent={() => acceptAccent.mutate(sel.index)}
+                accepting={acceptAccent.isPending}
+                onTricky={() => addTricky.mutate(sel.expected, { onSuccess: () => setTricky((t) => new Set(t).add(sel.expected)) })}
+                trickySaved={tricky.has(sel.expected)}
               />
             ) : (
               <EmptyState title="Select a word" />
             )}
-            <ErrorBox error={setMark.error} className="mt-3" />
+            <ErrorBox error={setMark.error || acceptAccent.error || addTricky.error} className="mt-3" />
           </Card>
 
           <Card className="p-5">

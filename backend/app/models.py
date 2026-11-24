@@ -132,6 +132,7 @@ class WordMark(Base):
     free_conf: Mapped[float | None] = mapped_column(Float, nullable=True)
     gop: Mapped[float | None] = mapped_column(Float, nullable=True)
     err_free: Mapped[float | None] = mapped_column(Float, nullable=True)  # see WordMarkResult.err_free
+    snr_db: Mapped[float | None] = mapped_column(Float, nullable=True)  # word level above local noise
     units: Mapped[list] = mapped_column(JSON, default=list)
     patterns: Mapped[list] = mapped_column(JSON, default=list)  # blamed patterns if final status is misread
     error_patterns: Mapped[list] = mapped_column(JSON, default=list)  # all patterns the unit diff found
@@ -159,6 +160,16 @@ class AcceptedVariant(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     word: Mapped[str] = mapped_column(String(200), index=True)
     variant: Mapped[str] = mapped_column(String(200))
+    note: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class TrickyWord(Base):
+    """A word the teacher says the AI is unreliable on (a name, a rare word): always left to the teacher."""
+
+    __tablename__ = "tricky_words"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    word: Mapped[str] = mapped_column(String(200), unique=True, index=True)
     note: Mapped[str | None] = mapped_column(String(200), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 

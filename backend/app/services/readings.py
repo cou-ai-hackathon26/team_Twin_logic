@@ -21,7 +21,7 @@ from ..assessment.english import run_english
 from ..assessment.metrics import compute_metrics
 from ..config import get_settings, load_thresholds
 from ..db import SessionLocal
-from ..models import AcceptedVariant, Reading, WordMark
+from ..models import SIMULATED_MODEL_ID, AcceptedVariant, Reading, TrickyWord, WordMark
 from ..pipeline import run_ctc_word_compare, run_porabondhu, run_whisper_word_compare
 from ..speech.audio import load_audio_bytes, load_audio_file, save_wav
 from ..speech.registry import get_ctc, get_whisper
@@ -76,6 +76,30 @@ def _enqueue(fn, reading_id: int) -> None:
 
 def variant_pairs(db: Session) -> set[tuple[str, str]]:
     return {(v.word, v.variant) for v in db.scalars(select(AcceptedVariant))}
+
+
+def guard_options(db: Session):
+    """Trust-guard settings plus the words teachers flagged or often corrected."""
+    from ..assessment.robust import GuardOptions
+
+    s = get_settings()
+    return GuardOptions(accent=s.accent_tolerance, noise=s.noise_guard, odd_words=s.odd_word_guard,
+                        tricky_words={t.word for t in db.scalars(select(TrickyWord))},
+                        unreliable_words=unreliable_words(db))
+
+
+def unreliable_words(db: Session, min_readings: int = 3, min_share: float = 0.5) -> set[str]:
+    """Words where teachers changed the AI's decision in 3+ reviewed readings and at least half of them."""
+    from collections import defaultdict
+
+    seen: dict[str, list[int]] = defaultdict(lambda: [0, 0])  # word -> [reviewed, overruled]
+    rows = db.execute(select(WordMark.expected, WordMark.teacher_status).join(Reading)
+                      .where(Reading.reviewed.is_(True), Reading.model_id.is_distinct_from(SIMULATED_MODEL_ID)))
+    for word, teacher in rows:
+        seen[word][0] += 1
+        if teacher is not None:
+            seen[word][1] += 1
+    return {w for w, (n, k) in seen.items() if k >= min_readings and k / n >= min_share}
 
 
 def store_audio(reading: Reading, data: bytes) -> float:
@@ -153,7 +177,8 @@ def store_marks(r: Reading, marks) -> None:
         r.marks.append(WordMark(
             index=m.index, display=m.display, expected=m.expected, heard=m.heard, status=m.status,
             raw_status=m.raw_status, flags=m.flags, inserted=m.inserted, start=m.start, end=m.end,
-            free_conf=m.free_conf, gop=m.gop, err_free=getattr(m, "err_free", None), units=[u.__dict__ for u in m.units],
+            free_conf=m.free_conf, gop=m.gop, err_free=getattr(m, "err_free", None),
+            snr_db=getattr(m, "snr_db", None), units=[u.__dict__ for u in m.units],
             patterns=m.patterns, error_patterns=err_pats, note_bn=m.note_bn, note_en=m.note_en))
 
 
@@ -181,7 +206,7 @@ def _process_reading(reading_id: int) -> None:
                     progress.set_stage(reading_id, "loading")
                 ctc = get_ctc()
                 res = run_porabondhu(audio, r.passage_text, ctc, th, variant_pairs(db),
-                                     count_unsure_as_correct=unsure_ok,
+                                     count_unsure_as_correct=unsure_ok, guards=guard_options(db),
                                      on_stage=lambda st: progress.set_stage(reading_id, st))
             progress.finish(reading_id, lang, res.quality.duration_sec, res.processing_ms)
             if res.processing_ms:

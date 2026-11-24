@@ -29,8 +29,20 @@ def mark_out(m: WordMark) -> dict:
         "final_status": m.final_status, "flags": m.flags or [], "inserted": m.inserted or [],
         "start": m.start, "end": m.end, "free_conf": m.free_conf, "gop": m.gop, "units": m.units or [],
         "patterns": [pattern_label(k) for k in (m.error_patterns or [])],
-        "note_bn": m.note_bn, "note_en": m.note_en,
+        "note_bn": m.note_bn, "note_en": m.note_en, "snr_db": m.snr_db,
     }
+
+
+def review_stats(r: Reading) -> dict | None:
+    """How often the teacher agreed with the AI on this reading (words the teacher changed)."""
+    marks = [m for m in r.marks if m.status != "not_reached"]
+    if not marks:
+        return None
+    changed = [m for m in marks if m.teacher_status is not None and m.teacher_status != m.status]
+    to_check = [m for m in marks if m.status in ("misread", "skipped", "unsure")]
+    return {"words": len(marks), "changed": len(changed), "agreement": round(1 - len(changed) / len(marks), 3),
+            "to_check": len(to_check),
+            "guards": {f: sum(1 for m in marks if f in (m.flags or [])) for f in ("accent", "noisy", "odd_word")}}
 
 
 def reading_out(r: Reading, with_marks: bool = True) -> dict:
@@ -56,4 +68,5 @@ def reading_out(r: Reading, with_marks: bool = True) -> dict:
         d["progress"] = progress.snapshot(r.id, d["language"], r.duration_sec)
     if with_marks:
         d["marks"] = [mark_out(m) for m in r.marks]
+        d["review_stats"] = review_stats(r)
     return d

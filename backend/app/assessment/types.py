@@ -22,6 +22,9 @@ FLAG_PARTIAL = "partial_attempt"
 FLAG_EXTRA = "extra_word"
 FLAG_SPELLING_ONLY = "spelling_only"
 FLAG_VARIANT = "accepted_variant"
+FLAG_ACCENT = "accent"  # regional sound swap, not an error (see robust.py)
+FLAG_NOISY = "noisy"  # background noise around the word: left to the teacher
+FLAG_ODD = "odd_word"  # word the AI is unreliable on: left to the teacher
 
 
 @dataclass
@@ -114,6 +117,7 @@ class WordMarkResult:
     # free_high); stored so decisions can be replayed with new thresholds after teacher reviews
     err_free: float | None = None
     note_en: str = ""
+    snr_db: float | None = None  # how far the word stands above the local background noise (dB)
 
     def to_dict(self) -> dict:
         return asdict(self)

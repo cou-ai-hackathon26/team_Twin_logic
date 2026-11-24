@@ -56,7 +56,7 @@ server); the progress bar shows the real stages, so do not cut the wait out of a
 | 1 | Log in as `teacher` | Dashboard: the **DEMO** banner says how many readings are simulated |
 | 2 | **Class 2** (or create a class: **+ New class**, then **Add students**) | Class pattern map: which units (র-ফলা, কার, যুক্তাক্ষর) most children misread |
 | 3 | **Assess a child** → Roll 01 → passage **T06** (ফলা lesson, NCTB Class 2 p. ২৩-২৪) | Read it aloud in **your own voice**, making two slips (স্মরণ → সরণ, দ্বিতীয় → দিতীয়). Watch the progress bar show the real pipeline stages |
-| 4 | **Review** | Click a red word: heard vs expected unit by unit, play just that word. Change one mark with a tap, then **Finalise review** (audio is deleted unless "Keep the audio" is ticked) |
+| 4 | **Review** | Click a red word: heard vs expected unit by unit. Press **Compare** (the child's word, then the correct one) and **In context**; try **0.75×**. Turn on **Quick check** to step through only flagged words. Change one mark with a tap (or **Accept as accent**), then **Finalise review** (audio is deleted unless "Keep the audio" is ticked) |
 | 5 | Student page → **Assign practice** on a weak pattern | Words and a passage containing that unit are picked for the child |
 | 6 | Log out, log in as `c2r01` / `student123` | A checked reading shows the teacher's mark; an unchecked one shows the AI result labelled "AI result · teacher will check". **From your teacher** shows the assigned words with a **Say it** check |
 | 7 | Teacher → **Benchmark** | The 100-recording held-out comparison (adult FLEURS speech, simulated errors): PoraBondhu vs plain CTC vs Whisper, paired differences, robustness checks including the child-like voice failure, and the missed targets |
@@ -183,6 +183,24 @@ calculation and a 10-minute teacher interview script: [docs/PROBLEM_EVIDENCE.md]
 * In-browser recording (16 kHz WAV) with an audio quality check
 * Marked passage with a per-word inspector: heard vs expected unit by unit,
   Bangla diagnosis, both confidence signals, and playback of just that word
+* **Replay for teacher correction:** for every word, **Word**, **In context** (with its neighbours) and
+  **Compare** (the child's word, then the correct pronunciation); 1×/0.75×/0.5× speed; the word under
+  the playhead lights up in the passage; **Quick check** steps through only the flagged words and plays
+  each one by itself; an agreement bar shows how often the teacher kept the AI's mark
+* **Trust guards** for noisy rooms, regional accents and odd words (`backend/app/assessment/robust.py`):
+  a possible regional pronunciation (dropped aspiration, র/ড়, স for চ) is flagged ♪ and sent to
+  **unsure** for teacher review; the teacher can replay it, mark it correct, or accept it as a variant;
+  a misread in background noise (per-word level above local noise and spectral flatness) becomes
+  unsure 〰; a misread on an odd word (3-letter conjuncts, very long, rare or foreign words, words the
+  teacher marked, words teachers often corrected) needs very strong evidence or becomes unsure ⚑.
+  One tap **Accept as accent** adds the teacher-confirmed pronunciation as an accepted variant for
+  future readings. **Trust test** (`python -m scripts.eval_noise_accent`, 60 FLEURS test recordings, guards off → on,
+  paired): on words read in a simulated regional accent, false alarms fall from 86.1% (186/216) to
+  28.7% (62/216); false alarms on other correct words fall slightly (3.8% → 3.2% clean, 4.6% → 4.1% in
+  5 dB classroom babble). **Cost:** recall falls from 87.9% to 70.7% on clean audio, mostly because
+  simulated aspiration slips that look like an accent (23 words) are sent to the teacher as unsure
+  instead of being counted as errors. Adult speech, simulated errors and simulated accent, not children
+  or real dialect recordings; full table on the Benchmark page.
 * Student progress (WCPM and accuracy over time), weak patterns, practice suggestions
 * Class pattern map: which units most children misread
 * "Listen first" model reading for students (neural TTS, word highlighting)

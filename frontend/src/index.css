@@ -87,6 +87,9 @@ body {
 .word-selected {
   @apply ring-2 ring-teal-600;
 }
+.word-playing {
+  @apply bg-teal-100 ring-2 ring-teal-400;
+}
 .word-teacher::after {
   content: '';
   @apply absolute -top-1 -right-1 size-2 rounded-full bg-teal-600;

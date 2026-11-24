@@ -20,9 +20,10 @@ from ..bangla.patterns import pattern_label
 from ..bangla.segment import segment_normalized
 from ..config import get_settings, load_thresholds
 from ..db import get_db
-from ..models import SIMULATED_MODEL_ID, AcceptedVariant, Assignment, Classroom, Passage, Reading, School, Student, User
+from ..models import (SIMULATED_MODEL_ID, AcceptedVariant, Assignment, Classroom, Passage, Reading, School, Student,
+                      TrickyWord, User)
 from ..schemas import (AccountIn, AnalyzeIn, DiffIn, ClassroomIn, FinalizeIn, MarkPatch, PassageIn, PassagePatch, StudentIn,
-                       StudentPatch, StudentsBulkIn, VariantIn)
+                       StudentPatch, StudentsBulkIn, TrickyWordIn, VariantIn)
 from ..seed.demo import is_demo_login
 from ..services import analytics
 from ..services import readings as reading_svc
@@ -372,6 +373,32 @@ def update_mark(rid: int, index: int, body: MarkPatch, db: Session = Depends(get
     return reading_out(r)
 
 
+ACCENT_NOTE = "accent (accepted by teacher)"
+
+
+@router.post("/readings/{rid}/marks/{index}/accept-accent")
+def accept_accent(rid: int, index: int, db: Session = Depends(get_db)) -> dict:
+    """The child said the word in their regional way: accept that pronunciation for every child and mark
+    this word correct. Future readings treat the heard form as correct (an accepted variant)."""
+    r = _get(db, Reading, rid)
+    mark = next((m for m in r.marks if m.index == index), None)
+    if mark is None:
+        raise HTTPException(404, "Word not found")
+    heard = (mark.heard or "").strip()
+    if not heard or " " in heard or heard == mark.expected:
+        raise HTTPException(422, "Only a single heard word that differs from the passage word can be accepted")
+    exists = db.scalar(select(AcceptedVariant).where(AcceptedVariant.word == mark.expected,
+                                                     AcceptedVariant.variant == heard))
+    if exists is None:
+        db.add(AcceptedVariant(word=mark.expected, variant=heard, note=ACCENT_NOTE))
+    mark.teacher_status = None if mark.status == "correct" else "correct"
+    if "accepted_variant" not in (mark.flags or []):
+        mark.flags = [*(mark.flags or []), "accepted_variant"]
+    reading_svc.recompute_metrics(r)
+    db.commit()
+    return reading_out(r)
+
+
 @router.post("/readings/{rid}/finalize")
 def finalize_reading(rid: int, body: FinalizeIn, db: Session = Depends(get_db)) -> dict:
     r = _get(db, Reading, rid)
@@ -450,6 +477,35 @@ def delete_variant(vid: int, db: Session = Depends(get_db)) -> None:
     db.commit()
 
 
+# ---------------------------------------------------------- tricky words
+@router.get("/tricky-words")
+def list_tricky(db: Session = Depends(get_db)) -> list[dict]:
+    return [{"id": t.id, "word": t.word, "note": t.note} for t in db.scalars(select(TrickyWord).order_by(TrickyWord.word))]
+
+
+@router.post("/tricky-words", status_code=201)
+def add_tricky(body: TrickyWordIn, db: Session = Depends(get_db)) -> dict:
+    """The AI should never decide this word alone (names, rare or foreign words)."""
+    w = normalize_word(body.word)
+    if not w:
+        raise HTTPException(422, "Give a word")
+    t = db.scalar(select(TrickyWord).where(TrickyWord.word == w))
+    if t is None:
+        t = TrickyWord(word=w, note=body.note)
+        db.add(t)
+        db.commit()
+    return {"id": t.id, "word": t.word, "note": t.note}
+
+
+@router.delete("/tricky-words/{tid}", status_code=204)
+def delete_tricky(tid: int, db: Session = Depends(get_db)) -> None:
+    t = db.get(TrickyWord, tid)
+    if t is None:
+        raise HTTPException(404, "Not found")
+    db.delete(t)
+    db.commit()
+
+
 # ------------------------------------------------------------ engine demo
 @router.post("/bangla/analyze")
 def analyze(body: AnalyzeIn) -> dict:
@@ -516,6 +572,9 @@ def benchmark_report() -> dict:
     extra = RESULTS_DIR / "robustness.json"
     if extra.exists():
         out["evidence"] = json.loads(extra.read_text(encoding="utf-8"))
+    na = RESULTS_DIR / "noise_accent.json"
+    if na.exists():  # trust test: background noise and simulated accent, guards off vs on
+        out["trust_test"] = json.loads(na.read_text(encoding="utf-8"))
     wc = RESULTS_DIR / "word_classifier.json"
     if wc.exists():  # trained word classifier: trained on tuning data, tested once on the same test set
         w = json.loads(wc.read_text(encoding="utf-8"))

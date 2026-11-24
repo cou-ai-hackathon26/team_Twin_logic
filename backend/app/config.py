@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     weak_min_errors: int = 3
     weak_min_readings: int = 2
     count_unsure_as_correct: bool = True
+    # trust guards (app/assessment/robust.py): regional accent, background noise, odd words
+    accent_tolerance: bool = True
+    noise_guard: bool = True
+    odd_word_guard: bool = True
     seed_demo: bool = True  # first start: demo teacher, one class per grade, student logins
     session_days: int = 14
     # privacy (safe by default): recordings not marked "keep" are deleted this many days after

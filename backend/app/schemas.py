@@ -63,6 +63,11 @@ class VariantIn(BaseModel):
     note: str | None = Field(default=None, max_length=200)
 
 
+class TrickyWordIn(BaseModel):
+    word: str = Field(min_length=1, max_length=200)
+    note: str | None = Field(default=None, max_length=200)
+
+
 class AnalyzeIn(BaseModel):
     text: str = Field(min_length=1, max_length=5000)
 

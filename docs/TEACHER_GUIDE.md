@@ -42,10 +42,33 @@ working: the next child can read while the previous reading is being marked.
 
 1. **Review queue** lists readings waiting for you, "needs most help first".
 2. Red = misread, grey line = skipped, dotted amber = **unsure** (the computer was not sure; it never
-   counts as an error). Click a word to hear just that word and see which unit differs.
-3. If the computer is wrong, change the mark with one tap (keys 1-4 also work). Then **Finalise review**.
-   The recording is deleted unless you tick "Keep the audio".
-4. Only now does the child see their mark out of 10 and the words to practise.
+   counts as an error). Click a word to see which unit differs.
+3. **Listen before you decide.** Each word has three buttons:
+   * **Word** (space): just that word from the child's recording.
+   * **In context** (C): the word with the words before and after, for cut-off or blended words.
+   * **Compare** (V): the child's word, then the correct pronunciation, back to back.
+   Use **0.75×** or **0.5×** to hear small slips (a missing ফলা or কার). While the recording plays,
+   the word being read lights up in the passage.
+4. **Quick check** jumps through only the flagged words and plays each one by itself: listen, press 1-4,
+   and the next flagged word plays. A typical reading takes under a minute.
+5. If the computer is wrong, change the mark with one tap (keys 1-4 also work). The bar above the passage
+   shows how often you agreed with the AI. Then **Finalise review**. The recording is deleted unless you
+   tick "Keep the audio".
+6. After you finalise, the child sees your checked mark instead of the AI result.
+
+### When to trust the AI less (trust guards)
+
+| Mark | Meaning | What to do |
+|---|---|---|
+| ♪ **accent** | The heard word differs only by a regional sound swap (ভাত as বাত, র for ড়, স for চ). Left as unsure, never counted as an error. | Listen: if it is the child's accent, press **Accept as accent**; if it was a reading slip, mark it misread. |
+| 〰 **noisy** | Background noise over this word. Left as unsure. | Listen and decide. |
+| ⚑ **odd word** | A word the AI is unreliable on (long conjuncts, rare or foreign words, or one teachers often corrected). Left as unsure. | Listen and decide. |
+
+* **Accept as accent** on a word: marks it correct and accepts that pronunciation for future readings in
+  this installation (Settings → Accepted variants; you can remove it there). Use it after listening and
+  confirming that the pronunciation is acceptable, not a reading slip.
+* **AI unreliable here: always ask me** on a word (for names and rare words): the AI never counts a misread on
+  that word again (Settings → Words the AI leaves to you).
 
 ## Using the results
 

@@ -17,6 +17,7 @@ from .assessment import learned
 from .assessment import types as T
 from .assessment.marking import assess, passage_words
 from .assessment.metrics import compute_metrics
+from .assessment.robust import GuardOptions, apply_guards
 from .assessment.word_compare import word_compare
 from .speech.audio import QualityReport, quality_check
 
@@ -51,7 +52,9 @@ def run_porabondhu(audio: np.ndarray, passage_text: str, recognizer, th: T.Thres
                    variant_pairs: set[tuple[str, str]] | None = None, skip_quality: bool = False,
                    count_unsure_as_correct: bool = True,
                    on_stage: Callable[[str], None] | None = None,
-                   use_word_model: bool = True) -> PipelineResult:
+                   use_word_model: bool = True, guards: GuardOptions | None = None) -> PipelineResult:
+    """``guards`` = None uses the default trust guards; pass GuardOptions(False, False, False) to switch
+    them off (the published FLEURS benchmark was measured before the guards existed)."""
     stage = on_stage or (lambda _s: None)
     t0 = time.perf_counter()
     stage("quality")
@@ -70,6 +73,7 @@ def run_porabondhu(audio: np.ndarray, passage_text: str, recognizer, th: T.Thres
     marks = assess(pw, rw, ev, th, variant_pairs)
     if use_word_model:
         learned.apply(marks, th=th)  # trained word classifier, if its held-out test beat the rules
+    apply_guards(marks, audio, pw, guards)  # regional accent, background noise, odd words
     metrics = compute_metrics([m.to_dict() for m in marks], q.duration_sec, count_unsure_as_correct)
     return PipelineResult(
         system="porabondhu", quality=q, rejected=False, transcript=" ".join(w.text for w in rw),

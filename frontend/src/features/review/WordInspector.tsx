@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Play, RotateCcw } from 'lucide-react'
+import { Flag, Headphones, Play, Repeat2, RotateCcw, Sparkles } from 'lucide-react'
 import type { WordMark, WordStatus } from '@/api/types'
 import { PatternChip, StatusBadge } from '@/components/domain'
 import { Button, ProgressBar } from '@/components/ui/primitives'
@@ -32,14 +32,31 @@ export function WordInspector({
   saving,
   canPlay,
   onPlay,
+  onContext,
+  onCompare,
+  comparing = false,
+  onAcceptAccent,
+  accepting = false,
+  onTricky,
+  trickySaved = false,
 }: {
   mark: WordMark
   onSet: (s: WordStatus | null) => void
   saving: boolean
   canPlay: boolean
   onPlay: () => void
+  onContext?: () => void
+  onCompare?: () => void
+  comparing?: boolean
+  onAcceptAccent?: () => void
+  accepting?: boolean
+  onTricky?: () => void
+  trickySaved?: boolean
 }) {
   const errors = mark.units.flatMap((u) => u.errors.map((e) => ({ ...e, unit: u })))
+  const heard = mark.heard.trim()
+  const canAccept = !!onAcceptAccent && !!heard && !heard.includes(' ') && heard !== mark.expected && mark.final_status !== 'correct'
+  const hasTime = canPlay && mark.start !== null
   return (
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-3">
@@ -50,11 +67,26 @@ export function WordInspector({
             {mark.teacher_status && <span className="text-xs text-teal-700">set by teacher (system: {STATUS_META[mark.status].label.toLowerCase()})</span>}
           </div>
         </div>
-        {canPlay && mark.start !== null && (
-          <Button variant="secondary" size="sm" onClick={onPlay} title="Play this word">
-            <Play className="size-4" /> Listen
-          </Button>
+      </div>
+
+      <div>
+        <div className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Listen before you decide</div>
+        {hasTime ? (
+          <div className="grid grid-cols-3 gap-2">
+            <Button variant="secondary" size="sm" onClick={onPlay} title="Play just this word (space)">
+              <Play className="size-4" /> Word
+            </Button>
+            <Button variant="secondary" size="sm" onClick={onContext} title="Play with the word before and after (C)">
+              <Repeat2 className="size-4" /> In context
+            </Button>
+            <Button variant="secondary" size="sm" onClick={onCompare} loading={comparing} title="The child's word, then the correct pronunciation (V)">
+              <Headphones className="size-4" /> Compare
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500">{canPlay ? 'No timing for this word.' : 'The audio was not kept for this reading.'}</p>
         )}
+        {hasTime && <p className="mt-1.5 text-[11px] text-slate-400">Compare plays the child, then the correct reading of the word.</p>}
       </div>
 
       <div>
@@ -82,6 +114,22 @@ export function WordInspector({
           <button onClick={() => onSet(null)} className="mt-2 inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800">
             <RotateCcw className="size-3" /> Reset to system decision
           </button>
+        )}
+        {(canAccept || onTricky) && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {canAccept && (
+              <Button variant="secondary" size="sm" loading={accepting} onClick={onAcceptAccent}
+                title="The child said it the regional way. Mark correct and accept this pronunciation from now on">
+                <Sparkles className="size-4" /> Accept as accent: <span className="font-bn">{heard}</span>
+              </Button>
+            )}
+            {onTricky && (
+              <Button variant="ghost" size="sm" disabled={trickySaved} onClick={onTricky}
+                title="Names, rare or foreign words: the AI will always leave this word to you">
+                <Flag className="size-4" /> {trickySaved ? 'Always left to you' : 'AI unreliable here: always ask me'}
+              </Button>
+            )}
+          </div>
         )}
       </div>
 
@@ -163,6 +211,9 @@ export function WordInspector({
         <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Evidence</div>
         <Signal label="Free-decoding confidence" value={mark.free_conf} min={0} max={1} hint="How sure the recogniser was about what it heard" />
         <Signal label="Expected-text score" value={mark.gop} min={-10} max={10} hint="How well the audio fits the passage text here (forced alignment)" />
+        {mark.snr_db !== null && mark.snr_db !== undefined && (
+          <Signal label="Above background noise (dB)" value={mark.snr_db} min={0} max={30} hint="Below 10 dB the word is not trusted and is left to you" />
+        )}
         {mark.start !== null && (
           <div className="text-xs text-slate-500">
             Time: {mark.start.toFixed(2)}s – {mark.end?.toFixed(2)}s

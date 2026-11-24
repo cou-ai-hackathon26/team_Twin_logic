@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { Cpu, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { TrickyWordsCard } from './TrickyWordsCard'
 import { useAddVariant, useDeleteVariant, useSystem, useVariants, useWarmup } from '@/api/hooks'
 import type { ModelStatus } from '@/api/types'
 import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, PageHeader, PageLoader } from '@/components/ui/primitives'
@@ -130,6 +131,7 @@ export function SettingsPage() {
                 <li key={v.id} className={clsx('flex items-center justify-between px-5 py-2.5')}>
                   <span className="font-bn text-base">
                     {v.word} <span className="text-slate-400">≈</span> {v.variant}
+                    {v.note && <span className="ml-2 font-sans text-xs text-slate-500">{v.note}</span>}
                   </span>
                   <Button variant="ghost" size="sm" onClick={() => delV.mutate(v.id)} aria-label="Remove">
                     <Trash2 className="size-4" />
@@ -139,6 +141,8 @@ export function SettingsPage() {
             </ul>
           )}
         </Card>
+
+        <TrickyWordsCard />
       </div>
     </>
   )

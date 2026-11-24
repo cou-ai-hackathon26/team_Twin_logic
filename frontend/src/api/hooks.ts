@@ -37,6 +37,7 @@ export const keys = {
   readings: ['readings'] as const,
   system: ['system'] as const,
   variants: ['variants'] as const,
+  tricky: ['tricky-words'] as const,
   benchmark: ['benchmark'] as const,
 }
 
@@ -281,6 +282,31 @@ export const useSetMark = (readingId: number) =>
   useReadingMutation((v: { index: number; status: WordStatus | null }) =>
     api.patch<Reading>(`/readings/${readingId}/marks/${v.index}`, { teacher_status: v.status }),
   )
+
+/** The child said the word in their regional way: accept that pronunciation and mark it correct. */
+export const useAcceptAccent = (readingId: number) =>
+  useReadingMutation((index: number) => api.post<Reading>(`/readings/${readingId}/marks/${index}/accept-accent`))
+
+export interface TrickyWord {
+  id: number
+  word: string
+  note: string | null
+}
+export const useTrickyWords = () => useQuery({ queryKey: keys.tricky, queryFn: () => api.get<TrickyWord[]>('/tricky-words') })
+
+/** Tell PoraBondhu it is unreliable on a word (a name, a rare word): always left to the teacher. */
+export function useAddTrickyWord() {
+  const inv = useInvalidate()
+  return useMutation({
+    mutationFn: (word: string) => api.post<TrickyWord>('/tricky-words', { word }),
+    onSuccess: () => inv([...keys.tricky]),
+  })
+}
+
+export function useDeleteTrickyWord() {
+  const inv = useInvalidate()
+  return useMutation({ mutationFn: (id: number) => api.del(`/tricky-words/${id}`), onSuccess: () => inv([...keys.tricky]) })
+}
 
 export const useFinalize = (readingId: number) =>
   useReadingMutation((keepAudio: boolean) =>

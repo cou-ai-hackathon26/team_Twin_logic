@@ -2,31 +2,36 @@ import clsx from 'clsx'
 import type { Language, WordMark } from '@/api/types'
 import { FLAG_META, langFont, STATUS_META } from '@/lib/format'
 
+const SHOWN_FLAGS = new Set(['hesitation', 'repeated', 'partial_attempt', 'extra_word', 'accent', 'noisy', 'odd_word'])
+
 export function MarkedPassage({
   marks,
   selected,
   onSelect,
   statusOf = (m) => m.final_status,
   language = 'bn',
+  playing = null,
 }: {
   marks: WordMark[]
   selected: number | null
   onSelect: (index: number) => void
   statusOf?: (m: WordMark) => WordMark['final_status']
   language?: Language
+  /** word under the playhead while the recording plays */
+  playing?: number | null
 }) {
   return (
     <p className={clsx('text-2xl leading-[2.4] text-slate-900', langFont(language))}>
       {marks.map((m) => {
         const st = statusOf(m)
-        const flags = m.flags.filter((f) => f === 'hesitation' || f === 'repeated' || f === 'partial_attempt' || f === 'extra_word')
+        const flags = m.flags.filter((f) => SHOWN_FLAGS.has(f))
         return (
           <span key={m.index}>
             <button
               type="button"
               onClick={() => onSelect(m.index)}
               title={`${STATUS_META[st].label}${m.heard ? ` · heard: ${m.heard}` : ''}`}
-              className={clsx('word', `word-${st}`, selected === m.index && 'word-selected', m.teacher_status && 'word-teacher')}
+              className={clsx('word', `word-${st}`, selected === m.index && 'word-selected', playing === m.index && 'word-playing', m.teacher_status && 'word-teacher')}
             >
               {flags.length > 0 && (
                 <sup className="mr-0.5 font-sans text-xs text-indigo-600" aria-label={flags.map((f) => FLAG_META[f]?.label).join(', ')}>
@@ -63,6 +68,15 @@ export function Legend() {
       </span>
       <span className="flex items-center gap-1.5">
         <span className="text-indigo-600">↻</span> repeated
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="text-indigo-600">♪</span> possible regional accent
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="text-indigo-600">〰</span> noisy
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="text-indigo-600">⚑</span> odd word
       </span>
       <span className="flex items-center gap-1.5">
         <span className="size-2 rounded-full bg-teal-600" /> changed by teacher

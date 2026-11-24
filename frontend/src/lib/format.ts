@@ -34,6 +34,9 @@ export const FLAG_META: Record<string, { label: string; icon: string }> = {
   extra_word: { label: 'Extra word inserted', icon: '+' },
   spelling_only: { label: 'Same sound, different spelling', icon: '≈' },
   accepted_variant: { label: 'Accepted variant', icon: '✓' },
+  accent: { label: 'Possible regional pronunciation: left to you, not counted as an error', icon: '♪' },
+  noisy: { label: 'Background noise over this word: left to you', icon: '〰' },
+  odd_word: { label: 'Odd word the AI is unreliable on: left to you', icon: '⚑' },
 }
 
 /** Words-correct-per-minute bands used only to colour numbers (not a norm). */

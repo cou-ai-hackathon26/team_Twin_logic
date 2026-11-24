@@ -190,6 +190,16 @@ export interface WordMark {
   patterns: PatternLabel[]
   note_bn: string
   note_en: string
+  /** how far the word stands above the local background noise, dB */
+  snr_db?: number | null
+}
+
+export interface ReviewStats {
+  words: number
+  changed: number
+  agreement: number
+  to_check: number
+  guards: { accent: number; noisy: number; odd_word: number }
 }
 
 export interface QualityReport {
@@ -226,6 +236,7 @@ export interface Thresholds {
 }
 
 export interface Reading {
+  review_stats?: ReviewStats | null
   pending_review?: boolean
   ai_provisional?: boolean
   simulated?: boolean
@@ -324,6 +335,31 @@ export interface DiffResult {
   }[]
 }
 
+export interface TrustSummary {
+  recordings: number
+  words: number
+  recall: Proportion
+  precision: Proportion
+  false_alarm: Proportion
+  unsure_rate: Proportion
+}
+
+/** scripts/eval_noise_accent.py: background noise and simulated accent, trust guards off vs on. */
+export interface TrustTest {
+  generated_at: string
+  label: string
+  recordings: number
+  noise: Record<string, { label: string; guards_off: TrustSummary; guards_on: TrustSummary; guard_changes: Record<string, number> }>
+  accent: {
+    label: string
+    accent_words: number
+    guards_off: { false_alarm: Proportion; unsure_rate: Proportion }
+    guards_on: { false_alarm: Proportion; unsure_rate: Proportion }
+    other_words_false_alarm: { guards_off: Proportion; guards_on: Proportion }
+    guard_changes: Record<string, number>
+  }
+}
+
 export interface Proportion {
   k: number
   n: number
@@ -366,6 +402,7 @@ export interface BenchmarkReport {
   hypothesis?: { recall_gain_pp: number; precision_not_worse: boolean; supported: boolean } | null
   evidence?: BenchmarkEvidence
   word_classifier?: WordClassifierReport
+  trust_test?: TrustTest
 }
 
 export interface ClsStats {

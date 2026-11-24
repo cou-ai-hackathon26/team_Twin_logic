@@ -1,4 +1,5 @@
 import { EvidenceSection } from './EvidenceSection'
+import { TrustTestCard } from './TrustTestCard'
 import { WordClassifierCard } from './WordClassifierCard'
 import clsx from 'clsx'
 import { CheckCircle2, FlaskConical, XCircle } from 'lucide-react'
@@ -121,6 +122,8 @@ python -m scripts.benchmark --recordings eval/recordings.csv --annotations eval/
               </div>
             </Card>
           ))}
+
+          {data.trust_test && <TrustTestCard t={data.trust_test} />}
 
           {data.word_classifier && <WordClassifierCard w={data.word_classifier} />}
 

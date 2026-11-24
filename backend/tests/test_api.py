@@ -10,6 +10,9 @@ import pytest
 
 os.environ["PB_DATA_DIR"] = tempfile.mkdtemp(prefix="pb_test_")
 os.environ["PB_DATABASE_URL"] = ""
+# the fake test audio is a gated tone whose silent gaps fall inside the fake word times, which the
+# noise guard would rightly call "not clear"; that guard is tested with designed audio in test_robust.py
+os.environ["PB_NOISE_GUARD"] = "false"
 
 from fastapi.testclient import TestClient  # noqa: E402
 
