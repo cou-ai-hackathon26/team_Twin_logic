@@ -5,6 +5,7 @@ This page answers three questions directly:
 1. **What data did we use, and why no children's speech?**
 2. **What did we train, fine-tune or tune, and what did we not?**
 3. **What is the architecture, from the microphone to the teacher's screen?**
+4. **Why does it run on an ordinary CPU, offline, with no API or token cost?**
 
 Everything here can be checked in the repository; file paths are given for each claim.
 
@@ -176,7 +177,28 @@ score = min( log p(expected) − log p(best competing character),
 
 ---
 
-## 5. Results in one table (adult speech, simulated errors; not children)
+## 5. Runs on an ordinary CPU, offline, with no API or token cost
+
+Bangladeshi primary schools rarely have a GPU, a fast or steady internet connection, or a budget for paid
+AI services. So PoraBondhu was built from the start to run on the **school's own computer**:
+
+| Question | Answer | Evidence |
+|---|---|---|
+| **GPU needed?** | **No.** Everything runs on the CPU. The speech model was exported by us to **ONNX with int8 weights**: about **2× faster** on CPU than the original PyTorch model and **355 MB** instead of 1.26 GB (fp32 ONNX). The server image contains no PyTorch at all | `scripts/export_onnx.py`; `backend/data/onnx/model.int8.onnx` (355 MB) vs `model.onnx` (1.26 GB) |
+| **How fast on a normal laptop?** | **15.5 s** for a 60 s reading on a 4-core laptop CPU (Intel i5-10310U, no GPU); about 18-20 s in everyday use. A 2-core server: about 31 s per 60 s. One reading marked live on our server today took **4.3 s** for 16 s of audio | `results/speed_test.json`, README "Evaluation" |
+| **How much memory?** | The running demo container uses about **545 MB** of RAM (measured with `docker stats`; limit set to 2 GB), so a 4 GB school laptop is enough | live server, 24 Nov |
+| **Internet needed?** | **No** for recording and marking: tested with networking switched off. Only the optional "Listen first" model reading uses Microsoft Edge TTS online; without internet the browser's own voice is used instead | README "Evidence still needed" (2-core server, networking switched off); `frontend/src/components/audio.tsx` |
+| **API key, tokens or per-use fee?** | **None.** No OpenAI, Anthropic, Gemini or other paid API is called. There is no token bill: marking 10 or 10,000 readings costs the same, only electricity | `requirements-deploy.txt` (no cloud AI SDK) |
+| **Where does the children's audio go?** | **Nowhere.** It stays on the school's computer and is deleted when the teacher finalises the review (or after 14 days) | [DATA_PROTECTION.md](DATA_PROTECTION.md) |
+| **How is it installed?** | Windows: `setup.ps1` then `start.ps1`. Server: the repository's `Dockerfile` (one container). Free and open models only (Apache-2.0 speech model) | README "Quick start" |
+
+**Why this matters for adoption:** a cloud speech API charges per minute of audio and needs a steady
+connection and sending children's voices to another company. A CPU model on the school laptop has no
+running cost, works without internet, and keeps children's data in the school.
+The trade-off is speed (about 15-30 s per reading instead of near-instant), which is why marking runs in
+the background while the teacher moves on to the next child.
+
+## 6. Results in one table (adult speech, simulated errors; not children)
 
 | Measure (100 FLEURS test recordings unless stated) | Value |
 |---|---|
@@ -189,7 +211,7 @@ score = min( log p(expected) − log p(best competing character),
 
 Full tables with counts and 95% intervals: [`backend/results/EVALUATION.md`](../backend/results/EVALUATION.md).
 
-## 6. What changes when child data exists
+## 7. What changes when child data exists
 
 1. Record children with written parental consent using [DATA_COLLECTION.md](DATA_COLLECTION.md)
    (roll codes only; testing only).
